@@ -1,18 +1,20 @@
 package ru.checker.tests.notepad;
 
 import lombok.extern.log4j.Log4j2;
+import mmarquee.automation.controls.Button;
 import org.junit.jupiter.api.*;
 import org.springframework.stereotype.Component;
-
-import ru.checker.tests.base.utils.CheckerTools;
+import ru.checker.tests.desktop.base.CheckerDesktopWindow;
 import ru.checker.tests.desktop.test.CheckerDesktopTestCase;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 /**
  * Notepad ++ tests.
  * @author vd.zinovev
  */
 @Component("Notepad")
-@Log4j2(topic = "[Test case]")
+@Log4j2(topic = "TEST CASE")
 @DisplayName("Тесты блокнота")
 public class NotepadTest extends CheckerDesktopTestCase {
 
@@ -28,26 +30,11 @@ public class NotepadTest extends CheckerDesktopTestCase {
     @Test
     @DisplayName("Простой тест")
     public void simpleTest() {
-        log.info("notepad first");
-    }
+        System.out.println("aaa");
+        CheckerDesktopWindow root = getSApplication().getWindow("notepad_root");
+        Button buttonNew = root.getButton("notepad_root_new");
+        System.out.println(assertDoesNotThrow(buttonNew::getName, "Не удалось получить имя кнопки"));
 
-    @Disabled
-    @Test
-    @DisplayName("Пропущеный тест")
-    void disabledTest() {
-        log.warn("disabled");
-    }
-
-    @Test
-    @DisplayName("Пропущеный тест")
-    void assumedTest() {
-        Assumptions.assumeTrue(false, "Тест пропущен");
-    }
-
-    @Test
-    @DisplayName("Тест с ошибкой")
-    void errorTest() {
-        Assertions.fail("Ошибка");
     }
 
 }

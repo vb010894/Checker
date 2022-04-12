@@ -44,12 +44,29 @@ public final class CheckerTools {
         }, "Не удалось загрузить описание тестового случая - " + partPath);
     }
 
+    /**
+     * Converting yaml to Map.
+     *
+     * @param partPath Yaml part path
+     * @return Map from yaml
+     */
     public static Map<String, Object> convertYAMLToMap(String partPath) {
         return assertDoesNotThrow(() -> {
             Yaml yaml = new Yaml(new Constructor());
             InputStream config = new FileInputStream(CheckerTools.getRootPath() + partPath);
             return yaml.load(config);
         }, "Не удалось загрузить описание тестового случая - " + partPath);
+    }
+
+    /**
+     * Casting object to required type.
+     * @param value Value as object
+     * @param <T> Required Type
+     * @return Casted value
+     */
+    @SuppressWarnings("unchecked")
+    public static  <T> T castDefinition(Object value) {
+        return assertDoesNotThrow(() -> (T) value, "Не возможно конвертировать значение. Тип - " + ((value == null) ? "null" : value.getClass().getSimpleName()));
     }
 
 }

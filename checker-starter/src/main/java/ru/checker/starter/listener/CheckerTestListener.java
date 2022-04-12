@@ -76,6 +76,10 @@ public class CheckerTestListener implements TestExecutionListener {
     @Override
     public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
         if(testIdentifier.isContainer()) {
+            if(testExecutionResult.getStatus().equals(TestExecutionResult.Status.FAILED)) {
+                System.out.println(testExecutionResult.getThrowable().orElseThrow().getMessage());
+                testExecutionResult.getThrowable().orElseThrow().printStackTrace();
+            }
             this.model.tests(String.valueOf(this.testCount));
             this.model.failures("0");
             this.model.skipped(String.valueOf(this.skippedCount));
@@ -87,6 +91,7 @@ public class CheckerTestListener implements TestExecutionListener {
         if(testIdentifier.isTest()) {
             switch (testExecutionResult.getStatus()) {
                 case FAILED:
+                    log.error(testExecutionResult.getThrowable().orElseThrow().getMessage(), testExecutionResult.getThrowable().orElseThrow());
                         ErrorModel errorModel = ErrorModel
                                 .builder()
                                 .type(testExecutionResult.getThrowable().orElseThrow().getClass().getName())
@@ -98,6 +103,7 @@ public class CheckerTestListener implements TestExecutionListener {
                         failureCount++;
                     break;
                 case ABORTED:
+                    log.error(testExecutionResult.getThrowable().orElseThrow().getMessage(), testExecutionResult.getThrowable().orElseThrow());
                     SkippedModel skippedModel = SkippedModel
                             .builder()
                             .message(testExecutionResult.getThrowable().orElseThrow().getMessage())

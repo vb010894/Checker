@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
  * Desktop test base.
  * @author vd.zinovev
  */
-@Log4j2(topic = "[Test case]")
+@Log4j2(topic = "TEST CASE")
 public abstract class CheckerDesktopTestCase extends CheckerTestCase {
 
     /**
@@ -66,8 +66,10 @@ public abstract class CheckerDesktopTestCase extends CheckerTestCase {
      * 2) Saving application in memory.
      */
     @BeforeAll
+    @SuppressWarnings("unchecked")
     public static void start() {
-        sApplication = new CheckerDesktopApplication((Map<String, Object>) definition.get("app"));
+        String modelPath = String.format("/Tests/%s/Windows/",caseName);
+        sApplication = new CheckerDesktopApplication((Map<String, Object>) definition.get("app"), modelPath);
         log.info(
                 "Инициализация тестовых случаев '{}'.\nТестируемое приложение - '{}'",
                 getID() + ". " + getName(),

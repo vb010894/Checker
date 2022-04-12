@@ -11,7 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
  * @since 1.0
  */
 @Data
-@Log4j2(topic = "Base test case")
+@Log4j2(topic = "TEST CASE")
 public abstract class CheckerTestCase {
 
     @BeforeEach
