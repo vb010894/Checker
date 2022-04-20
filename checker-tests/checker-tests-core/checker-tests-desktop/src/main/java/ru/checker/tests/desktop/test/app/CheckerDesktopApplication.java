@@ -1,4 +1,4 @@
-package ru.checker.tests.desktop.base;
+package ru.checker.tests.desktop.test.app;
 
 import lombok.AccessLevel;
 import lombok.Data;
@@ -48,16 +48,24 @@ public class CheckerDesktopApplication extends CheckerApplication {
     /**
      * Constructor.
      */
-    public CheckerDesktopApplication(Map<String, Object> definition, String windowPath) {
+    public CheckerDesktopApplication(Map<String, Object> definition) {
         this.definition = definition;
-        List<LinkedHashMap<String, Object>> windows = CheckerTools.castDefinition(definition.get("windows"));
-        windows.parallelStream().forEach(window -> {
-            assertTrue(window.containsKey("path"), "Не найден ключ местонахождения описания формы. Ключ - 'path'");
-            CheckerDesktopWindow win =  assertDoesNotThrow(() ->
-                    new CheckerDesktopWindow(CheckerTools.convertYAMLToMap(windowPath  + window.get("path"))),
-                    "Не удалось создать экземпляр окна приложения");
-            this.windows.put(win.getID(), win);
-        });
+        if(this.getDefinition().containsKey("windows")) {
+            List<Map<String, Object>> forms = CheckerTools.castDefinition(this.getDefinition().get("windows"));
+            forms.parallelStream().forEach(form -> {
+                if(form.containsKey("path")) {
+                    String path = CheckerTools.castDefinition(form.get("path"));
+                    CheckerDesktopWindow frm = new CheckerDesktopWindow(path);
+                    this.windows.put(frm.getID(), frm);
+                } else if (this.windows.containsKey("window")) {
+                    Map<String, Object> def = CheckerTools.castDefinition(form.get("window"));
+                    CheckerDesktopWindow frm = new CheckerDesktopWindow(def);
+                    this.windows.put(frm.getID(), frm);
+                } else {
+                    fail("В описании Forms должны содержаться ключи 'path' (для отдельного файла) или 'form' (для локального описания)");
+                }
+            });
+        }
     }
 
     /**
@@ -65,10 +73,10 @@ public class CheckerDesktopApplication extends CheckerApplication {
      * @param id Window ID
      * @return Application window
      */
-    public CheckerDesktopWindow getWindow(String id) {
+    public CheckerDesktopWindow window(String id) {
         assertTrue(this.windows.containsKey(id), String.format("Форма с id - %s не найдена. Добавьте форму в описание приложения", id));
         CheckerDesktopWindow window = this.windows.get(id);
-        window.findWindow();
+        window.createWindow(getApplication());
         return window;
     }
 
@@ -101,11 +109,20 @@ public class CheckerDesktopApplication extends CheckerApplication {
             assertNotNull((location = (String) this.definition.get("location")), "Не заполнено местоположение приложения. Ключ - 'location'");
             if(isPreStart) {
                 String[] arguments;
-                arguments = (String[]) this.definition.getOrDefault("arguments", null);
-                appProcess = Runtime.getRuntime().exec(
-                        location,
-                        arguments,
-                        new File(location).getParentFile());
+                ArrayList<String> args = CheckerTools.castDefinition(this.definition.getOrDefault("arguments", null));
+
+                if(args != null) {
+                    args.add(0, location);
+                    arguments = new String[args.size()];
+                    args.toArray(arguments);
+                } else {
+                    arguments = new String[] {location};
+                }
+
+                appProcess = new ProcessBuilder()
+                        .directory(new File(location).getParentFile())
+                        .command(arguments)
+                        .start();
 
             }
             application = UIAutomation.getInstance().launchOrAttach(location);
@@ -125,5 +142,9 @@ public class CheckerDesktopApplication extends CheckerApplication {
             else
                 application.end();
         }
+    }
+
+    public void waitApp() {
+        application.waitForInputIdle();
     }
 }

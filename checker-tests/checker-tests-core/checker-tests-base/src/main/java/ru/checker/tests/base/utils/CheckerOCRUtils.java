@@ -2,15 +2,20 @@ package ru.checker.tests.base.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import net.sourceforge.tess4j.ITessAPI;
 import net.sourceforge.tess4j.Tesseract1;
+import net.sourceforge.tess4j.Word;
 import net.sourceforge.tess4j.util.ImageHelper;
 import ru.checker.tests.base.enums.CheckerOCRLanguage;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
@@ -91,6 +96,51 @@ public final class CheckerOCRUtils {
         return getTextFromRectangle(rectangle, CheckerOCRLanguage.RUS);
     }
 
+    public static Rectangle getTextAndMove(Rectangle rectangle, String text) {
+        return getTextAndMove(rectangle, text, CheckerOCRLanguage.RUS, ITessAPI.TessPageIteratorLevel.RIL_TEXTLINE);
+    }
+
+    /**
+     * Recognize text and move to word's rectangle with 'RUS' default language.
+     * @param rectangle Rectangle for recognize
+     * @param text Searching word
+     * @return Recognized text
+     */
+    public static Rectangle getTextAndMove(Rectangle rectangle, String text, int level) {
+        return getTextAndMove(rectangle, text, CheckerOCRLanguage.RUS, level);
+    }
+
+    public static Rectangle getTextAndMove(Rectangle rectangle, String text, CheckerOCRLanguage language) {
+        return getTextAndMove(rectangle,text,language, ITessAPI.TessPageIteratorLevel.RIL_TEXTLINE);
+    }
+    /**
+     * Recognize text and move to word's rectangle.
+     * @param rectangle Rectangle for recognize
+     * @param text Searching text
+     * @param language Recognizing language
+     * @return Recognized text
+     */
+    public static Rectangle getTextAndMove(Rectangle rectangle, String text, CheckerOCRLanguage language, int level) {
+        return assertDoesNotThrow(() -> {
+            Robot robot = new Robot();
+            BufferedImage img = prepareImage(getImageFromScreen(rectangle));
+            List<Word> rectangles = getTesseract(language).getWords(img, level);
+            AtomicReference<Rectangle> out = new AtomicReference<>(rectangle);
+            rectangles.forEach(r -> {
+                if(r.getText().contains(text)) {
+                    Rectangle bounding = r.getBoundingBox();
+                    int x = rectangle.x + (bounding.x / 3);
+                    int y = rectangle.y + (bounding.y / 3);
+                    int width = bounding.width / 3;
+                    int height = bounding.height / 3;
+                    robot.mouseMove(x + 5, y + 5);
+                    out.set(new Rectangle(x, y, width, height));
+                }
+            });
+            return out.get();
+        }, "Не удалось распознать текст в области - " + rectangle);
+    }
+
     /**
      * Take screenshot and recognize the text from place.
      * @param language Text language
@@ -110,7 +160,10 @@ public final class CheckerOCRUtils {
      */
     public static BufferedImage getImageFromScreen(Rectangle rectangle) {
         return assertDoesNotThrow(
-                () ->  new Robot().createScreenCapture(rectangle),
+                () -> {
+                    Robot robot = new Robot();
+                    return robot.createScreenCapture(rectangle);
+                },
                 "Не удалось получить скриншот из области - " + rectangle.toString());
     }
 

@@ -38,11 +38,11 @@ public class CheckerStarterApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        //String testCase = args[0];
+        String testCase = args[0];
         Launcher launcher = LauncherFactory.create();
         LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder
                 .request()
-                .selectors(selectClass(application.getBean("Notepad").getClass())).build();
+                .selectors(selectClass(application.getBean(testCase).getClass())).build();
         TestPlan plan = launcher.discover(request);
         launcher.registerTestExecutionListeners(listener);
         launcher.execute(plan);

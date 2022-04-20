@@ -5,8 +5,14 @@ import lombok.NoArgsConstructor;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
+import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
@@ -67,6 +73,11 @@ public final class CheckerTools {
     @SuppressWarnings("unchecked")
     public static  <T> T castDefinition(Object value) {
         return assertDoesNotThrow(() -> (T) value, "Не возможно конвертировать значение. Тип - " + ((value == null) ? "null" : value.getClass().getSimpleName()));
+    }
+
+    public static void clearClipboard() {
+        StringSelection selection = new StringSelection("");
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, null);
     }
 
 }

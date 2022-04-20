@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import ru.checker.tests.base.test.CheckerTestCase;
 import ru.checker.tests.base.utils.CheckerTools;
-import ru.checker.tests.desktop.base.CheckerDesktopApplication;
+import ru.checker.tests.desktop.test.app.CheckerDesktopApplication;
 
 import java.util.Map;
 
@@ -33,6 +33,12 @@ public abstract class CheckerDesktopTestCase extends CheckerTestCase {
     static String caseName;
 
     /**
+     * Application's name under test.
+     */
+    @Getter
+    static String applicationName;
+
+    /**
      * Test case ID.
      */
     @Getter
@@ -50,9 +56,10 @@ public abstract class CheckerDesktopTestCase extends CheckerTestCase {
     @Getter
     private static CheckerDesktopApplication sApplication;
 
-    public static void prepare(String testCaseName) {
+    public static void prepare(String targetApplicationName, String testCaseName) {
         caseName = testCaseName;
-        definition = CheckerTools.convertYAMLToMap(String.format("/Tests/%s/Cases/%s.yaml",testCaseName,testCaseName));
+        applicationName = targetApplicationName;
+        definition = CheckerTools.convertYAMLToMap(String.format("/Tests/%s/Cases/%s.yaml",applicationName , testCaseName));
         ID = assertDoesNotThrow(() -> (String) definition.get("id"), "Не удалось получить ID теста. Ключ - 'id'");
         name = assertDoesNotThrow(() -> (String) definition.get("name"), "Не удалось получить ID теста. Ключ - 'name'");
         Assumptions.assumeTrue(definition.containsKey("app"), "Не найдено описание приложения. Ключ - 'app'");
@@ -68,8 +75,7 @@ public abstract class CheckerDesktopTestCase extends CheckerTestCase {
     @BeforeAll
     @SuppressWarnings("unchecked")
     public static void start() {
-        String modelPath = String.format("/Tests/%s/Windows/",caseName);
-        sApplication = new CheckerDesktopApplication((Map<String, Object>) definition.get("app"), modelPath);
+        sApplication = new CheckerDesktopApplication((Map<String, Object>) definition.get("app"));
         log.info(
                 "Инициализация тестовых случаев '{}'.\nТестируемое приложение - '{}'",
                 getID() + ". " + getName(),

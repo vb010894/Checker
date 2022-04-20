@@ -28,7 +28,12 @@ public enum CheckerOCRLanguage {
     /**
      * English language.
      */
-    ENG("eng");
+    ENG("eng"),
+
+    /**
+     * English language.
+     */
+    ENG_RUS("rus+eng");
 
     /**
      * Enum value.

@@ -1,0 +1,13 @@
+id: sap_oreder_prb_form
+name: Задание ПРБ
+deep: true
+search:
+  ClassName: TfZadPRB
+  Name: ЗАДАНИЕ ПРБ - создание.
+elements:
+  - element:
+      id: ssm_01_01
+      name: Группа 'Фильтр ПЗ'
+      search:
+        Name: ФИЛЬТР ПЗ
+        ClassName: TdxRibbonGroupBarControl

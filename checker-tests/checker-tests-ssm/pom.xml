@@ -12,4 +12,12 @@
   <artifactId>checker-tests-ssm</artifactId>
 
   <name>checker-tests-ssm</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>ru.checker</groupId>
+      <artifactId>checker-tests-desktop</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
 </project>

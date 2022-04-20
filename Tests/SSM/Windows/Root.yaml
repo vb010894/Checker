@@ -1,0 +1,15 @@
+id: ssm_main
+search:
+  ClassName: TMainForm
+elements:
+  - element:
+      id: ssm_information
+      name: Панель-группа информация
+      search:
+        Name: ИНФОРМАЦИЯ
+        ClassName: TdxRibbonGroupBarControl
+forms:
+  - path: SAP_ORDERS.yaml
+widgets:
+  - path: SSM_TOOLS.yaml
+  - path: SSM_NAVIGATION.yaml

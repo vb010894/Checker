@@ -12,7 +12,7 @@ import java.io.Closeable;
  * 1) YAML
  */
 @Data
-public abstract class CheckerApplication implements Closeable, Runnable{
+public abstract class CheckerApplication implements Closeable, Runnable {
 
    public abstract String getName();
    public abstract void run();

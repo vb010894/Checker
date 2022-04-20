@@ -15,7 +15,7 @@
     <dependencies>
         <dependency>
             <groupId>ru.checker</groupId>
-            <artifactId>checker-tests-notepad</artifactId>
+            <artifactId>checker-tests-ssm</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
