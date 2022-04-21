@@ -8,6 +8,7 @@ import lombok.extern.log4j.Log4j2;
 import mmarquee.automation.controls.Panel;
 import mmarquee.automation.controls.mouse.AutomationMouse;
 import ru.checker.tests.base.utils.CheckerTools;
+import ru.checker.tests.desktop.test.CheckerDesktopTestCase;
 
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
@@ -63,13 +64,14 @@ public class SSMGrid {
         this.focus();
         int limit = 10000;
         while (stringData.equals("") & limit >= 0) {
-            this.robot.keyPress(KeyEvent.VK_HOME);
-            this.robot.keyRelease(KeyEvent.VK_HOME);
 
             this.robot.keyPress(KeyEvent.VK_CONTROL);
+            this.robot.keyPress(KeyEvent.VK_A);
+            this.robot.keyRelease(KeyEvent.VK_CONTROL);
+            this.robot.keyRelease(KeyEvent.VK_A);
+
             this.robot.keyPress(KeyEvent.VK_SHIFT);
             this.robot.keyPress(KeyEvent.VK_PAGE_DOWN);
-            this.robot.keyRelease(KeyEvent.VK_CONTROL);
             this.robot.keyRelease(KeyEvent.VK_SHIFT);
             this.robot.keyRelease(KeyEvent.VK_PAGE_DOWN);
 
@@ -112,6 +114,8 @@ public class SSMGrid {
             this.robot.keyPress(KeyEvent.VK_C);
             this.robot.keyRelease(KeyEvent.VK_CONTROL);
             this.robot.keyRelease(KeyEvent.VK_C);
+
+            CheckerDesktopTestCase.getSApplication().waitApp();
 
             stringData = assertDoesNotThrow(() -> Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor).toString(), "Не удалось получить данные из буфера");
             if (stringData.equals("")) {

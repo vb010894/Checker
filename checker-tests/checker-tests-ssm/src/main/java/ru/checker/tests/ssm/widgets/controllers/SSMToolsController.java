@@ -3,6 +3,9 @@ package ru.checker.tests.ssm.widgets.controllers;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
+import mmarquee.automation.UIAutomation;
+import mmarquee.automation.controls.List;
+import mmarquee.automation.controls.ListItem;
 import mmarquee.automation.controls.mouse.AutomationMouse;
 import net.sourceforge.tess4j.ITessAPI;
 import ru.checker.tests.base.enums.CheckerOCRLanguage;
@@ -27,6 +30,24 @@ public class SSMToolsController {
         this.widget = widget;
     }
 
+    public void  selectCombobox(String ID, String value) {
+
+        Rectangle rect = this.moveAngGetElementRectangle(ID);
+        Map<String, Object> definition = this.widget.getElement(ID);
+       /*log.info(
+                "Переключение фильтра {} в статус - '{}'",
+                CheckerTools.castDefinition(definition.get("buttonName")),
+                (isOn)? "Включен" : "Выключен");*/
+        AutomationMouse.getInstance().setLocation((int) rect.getMaxX() + 20, (int) rect.getCenterY());
+        AutomationMouse.getInstance().doubleLeftClick();
+        assertDoesNotThrow(() -> {
+            List list = UIAutomation.getInstance().getDesktop().getList(0);
+            ListItem item = list.getItem(value);
+            item.click();
+        }, "Не удалось выбрать элемент списка комбобокса. ID - " + ID);
+
+    }
+
     public void clickButton(String ID) {
         this.moveAngGetElementRectangle(ID);
         Map<String, Object> definition = this.widget.getElement(ID);
@@ -48,13 +69,19 @@ public class SSMToolsController {
                         (isOn)? "Включен" : "Выключен");
         Color color = assertDoesNotThrow(() -> new Robot().getPixelColor((int) rect.getMaxX() + 20, (int) rect.getCenterY()));
         AutomationMouse.getInstance().setLocation((int) rect.getMaxX() + 20, (int) rect.getCenterY());
-        if(color.equals(this.toggleEnabledColor) & !isOn)
+        if(color.equals(this.toggleEnabledColor) & !isOn) {
+            log.info("Переключение на статус выключен");
             AutomationMouse.getInstance().leftClick();
+        }
 
-        if(!color.equals(this.toggleEnabledColor) & isOn)
+        if(!color.equals(this.toggleEnabledColor) & isOn) {
+            log.info("Переключение на статус включен");
             AutomationMouse.getInstance().leftClick();
+        }
 
+        assertDoesNotThrow(() -> Thread.sleep(1000), "Не удалось выполнить ожидание элемента");
         CheckerDesktopTestCase.getSApplication().waitApp();
+
         log.info("Переключение успешно");
     }
 

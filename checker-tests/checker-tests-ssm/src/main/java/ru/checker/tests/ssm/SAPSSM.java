@@ -30,20 +30,21 @@ public class SAPSSM extends SSMTestCase {
         SSMToolsController menu = this.getRootWindow().widget("ssm_menu", SSMToolsController.class);
         menu.toggle("ssm_01", false);
         SSMGridData data = grid.getAllData();
-        assertEquals(data.getRowSize(), 0, "Таблица 'Заказы SAP' не пуста");
+        assertEquals(data.getRowSize(), 0L, "Таблица 'Заказы SAP' не пуста");
         menu.toggle("ssm_01", true);
         data = grid.getAllData();
-        assertNotEquals(data.getRowSize(), 0, "Таблица 'Заказы SAP' пуста");
+        assertNotEquals(data.getRowSize(), 0L, "Таблица 'Заказы SAP' пуста");
         assertTrue(
                 grid.columnExistValue("С", "Открыт"),
                 "В таблице 'Заказы SAP' найдено значение в колонке 'C' отличное от 'Открыт'. ID - 'ssm_01_01'");
         menu.toggle("ssm_01", false);
         menu.toggle("ssm_02", true);
         data = grid.getFirstPageData();
-        assertNotEquals(data.getRowSize(), 0, "Таблица 'Заказы SAP' пуста");
+        assertNotEquals(data.getRowSize(), 0L, "Таблица 'Заказы SAP' пуста");
         assertTrue(
                 grid.columnExistValue("С", "Закрыт"),
                 "В таблице 'Заказы SAP' найдено значение в колонке 'C' отличное от 'Закрыт'. ID - 'ssm_01_01'");
+        menu.selectCombobox("ssm_03", "РМЦ-1");
 
       /*  SSMToolsMenu menu = new SSMToolsMenu(filterPZ);
         menu.clickOnField("Закрытые");*/

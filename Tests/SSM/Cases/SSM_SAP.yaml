@@ -3,7 +3,7 @@ name: Тесты формы 'Заказы SAP'
 app:
   location: Z:\bin\SSM.exe
   arguments: [-pp]
-  preStart: true
+  preStart: false
   stayAlive: true
   windows:
     - path: ORDER_PRB.yaml

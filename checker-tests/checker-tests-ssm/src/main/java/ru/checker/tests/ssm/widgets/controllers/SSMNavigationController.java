@@ -72,6 +72,11 @@ public class SSMNavigationController {
         AutomationMouse.getInstance().setLocation((int) foundRectangle.getCenterX(), foundRectangle.y + 5 );
         AutomationMouse.getInstance().rightClick();
         AutomationMouse.getInstance().doubleLeftClick();
+        assertDoesNotThrow(() -> {
+            Robot robot = new Robot();
+            robot.keyPress(KeyEvent.VK_ENTER);
+            robot.keyRelease(KeyEvent.VK_ENTER);
+        }, "Не удалось выбрать элемент навигации");
     }
 
     public void selectRoot() {
@@ -79,11 +84,6 @@ public class SSMNavigationController {
         Rectangle foundRectangle = CheckerOCRUtils.getTextAndMove(place, ROOT, CheckerOCRLanguage.ENG_RUS);
         AutomationMouse.getInstance().setLocation((int) foundRectangle.getCenterX(), foundRectangle.y + 5 );
         AutomationMouse.getInstance().rightClick();
-        assertDoesNotThrow(() -> {
-           Robot robot = new Robot();
-           robot.keyPress(KeyEvent.VK_ENTER);
-           robot.keyRelease(KeyEvent.VK_ENTER);
-        }, "Не удалось выбрать элемент навигации");
         CheckerDesktopTestCase.getSApplication().waitApp();
     }
 
