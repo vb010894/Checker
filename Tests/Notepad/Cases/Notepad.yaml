@@ -1,0 +1,9 @@
+id: Notepad
+name: Тесты блокнота
+app:
+  location: D:\Programs\Notepad++\notepad++.exe
+  arguments: [empty, e2]
+  preStart: false
+  stayAlive: false
+  windows:
+    - path: Root.yaml

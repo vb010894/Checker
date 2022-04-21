@@ -1,0 +1,12 @@
+id: sap_orders_form
+name: Заказы SAP
+search:
+  ClassName: TcxTabSheet
+  Name: Тяжмаш MES - PREPROD-Заказы SAP
+elements:
+  - element:
+      id: ssm_01_01
+      name: Таблица 'Производственные заказы'
+      index: 3
+      search:
+        ClassName: TcxGridSite

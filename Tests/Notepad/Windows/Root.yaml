@@ -1,0 +1,13 @@
+id: notepad_root
+className: Notepad++
+elements:
+  - element:
+      id: notepad_root_new
+      name: Новый
+      search:
+        Name: Новый
+  - element:
+      id: notepad_root_repeat
+      name: Повторить
+      search:
+        AutomationId: Item 42004

@@ -1,0 +1,34 @@
+id: ssm_menu
+name: Меню ССМ
+search:
+  ClassName: TdxRibbonGroupsDockControl
+elements:
+  - element:
+      id: ssm_03
+      name: Фильтр 'Цех'
+      buttonName: Цех
+      search:
+        ClassName: TdxRibbonGroupBarControl
+        Name: ФИЛЬТР ПЗ
+  - element:
+      id: ssm_02
+      name: Фильтр 'Закрытые'
+      buttonName: Закрытые
+      search:
+        ClassName: TdxRibbonGroupBarControl
+        Name: ФИЛЬТР ПЗ
+  - element:
+      id: ssm_01
+      name: Фильтр 'Открытые'
+      buttonName: Открытые
+      search:
+        ClassName: TdxRibbonGroupBarControl
+        Name: ФИЛЬТР ПЗ
+  - element:
+      id: info_exit
+      name: Кнопка выход
+      buttonName: Выход
+      search:
+        ClassName: TdxRibbonGroupBarControl
+        Name: ИНФОРМАЦИЯ
+
