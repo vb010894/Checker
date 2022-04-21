@@ -9,6 +9,7 @@ import ru.checker.tests.base.test.CheckerTestCase;
 import ru.checker.tests.base.utils.CheckerTools;
 import ru.checker.tests.desktop.test.app.CheckerDesktopApplication;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -25,6 +26,12 @@ public abstract class CheckerDesktopTestCase extends CheckerTestCase {
      */
     @Getter
     static Map<String, Object> definition;
+
+    /**
+     * Test case constant.
+     */
+    @Getter
+    static Map<String, Object> constants = new LinkedHashMap<>();
 
     /**
      * Test case name.
@@ -56,14 +63,19 @@ public abstract class CheckerDesktopTestCase extends CheckerTestCase {
     @Getter
     private static CheckerDesktopApplication sApplication;
 
-    public static void prepare(String targetApplicationName, String testCaseName) {
+    /**
+     * Prepare test case.
+
+     * @param testCaseName Case name
+     */
+    public static void prepare(String testCaseName) {
         caseName = testCaseName;
-        applicationName = targetApplicationName;
-        definition = CheckerTools.convertYAMLToMap(String.format("/Tests/%s/Cases/%s.yaml",applicationName , testCaseName));
+        applicationName = System.getProperty("app");
+        definition = CheckerTools.convertYAMLToMap(String.format("/Tests/%s/Cases/%s.yaml", applicationName, testCaseName));
         ID = assertDoesNotThrow(() -> (String) definition.get("id"), "Не удалось получить ID теста. Ключ - 'id'");
         name = assertDoesNotThrow(() -> (String) definition.get("name"), "Не удалось получить ID теста. Ключ - 'name'");
         Assumptions.assumeTrue(definition.containsKey("app"), "Не найдено описание приложения. Ключ - 'app'");
-        log.info(definition.get("app").getClass().getSimpleName());
+        constants = CheckerTools.castDefinition(definition.getOrDefault("constants", new LinkedHashMap<>()));
     }
 
 

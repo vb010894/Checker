@@ -60,6 +60,7 @@ public class SSMGrid {
     public SSMGridData getFirstPageData() {
         log.info("Чтение данных таблицы из первой страницы");
         CheckerTools.clearClipboard();
+        this.data = new SSMGridData("");
         String stringData = "";
         this.focus();
         int limit = 10000;
@@ -101,6 +102,7 @@ public class SSMGrid {
     public SSMGridData getAllData() {
         log.info("Чтение данных таблицы");
         CheckerTools.clearClipboard();
+        this.data = new SSMGridData("");
         String stringData = "";
         this.focus();
         int limit = 10000;

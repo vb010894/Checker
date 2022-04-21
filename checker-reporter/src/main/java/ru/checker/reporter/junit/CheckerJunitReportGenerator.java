@@ -6,11 +6,13 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.core.util.FileUtils;
 import ru.checker.reporter.junit.models.JunitReportModel;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,6 +44,9 @@ public final class CheckerJunitReportGenerator {
                         "Checker/Reposts/Junit/Report-%s-%s.xml",
                         model.getName(), new SimpleDateFormat("dd-MM-yyy-hh-ss").format(new Date()));
         File pathFile = new File(path);
+        if(pathFile.getParentFile().listFiles() != null) {
+            Arrays.asList(pathFile.getParentFile().listFiles()).parallelStream().forEach(File::delete);
+        }
         if (!pathFile.getParentFile().exists())
             if(!pathFile.getParentFile().mkdirs())
                 throw new IOException("Не удалось создать директорию с отчетами");
