@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Log4j2
+@SuppressWarnings("unused")
 public class CheckerTestListener implements TestExecutionListener {
 
     @Getter
@@ -25,7 +26,6 @@ public class CheckerTestListener implements TestExecutionListener {
 
     private JunitReportModel.JunitReportModelBuilder model;
     private TestCaseModel.TestCaseModelBuilder test;
-    private TestPlan plan;
     private long testStartTime;
     private long startCaseTime = System.currentTimeMillis();
     private long testCount = 0;
@@ -34,7 +34,6 @@ public class CheckerTestListener implements TestExecutionListener {
 
     @Override
     public void testPlanExecutionStarted(TestPlan testPlan) {
-        this.plan = testPlan;
         log.info("Старт тестов");
     }
 
@@ -84,7 +83,7 @@ public class CheckerTestListener implements TestExecutionListener {
             this.model.failures("0");
             this.model.skipped(String.valueOf(this.skippedCount));
             this.model.errors(String.valueOf(this.failureCount));
-            this.model.time(String.valueOf(System.currentTimeMillis() - this.startCaseTime));
+            this.model.time(System.currentTimeMillis() - this.startCaseTime + ".000");
             this.model.testcase(this.cases);
             this.reports.add(this.model.build());
         }
@@ -119,7 +118,7 @@ public class CheckerTestListener implements TestExecutionListener {
                     .replace("]", "")
                     .replace("class:", "");
             this.test.className(type);
-            this.test.time(String.valueOf(System.currentTimeMillis() - this.testStartTime));
+            this.test.time(System.currentTimeMillis() - this.testStartTime + ".000");
             this.cases.add(this.test.build());
         }
 

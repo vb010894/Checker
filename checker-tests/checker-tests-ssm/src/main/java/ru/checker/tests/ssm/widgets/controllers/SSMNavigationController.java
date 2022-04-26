@@ -149,7 +149,6 @@ public class SSMNavigationController {
         Rectangle foundRectangle = CheckerOCRUtils.getTextAndMove(place, name, CheckerOCRLanguage.ENG_RUS);
         AutomationMouse.getInstance().setLocation((int) foundRectangle.getCenterX(), foundRectangle.y + 5 );
         AutomationMouse.getInstance().rightClick();
-        AutomationMouse.getInstance().doubleLeftClick();
         assertDoesNotThrow(() -> {
             Robot robot = new Robot();
             robot.keyPress(KeyEvent.VK_ENTER);
