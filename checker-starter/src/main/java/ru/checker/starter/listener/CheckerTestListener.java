@@ -84,8 +84,8 @@ public class CheckerTestListener implements TestExecutionListener {
             this.model.failures("0");
             this.model.skipped(String.valueOf(this.skippedCount));
             this.model.errors(String.valueOf(this.failureCount));
-            long seconds = (System.currentTimeMillis() - this.startCaseTime) / 1000;
-            this.model.time(seconds + ".000");
+            double seconds = (System.currentTimeMillis() - this.startCaseTime) / 1000.0;
+            this.model.time(String.format("%.3f", seconds).replace(",", "."));
             this.model.testcase(this.cases);
             this.reports.add(this.model.build());
         }
@@ -120,8 +120,8 @@ public class CheckerTestListener implements TestExecutionListener {
                     .replace("]", "")
                     .replace("class:", "");
             this.test.className(type);
-            long seconds = (System.currentTimeMillis() - this.testStartTime) / 1000;
-            this.test.time(seconds + ".000");
+            double seconds = (System.currentTimeMillis() - this.testStartTime) / 1000;
+            this.test.time(String.format("%.3f", seconds).replace(",", "."));
             this.cases.add(this.test.build());
         }
 
