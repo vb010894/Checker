@@ -4,6 +4,13 @@ search:
   ClassName: TdxRibbonGroupsDockControl
 elements:
   - element:
+      id: ssm_04
+      name: Кнопка 'Назначить'
+      buttonName: Назначить
+      search:
+        ClassName: TdxRibbonGroupBarControl
+        Name: ЗАДАНИЯ ПРБ
+  - element:
       id: ssm_03
       name: Фильтр 'Цех'
       buttonName: Цех
