@@ -17,6 +17,7 @@ import ru.checker.reporter.junit.CheckerJunitReportGenerator;
 import ru.checker.starter.listener.CheckerTestListener;
 
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
 
 @ComponentScan("ru.checker.tests")
 @SpringBootApplication
@@ -40,10 +41,14 @@ public class CheckerStarterApplication implements CommandLineRunner {
     public void run(String... args) {
         String testCase = args[0];
         Launcher launcher = LauncherFactory.create();
-        LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder
-                .request()
-                .selectors(selectClass(application.getBean(testCase).getClass())).build();
-        TestPlan plan = launcher.discover(request);
+        LauncherDiscoveryRequestBuilder request = LauncherDiscoveryRequestBuilder
+                .request();
+        if(System.getProperties().containsKey("test")) {
+            request.selectors(selectMethod(application.getBean(testCase).getClass(), System.getProperty("test").trim()));
+        } else {
+            request.selectors(selectClass(application.getBean(testCase).getClass()));
+        }
+        TestPlan plan = launcher.discover(request.build());
         launcher.registerTestExecutionListeners(listener);
         launcher.execute(plan);
         CheckerJunitReportGenerator.generateJunitReports(listener.getReports());

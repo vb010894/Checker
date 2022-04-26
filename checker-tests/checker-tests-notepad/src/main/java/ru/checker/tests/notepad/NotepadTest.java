@@ -20,7 +20,7 @@ public class NotepadTest extends CheckerDesktopTestCase {
 
     // Test case definition.
     static {
-        prepare("Notepad","Notepad");
+        prepare("Notepad");
     }
 
     /**

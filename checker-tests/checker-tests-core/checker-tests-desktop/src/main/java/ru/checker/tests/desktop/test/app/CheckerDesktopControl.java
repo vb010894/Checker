@@ -128,14 +128,20 @@ public abstract class CheckerDesktopControl<T extends AutomationBase> extends Ch
                     List<AutomationBase> result = new LinkedList<>();
                     int timeout = 60000;
                     while (result.isEmpty() && timeout > 0) {
-                        result = root.getChildren(true)
-                                .parallelStream()
-                                .filter(control -> this.isSearchingControl(control, definition))
-                                .collect(Collectors.toList());
-                        if(result.isEmpty()) {
+                        try {
+                            result = root.getChildren(true)
+                                    .parallelStream()
+                                    .filter(control -> this.isSearchingControl(control, definition))
+                                    .collect(Collectors.toList());
+                            if(result.isEmpty()) {
+                                Thread.sleep(1000);
+                                timeout -= 1000;
+                            }
+                        } catch (Exception ex) {
                             Thread.sleep(1000);
                             timeout -= 1000;
                         }
+
                     }
                     return result;
                 },

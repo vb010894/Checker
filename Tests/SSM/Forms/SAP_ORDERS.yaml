@@ -5,6 +5,18 @@ search:
   Name: Тяжмаш MES - PREPROD-Заказы SAP
 elements:
   - element:
+      id: ssm_01_03
+      name: Таблица 'Выпуск продукции по заказу'
+      index: 0
+      search:
+        ClassName: TcxGridSite
+  - element:
+      id: ssm_01_02
+      name: Таблица 'Мастера'
+      index: 2
+      search:
+        ClassName: TcxGridSite
+  - element:
       id: ssm_01_01
       name: Таблица 'Производственные заказы'
       index: 3

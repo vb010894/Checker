@@ -11,6 +11,7 @@ import ru.checker.reporter.junit.models.JunitReportModel;
 import ru.checker.reporter.junit.models.SkippedModel;
 import ru.checker.reporter.junit.models.TestCaseModel;
 
+import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,6 +32,7 @@ public class CheckerTestListener implements TestExecutionListener {
     private long testCount = 0;
     private long skippedCount = 0;
     private long failureCount = 0;
+    private String logStorage = "";
 
     @Override
     public void testPlanExecutionStarted(TestPlan testPlan) {
@@ -66,6 +68,12 @@ public class CheckerTestListener implements TestExecutionListener {
             this.model.name(testIdentifier.getLegacyReportingName());
         }
         if(testIdentifier.isTest()) {
+            System.setOut(new PrintStream(System.out) {
+                public void println(String s) {
+                    logStorage += s + "\n";
+                    super.println(s);
+                }
+            });
             this.test = TestCaseModel.builder();
             this.testStartTime = System.currentTimeMillis();
             this.test.name(testIdentifier.getDisplayName());
@@ -84,7 +92,8 @@ public class CheckerTestListener implements TestExecutionListener {
             this.model.failures("0");
             this.model.skipped(String.valueOf(this.skippedCount));
             this.model.errors(String.valueOf(this.failureCount));
-            this.model.time(String.valueOf(System.currentTimeMillis() - this.startCaseTime));
+            double seconds = (System.currentTimeMillis() - this.startCaseTime) / 1000.0;
+            this.model.time(String.format("%.3f", seconds).replace(",", "."));
             this.model.testcase(this.cases);
             this.reports.add(this.model.build());
         }
@@ -100,6 +109,7 @@ public class CheckerTestListener implements TestExecutionListener {
                                 .build();
                         this.test.error(errorModel);
                         this.test.stack(Stream.of(testExecutionResult.getThrowable().orElseThrow().getStackTrace()).map(String::valueOf).collect(Collectors.joining("\n")));
+                        this.test.stackTrace(Stream.of(testExecutionResult.getThrowable().orElseThrow().getStackTrace()).map(String::valueOf).collect(Collectors.joining("\n")));
                         failureCount++;
                     break;
                 case ABORTED:
@@ -119,8 +129,11 @@ public class CheckerTestListener implements TestExecutionListener {
                     .replace("]", "")
                     .replace("class:", "");
             this.test.className(type);
-            this.test.time(String.valueOf(System.currentTimeMillis() - this.testStartTime));
+            double seconds = (System.currentTimeMillis() - this.testStartTime) / 1000;
+            this.test.time(String.format("%.3f", seconds).replace(",", "."));
+            this.test.out(logStorage);
             this.cases.add(this.test.build());
+            logStorage = "";
         }
 
     }
