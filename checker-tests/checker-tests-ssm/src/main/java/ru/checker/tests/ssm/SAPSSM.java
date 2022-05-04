@@ -41,7 +41,7 @@ public class SAPSSM extends SSMTestCase {
     /**
      * ТС.SSM.02 test
      */
-    @DisplayName("ТС.SSM.01.Заказы SAP. Работа с фильтрами")
+    @DisplayName("ТС.ССМ.2. Заказы SAP. Назначение мастера на заказ.")
     @Test
     void ssm02() {
         SSMSapTests.SSM02(this.getRootWindow(), this.getForm());
