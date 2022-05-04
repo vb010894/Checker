@@ -82,6 +82,7 @@ public class SSMGrid {
             this.robot.keyRelease(KeyEvent.VK_CONTROL);
             this.robot.keyRelease(KeyEvent.VK_A);
 
+            this.robot.keyPress(KeyEvent.VK_SHIFT);
             this.robot.keyPress(KeyEvent.VK_PAGE_DOWN);
             this.robot.keyRelease(KeyEvent.VK_SHIFT);
             this.robot.keyRelease(KeyEvent.VK_PAGE_DOWN);

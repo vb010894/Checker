@@ -161,6 +161,11 @@ public class SSMNavigationController {
      * @param node Node
      */
     public void selectNode (SSMNavigation node) {
+        /*раскрыть меню если закрыто*/
+        Rectangle place = this.widget.getRectangle();
+        String menuText = CheckerOCRUtils.getTextFromRectangle(place, CheckerOCRLanguage.ENG_RUS);
+        if (menuText.split("\n").length < 2) selectRoot();
+
         switch (node) {
             default:
                 this.selectRoot();
