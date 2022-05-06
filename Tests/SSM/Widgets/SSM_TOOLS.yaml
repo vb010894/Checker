@@ -4,6 +4,13 @@ search:
   ClassName: TdxRibbonGroupsDockControl
 elements:
   - element:
+      id: ssm_05
+      name: Кнопка 'Добавить'
+      buttonName: Добавить
+      search:
+        ClassName: TdxRibbonGroupBarControl
+        Name: ЗАДАНИЯ ПРБ
+  - element:
       id: ssm_04
       name: Кнопка 'Назначить'
       buttonName: Назначить

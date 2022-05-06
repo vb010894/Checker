@@ -135,7 +135,15 @@ public class CheckerDesktopWindow extends CheckerDesktopControl<Window> implemen
                 log.info("Поиск формы через глубокий поиск. ID -" + this.getID());
                 String name = CheckerTools.castDefinition(this.getSearch().getOrDefault("Name", null));
                 String className = CheckerTools.castDefinition(this.getSearch().getOrDefault("ClassName", null));
-                WinDef.HWND handle = User32.INSTANCE.FindWindow(className, name);
+                int limit = 60000;
+                WinDef.HWND handle = null;
+                while (handle == null && limit > 0) {
+                    handle = User32.INSTANCE.FindWindow(className, name);
+                    if(handle == null) {
+                        Thread.sleep(1000);
+                        limit -= 1000;
+                    }
+                }
                 assertNotNull(handle, "Не найдено окно. ID - " + this.getID());
                 Element window = UIAutomation
                         .getInstance()

@@ -41,7 +41,7 @@ public final class CheckerJunitReportGenerator {
         String path = root
                 .substring(0, root.indexOf("Checker"))
                 + String.format(
-                        "Checker/Reposts/Junit/Report-%s-%s.xml",
+                        "Checker/Reports/Junit/Report-%s-%s.xml",
                         model.getName(), new SimpleDateFormat("dd-MM-yyy-hh-ss").format(new Date()));
         File pathFile = new File(path);
         if(pathFile.getParentFile().listFiles() != null) {

@@ -1,0 +1,4 @@
+id: ssm_paging
+name: Вкладки ССМ
+search:
+  ClassName: TcxPageControl
