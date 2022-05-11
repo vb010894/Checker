@@ -1,15 +1,29 @@
 package ru.checker.tests.ssm;
 
+import com.sun.jna.platform.win32.User32;
+import com.sun.jna.platform.win32.WinDef;
 import lombok.extern.log4j.Log4j2;
+import mmarquee.automation.AutomationException;
+import mmarquee.automation.ControlType;
+import mmarquee.automation.Element;
+import mmarquee.automation.UIAutomation;
+import mmarquee.automation.controls.AutomationBase;
 import mmarquee.automation.controls.Panel;
+import mmarquee.uiautomation.TreeScope;
+import net.sourceforge.tess4j.ITessAPI;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.*;
 import org.springframework.stereotype.Component;
+import ru.checker.tests.base.utils.CheckerOCRUtils;
+import ru.checker.tests.desktop.base.robot.CheckerDesktopMarker;
 import ru.checker.tests.ssm.base.SSMTestCase;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
 import ru.checker.tests.ssm.controls.grid.SSMGridData;
 import ru.checker.tests.ssm.tests.SSMSapTests;
+
+import java.awt.*;
+import java.util.List;
 
 /**
  * SSM 'SAP Orders' form testing.
@@ -67,21 +81,8 @@ public class SAPSSM extends SSMTestCase {
      */
     @DisplayName("ТС.SSM.01.Заказы SAP. Работа с фильтрами")
     @Test
-    void draft() {
-        Panel sap_order_grid = this.getForm().panel("ssm_01_01", -1);
-        SSMGrid sap_order_grid_wrapper = new SSMGrid(sap_order_grid);
-        SSMGrid.ConditionConfigurer config = SSMGrid.ConditionConfigurer
-                .builder()
-                .column("Н")
-                .condition1(SSMGrid.Condition.EQUAL)
-                .value1("000058005621")
-                .separator(SSMGrid.Separator.OR)
-                .condition2(SSMGrid.Condition.EQUAL)
-                .value2("222")
-                .build();
-        sap_order_grid_wrapper.filterByGUI(config, "С", "Н", "Т");
-        sap_order_grid_wrapper.clearFilter();
-        System.out.println("aaa");
+    void draft() throws AWTException, AutomationException, InterruptedException {
+
     }
 
 

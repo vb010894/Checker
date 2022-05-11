@@ -6,8 +6,26 @@ search:
   Name: ЗАДАНИЕ ПРБ - создание.
 elements:
   - element:
-      id: ssm_01_01
-      name: Группа 'Фильтр ПЗ'
+      id: prb_04
+      name: Таблица 'Мастера'
+      index: 0
       search:
-        Name: ФИЛЬТР ПЗ
-        ClassName: TdxRibbonGroupBarControl
+        ClassName: TcxGridSite
+  - element:
+      id: prb_03
+      name: Кнопка 'Ок'
+      search:
+        ClassName: TcxButton
+        Name: OK
+  - element:
+      id: prb_02
+      name: Панель 'Мастер'
+      search:
+        ClassName: TcxGroupBox
+        Name:           МАСТЕР
+  - element:
+      id: prb_01
+      name: Поле 'Планируемое'
+      label: Планируемое
+      search:
+        ClassName: TcxCustomInnerTextEdit

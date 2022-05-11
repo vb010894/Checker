@@ -3,6 +3,7 @@ package ru.checker.tests.ssm.tests;
 import lombok.extern.log4j.Log4j2;
 import mmarquee.automation.ControlType;
 import mmarquee.automation.controls.AutomationBase;
+import mmarquee.automation.controls.EditBox;
 import mmarquee.automation.controls.Panel;
 import mmarquee.automation.controls.mouse.AutomationMouse;
 import ru.checker.tests.base.test.CheckerTestCase;
@@ -11,12 +12,14 @@ import ru.checker.tests.desktop.test.CheckerDesktopTestCase;
 import ru.checker.tests.desktop.test.app.CheckerDesktopApplication;
 import ru.checker.tests.desktop.test.app.CheckerDesktopForm;
 import ru.checker.tests.desktop.test.app.CheckerDesktopWindow;
+import ru.checker.tests.ssm.base.SSMTestCase;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
 import ru.checker.tests.ssm.controls.grid.SSMGridData;
 import ru.checker.tests.ssm.widgets.controllers.SSMPageController;
 import ru.checker.tests.ssm.widgets.controllers.SSMToolsController;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -158,8 +161,27 @@ public final class SSMSapTests {
         SSMToolsController menu = window.widget("ssm_menu", SSMToolsController.class);
         menu.clickButton("ssm_05");
         CheckerDesktopWindow order_prb_window = CheckerDesktopTestCase.getSApplication().window("sap_order_prb_form");
-        new CheckerDesktopMarker(order_prb_window.getRectangle()).draw();
-        System.out.println("aaa");
+        EditBox plan_field = order_prb_window.labelEdit("prb_01");
+        Panel prb_master_panel = order_prb_window.firstPanel("prb_02");
+        assertDoesNotThrow(
+                ()-> AutomationMouse.getInstance().setLocation(prb_master_panel.getBoundingRectangle().toRectangle().x + 10, (int) prb_master_panel.getBoundingRectangle().toRectangle().getCenterY()),
+                "Не удалось переместить мышь на кнопку 'Добавить мастера'"
+                );
+        AutomationMouse.getInstance().leftClick();
+        CheckerDesktopWindow order_prb_master_window = CheckerDesktopTestCase.getSApplication().window("sap_order_prb_master_form");
+        Panel master_prb_grid = order_prb_master_window.panel("prb_master_02", -1);
+        SSMGrid sap_order_master_grid_wrapper = new SSMGrid(master_prb_grid);
+        String master_FIO = sap_order_master_grid_wrapper.getDataFromRow(0, new AtomicReference<>()).getColumnData("Фамилия И.О.").get(0);
+        assertDoesNotThrow(() -> order_prb_master_window.firstButton("prb_master_01").click(), "Не удалось нажать на кнопку 'Выбрать'");
+        assertDoesNotThrow(() -> plan_field.setValue("1"), "Не удалось вставить значение в поле 'Планируемое'");
+
+        master_prb_grid = order_prb_window.panel("prb_04", -1);
+        sap_order_master_grid_wrapper = new SSMGrid(master_prb_grid);
+        //String master_FIO_prb = sap_order_master_grid_wrapper.getDataFromRow(0, new AtomicReference<>()).getColumnData("Фамилия И.О.").get(0);
+        //assertEquals(master_FIO_prb, master_FIO, "В окно задание прб подтянулся не тот мастер");
+        assertDoesNotThrow(() -> order_prb_window.firstButton("prb_03").click(), "Не удалось нажать кнопку 'ok' в окне 'Задания ПРБ'");
+
+        System.out.println(master_FIO);
     }
 
 }

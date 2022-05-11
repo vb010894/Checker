@@ -402,7 +402,7 @@ public class SSMGrid {
             AutomationMouse.getInstance().leftClick();
 
             // Кода в таблице отсутствует область для выделения
-            if (this.robot.getPixelColor(x + 5, y).equals(Color.WHITE)) {
+            if (!this.robot.getPixelColor(x + 3, y).equals(new Color(240, 240, 240))) {
                 this.robot.keyPress(KeyEvent.VK_ESCAPE);
                 this.robot.keyRelease(KeyEvent.VK_ESCAPE);
 

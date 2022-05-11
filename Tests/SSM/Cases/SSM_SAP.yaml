@@ -8,5 +8,6 @@ app:
   preStart: false
   stayAlive: true
   windows:
+    - path: ORDER_MASTER_PRB.yaml
     - path: ORDER_PRB.yaml
     - path: Root.yaml

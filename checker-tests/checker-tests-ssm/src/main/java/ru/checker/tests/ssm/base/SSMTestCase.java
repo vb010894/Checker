@@ -85,7 +85,7 @@ public class SSMTestCase extends CheckerDesktopTestCase {
             SSMNavigationController.SSMNavigation nav = SSMNavigationController.SSMNavigation.valueOf(env);
             SSMNavigationController navigation = this.rootWindow.widget("ssm_navigation", SSMNavigationController.class);
             navigation.selectNode(nav);
-
+            // TODO: 06.05.2022 Убрать хард код!!!
             this.form = this.rootWindow.form("sap_orders_form");
         }, "Не удалось выбрать пункт в навигации");
     }
