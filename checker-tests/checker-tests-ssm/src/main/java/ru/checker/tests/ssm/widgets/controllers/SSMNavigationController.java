@@ -197,6 +197,7 @@ public class SSMNavigationController {
         Rectangle foundRectangle = CheckerOCRUtils.getTextAndMove(place, ROOT, CheckerOCRLanguage.ENG_RUS);
         AutomationMouse.getInstance().setLocation((int) foundRectangle.getCenterX(), foundRectangle.y + 5 );
         AutomationMouse.getInstance().rightClick();
+        assertDoesNotThrow(() -> Thread.sleep(500), "Не удалось выждать открытие корневого пункта навигации");
         CheckerDesktopTestCase.getSApplication().waitApp();
     }
 
