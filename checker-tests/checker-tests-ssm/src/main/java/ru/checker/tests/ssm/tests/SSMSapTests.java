@@ -2,6 +2,7 @@ package ru.checker.tests.ssm.tests;
 
 import lombok.extern.log4j.Log4j2;
 import mmarquee.automation.ControlType;
+import mmarquee.automation.UIAutomation;
 import mmarquee.automation.controls.AutomationBase;
 import mmarquee.automation.controls.EditBox;
 import mmarquee.automation.controls.Panel;
@@ -18,6 +19,8 @@ import ru.checker.tests.ssm.controls.grid.SSMGridData;
 import ru.checker.tests.ssm.widgets.controllers.SSMPageController;
 import ru.checker.tests.ssm.widgets.controllers.SSMToolsController;
 
+import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
@@ -173,14 +176,17 @@ public final class SSMSapTests {
         SSMGrid sap_order_master_grid_wrapper = new SSMGrid(master_prb_grid);
         String master_FIO = sap_order_master_grid_wrapper.getDataFromRow(0, new AtomicReference<>()).getColumnData("Фамилия И.О.").get(0);
         assertDoesNotThrow(() -> order_prb_master_window.firstButton("prb_master_01").click(), "Не удалось нажать на кнопку 'Выбрать'");
-        assertDoesNotThrow(() -> plan_field.setValue("1"), "Не удалось вставить значение в поле 'Планируемое'");
+        assertDoesNotThrow(() -> {
+            AutomationMouse.getInstance().setLocation(plan_field.getClickablePoint());
+            AutomationMouse.getInstance().leftClick();
+            Robot r = new Robot();
+            r.keyPress(KeyEvent.VK_UP);
+            r.keyRelease(KeyEvent.VK_UP);
+        },
+                "Не удалось вставить значение в поле 'Планируемое'");
 
-        master_prb_grid = order_prb_window.panel("prb_04", -1);
-        sap_order_master_grid_wrapper = new SSMGrid(master_prb_grid);
-        //String master_FIO_prb = sap_order_master_grid_wrapper.getDataFromRow(0, new AtomicReference<>()).getColumnData("Фамилия И.О.").get(0);
-        //assertEquals(master_FIO_prb, master_FIO, "В окно задание прб подтянулся не тот мастер");
-        assertDoesNotThrow(() -> order_prb_window.firstButton("prb_03").click(), "Не удалось нажать кнопку 'ok' в окне 'Задания ПРБ'");
 
+        assertDoesNotThrow(() -> order_prb_window.firstButton("prb_03").click(), "Не удалось нажать на кнопку 'OK'");
         System.out.println(master_FIO);
     }
 
