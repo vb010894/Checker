@@ -1,4 +1,4 @@
-id: sap_orders_form
+id: mf
 name: Заказы SAP
 search:
   ClassName: TcxTabSheet
