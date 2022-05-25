@@ -7,7 +7,6 @@ import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
 import org.monte.media.Format;
-import org.monte.media.FormatKeys;
 import org.monte.media.math.Rational;
 import org.monte.screenrecorder.ScreenRecorder;
 import ru.checker.reporter.junit.models.ErrorModel;
@@ -30,6 +29,7 @@ import static org.monte.media.FormatKeys.*;
 import static org.monte.media.VideoFormatKeys.*;
 
 @Log4j2
+@SuppressWarnings("unused")
 public class CheckerTestListener implements TestExecutionListener {
 
     @Getter
@@ -100,7 +100,7 @@ public class CheckerTestListener implements TestExecutionListener {
                 if (!pathFile.mkdirs())
                     log.warn("Не удалось создать папку для записи видео");
             } else {
-                Arrays.stream(pathFile.listFiles()).forEach(file -> {
+                Arrays.stream(Objects.requireNonNull(pathFile.listFiles())).forEach(file -> {
                     if(!file.delete())
                         log.warn("Не удалось удалить видео - " + file.getAbsolutePath());
                 });
@@ -186,7 +186,7 @@ public class CheckerTestListener implements TestExecutionListener {
                 if(pathFile.listFiles() != null) {
                     Arrays.stream(Objects.requireNonNull(pathFile.listFiles()))
                             .parallel()
-                            .forEach(file -> this.logStorage += String.format("[[ATTACHMENT|%s]]\n", file.getAbsolutePath()));
+                            .forEach(file -> System.out.println(this.logStorage += String.format("[[ATTACHMENT|%s]]\n", file.getAbsolutePath())));
                 }
             } catch (IOException e) {
                 log.warn("Не удалось остановить запись");
