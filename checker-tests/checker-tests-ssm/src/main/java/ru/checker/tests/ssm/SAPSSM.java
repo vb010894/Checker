@@ -68,7 +68,7 @@ public class SAPSSM extends SSMTestCase {
      */
     @DisplayName("ТС.SSM.01.Заказы SAP. Работа с фильтрами")
     @Test
-    @Disabled
+    //@Disabled
     void draft() {
 
     }

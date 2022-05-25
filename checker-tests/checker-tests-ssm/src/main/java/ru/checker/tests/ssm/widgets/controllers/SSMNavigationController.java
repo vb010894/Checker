@@ -32,7 +32,7 @@ public class SSMNavigationController {
     /**
      * Root navigation item.
      */
-    final String ROOT = "Тяжмаш MES - PREPROD";
+    final String ROOT = "Тяжмаш";
 
     /**
      * Item 'Выпуск продукции'.
@@ -95,6 +95,10 @@ public class SSMNavigationController {
     public void selectSapOrders() {
         Rectangle place = this.widget.getRectangle();
         String node = CheckerOCRUtils.getTextFromRectangle(place, CheckerOCRLanguage.ENG_RUS);
+        if(!node.contains(SAP_ORDERS) || !node.contains(SAP_ORDERS_RUS))
+            this.selectRoot();
+
+        node = CheckerOCRUtils.getTextFromRectangle(place, CheckerOCRLanguage.ENG_RUS);
         if(node.contains(SAP_ORDERS))
             this.selectNode(SAP_ORDERS);
         else
