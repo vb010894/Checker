@@ -13,8 +13,11 @@ import ru.checker.reporter.junit.models.ErrorModel;
 import ru.checker.reporter.junit.models.JunitReportModel;
 import ru.checker.reporter.junit.models.SkippedModel;
 import ru.checker.reporter.junit.models.TestCaseModel;
+import ru.checker.tests.base.utils.CheckerTools;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -81,7 +84,7 @@ public class CheckerTestListener implements TestExecutionListener {
             this.model = JunitReportModel.builder();
             this.model.name(testIdentifier.getLegacyReportingName());
         }
-        if(testIdentifier.isTest()) {
+        if (testIdentifier.isTest()) {
 
             System.setOut(new PrintStream(System.out) {
                 public void println(String s) {
@@ -93,15 +96,26 @@ public class CheckerTestListener implements TestExecutionListener {
             this.testStartTime = System.currentTimeMillis();
             this.test.name(testIdentifier.getDisplayName());
             this.testCount++;
+
             String root = new File("").getAbsolutePath();
+            File out = new File(root + "/Reports/Images/" + testIdentifier.getDisplayName() + "/dialog-windows.bmp");
+            if (!out.getParentFile().exists())
+                if (!out.getParentFile().mkdirs()) {
+                    log.warn("Не удалось создать папку со скриншотами");
+                } else {
+                    Arrays.stream(Objects.requireNonNull(out.listFiles())).forEach(file -> {
+                        if (!file.delete())
+                            log.warn("Не удалось удалить видео - " + file.getAbsolutePath());
+                    });
+                }
             String path = root.substring(0, root.indexOf("Checker")) + "/Checker/Reports/Video" + testIdentifier.getDisplayName();
             File pathFile = new File(path);
-            if(!pathFile.exists()) {
+            if (!pathFile.exists()) {
                 if (!pathFile.mkdirs())
                     log.warn("Не удалось создать папку для записи видео");
             } else {
                 Arrays.stream(Objects.requireNonNull(pathFile.listFiles())).forEach(file -> {
-                    if(!file.delete())
+                    if (!file.delete())
                         log.warn("Не удалось удалить видео - " + file.getAbsolutePath());
                 });
             }
@@ -129,8 +143,8 @@ public class CheckerTestListener implements TestExecutionListener {
 
     @Override
     public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
-        if(testIdentifier.isContainer()) {
-            if(testExecutionResult.getStatus().equals(TestExecutionResult.Status.FAILED)) {
+        if (testIdentifier.isContainer()) {
+            if (testExecutionResult.getStatus().equals(TestExecutionResult.Status.FAILED)) {
                 System.out.println(testExecutionResult.getThrowable().orElseThrow().getMessage());
                 testExecutionResult.getThrowable().orElseThrow().printStackTrace();
             }
@@ -143,20 +157,31 @@ public class CheckerTestListener implements TestExecutionListener {
             this.model.testcase(this.cases);
             this.reports.add(this.model.build());
         }
-        if(testIdentifier.isTest()) {
+        if (testIdentifier.isTest()) {
             switch (testExecutionResult.getStatus()) {
                 case FAILED:
+                    try {
+                        BufferedImage image = new Robot().createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
+                        File out = new File(CheckerTools.getRootPath() + "/Reports/Images/" + testIdentifier.getDisplayName() + "/dialog-windows.bmp");
+                        if (!out.getParentFile().exists())
+                            if (!out.getParentFile().mkdirs())
+                                log.warn("Не удалось создать папку со скриншотами");
+
+                        ImageIO.write(image, "bmp", out);
+                    } catch (Exception e) {
+                        log.error("Не удалось сохранить скриншот всплывающих окон");
+                    }
                     log.error(testExecutionResult.getThrowable().orElseThrow().getMessage(), testExecutionResult.getThrowable().orElseThrow());
-                        ErrorModel errorModel = ErrorModel
-                                .builder()
-                                .type(testExecutionResult.getThrowable().orElseThrow().getClass().getName())
-                                .data(testExecutionResult.getThrowable().orElseThrow().getMessage())
-                                .message(testExecutionResult.getThrowable().orElseThrow().getMessage())
-                                .build();
-                        this.test.error(errorModel);
-                        this.test.stack(Stream.of(testExecutionResult.getThrowable().orElseThrow().getStackTrace()).filter(stack -> stack.getClassName().contains("ru.checker")).map(String::valueOf).collect(Collectors.joining("\n")));
-                        this.test.stackTrace(Stream.of(testExecutionResult.getThrowable().orElseThrow().getStackTrace()).filter(stack -> stack.getClassName().contains("ru.checker")).map(String::valueOf).collect(Collectors.joining("\n")));
-                        failureCount++;
+                    ErrorModel errorModel = ErrorModel
+                            .builder()
+                            .type(testExecutionResult.getThrowable().orElseThrow().getClass().getName())
+                            .data(testExecutionResult.getThrowable().orElseThrow().getMessage())
+                            .message(testExecutionResult.getThrowable().orElseThrow().getMessage())
+                            .build();
+                    this.test.error(errorModel);
+                    this.test.stack(Stream.of(testExecutionResult.getThrowable().orElseThrow().getStackTrace()).filter(stack -> stack.getClassName().contains("ru.checker")).map(String::valueOf).collect(Collectors.joining("\n")));
+                    this.test.stackTrace(Stream.of(testExecutionResult.getThrowable().orElseThrow().getStackTrace()).filter(stack -> stack.getClassName().contains("ru.checker")).map(String::valueOf).collect(Collectors.joining("\n")));
+                    failureCount++;
                     break;
                 case ABORTED:
                     log.error(testExecutionResult.getThrowable().orElseThrow().getMessage(), testExecutionResult.getThrowable().orElseThrow());
@@ -183,7 +208,7 @@ public class CheckerTestListener implements TestExecutionListener {
                 String root = new File("").getAbsolutePath();
                 String path = root.substring(0, root.indexOf("Checker")) + "/Checker/Reports/Video/" + testIdentifier.getDisplayName();
                 File pathFile = new File(path);
-                if(pathFile.listFiles() != null) {
+                if (pathFile.listFiles() != null) {
                     Arrays.stream(Objects.requireNonNull(pathFile.listFiles()))
                             .parallel()
                             .forEach(file -> System.out.println(this.logStorage += String.format("[[ATTACHMENT|%s]]\n", file.getAbsolutePath())));
