@@ -94,7 +94,7 @@ public class CheckerTestListener implements TestExecutionListener {
             this.test.name(testIdentifier.getDisplayName());
             this.testCount++;
             String root = new File("").getAbsolutePath();
-            String path = root.substring(0, root.indexOf("Checker")) + "/Checker/Reports/Video";
+            String path = root.substring(0, root.indexOf("Checker")) + "/Checker/Reports/Video" + testIdentifier.getDisplayName();
             File pathFile = new File(path);
             if(!pathFile.exists()) {
                 if (!pathFile.mkdirs())
@@ -181,7 +181,7 @@ public class CheckerTestListener implements TestExecutionListener {
                 this.recorder.stop();
                 log.info("Видео успешно записано");
                 String root = new File("").getAbsolutePath();
-                String path = root.substring(0, root.indexOf("Checker")) + "/Checker/Reports/Video";
+                String path = root.substring(0, root.indexOf("Checker")) + "/Checker/Reports/Video/" + testIdentifier.getDisplayName();
                 File pathFile = new File(path);
                 if(pathFile.listFiles() != null) {
                     Arrays.stream(Objects.requireNonNull(pathFile.listFiles()))
