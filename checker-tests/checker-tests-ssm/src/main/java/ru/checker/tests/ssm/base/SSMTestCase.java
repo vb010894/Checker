@@ -130,7 +130,6 @@ public class SSMTestCase extends CheckerDesktopTestCase {
         while (handle != null & !handle.equals(this.rootWindowHandle)) {
             WinDef.HWND temp = handle;
             Element el = assertDoesNotThrow(() -> UIAutomation.getInstance().getElementFromHandle(temp), "Не удалось получить активное окно");
-            el.getControlType()
             assertDoesNotThrow(() -> new Window(new ElementBuilder().element(el)).close());
             //handle = temp;
             assertDoesNotThrow(() -> Thread.sleep(1000));
