@@ -114,7 +114,7 @@ public class SSMTestCase extends CheckerDesktopTestCase {
         log.info("Закрытие всплывающих окон");
         assertDoesNotThrow(() -> Thread.sleep(5000));
         WinDef.HWND handle = User32.INSTANCE.GetForegroundWindow();
-        if(handle == null || !handle.equals(this.rootWindowHandle)) {
+        if(handle != null & !handle.equals(this.rootWindowHandle)) {
             BufferedImage image = this.robot.createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
             File out = new File(CheckerTools.getRootPath() + "/Reports/Images/dialog-windows.bmp");
             if(!out.getParentFile().exists())
@@ -127,12 +127,14 @@ public class SSMTestCase extends CheckerDesktopTestCase {
             }
         }
 
-        while (handle == null || !handle.equals(this.rootWindowHandle)) {
-            WinDef.HWND temp = User32.INSTANCE.GetForegroundWindow();
+        while (handle != null & !handle.equals(this.rootWindowHandle)) {
+            WinDef.HWND temp = handle;
             Element el = assertDoesNotThrow(() -> UIAutomation.getInstance().getElementFromHandle(temp), "Не удалось получить активное окно");
+            el.getControlType()
             assertDoesNotThrow(() -> new Window(new ElementBuilder().element(el)).close());
-            handle = temp;
+            //handle = temp;
             assertDoesNotThrow(() -> Thread.sleep(1000));
+            handle = User32.INSTANCE.GetForegroundWindow();
         }
 
         log.info("Окна закрыты");
