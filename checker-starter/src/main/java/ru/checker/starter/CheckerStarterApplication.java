@@ -1,9 +1,7 @@
 package ru.checker.starter;
 
 import lombok.extern.log4j.Log4j2;
-import org.apache.logging.log4j.LogManager;
 import org.junit.platform.launcher.Launcher;
-import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.TestPlan;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
@@ -17,7 +15,6 @@ import ru.checker.reporter.junit.CheckerJunitReportGenerator;
 import ru.checker.starter.listener.CheckerTestListener;
 
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
 
 @ComponentScan("ru.checker.tests")
 @SpringBootApplication
@@ -43,11 +40,12 @@ public class CheckerStarterApplication implements CommandLineRunner {
         Launcher launcher = LauncherFactory.create();
         LauncherDiscoveryRequestBuilder request = LauncherDiscoveryRequestBuilder
                 .request();
-        if(System.getProperties().containsKey("test")) {
+        request.selectors(selectClass(application.getBean(testCase).getClass()));
+       /*if(System.getProperties().containsKey("test")) {
             request.selectors(selectMethod(application.getBean(testCase).getClass(), System.getProperty("test").trim()));
         } else {
             request.selectors(selectClass(application.getBean(testCase).getClass()));
-        }
+        }*/
         TestPlan plan = launcher.discover(request.build());
         launcher.registerTestExecutionListeners(listener);
         launcher.execute(plan);

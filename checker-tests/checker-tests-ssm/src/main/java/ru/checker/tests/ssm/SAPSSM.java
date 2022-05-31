@@ -1,15 +1,12 @@
 package ru.checker.tests.ssm;
 
 import lombok.extern.log4j.Log4j2;
-import mmarquee.automation.AutomationException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.stereotype.Component;
 import ru.checker.tests.ssm.base.SSMTestCase;
 import ru.checker.tests.ssm.tests.SSMSapTests;
-
-import java.awt.*;
 
 /**
  * SSM 'SAP Orders' form testing.
