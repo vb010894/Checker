@@ -95,7 +95,7 @@ public class SSMNavigationController {
     public void selectSapOrders() {
         Rectangle place = this.widget.getRectangle();
         String node = CheckerOCRUtils.getTextFromRectangle(place, CheckerOCRLanguage.ENG_RUS);
-        if(!node.contains(SAP_ORDERS) || !node.contains(SAP_ORDERS_RUS))
+        if(!node.contains(SAP_ORDERS) & !node.contains(SAP_ORDERS_RUS))
             this.selectRoot();
 
         node = CheckerOCRUtils.getTextFromRectangle(place, CheckerOCRLanguage.ENG_RUS);
