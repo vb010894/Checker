@@ -6,6 +6,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
+import mmarquee.automation.AutomationException;
+import mmarquee.automation.ControlType;
 import mmarquee.automation.Element;
 import mmarquee.automation.UIAutomation;
 import mmarquee.automation.controls.ElementBuilder;
@@ -114,7 +116,7 @@ public class SSMTestCase extends CheckerDesktopTestCase {
         log.info("Закрытие всплывающих окон");
         assertDoesNotThrow(() -> Thread.sleep(5000));
         WinDef.HWND handle = User32.INSTANCE.GetForegroundWindow();
-        if(handle == null || !handle.equals(this.rootWindowHandle)) {
+        if(handle != null && !handle.equals(this.rootWindowHandle)) {
             BufferedImage image = this.robot.createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
             File out = new File(CheckerTools.getRootPath() + "/Reports/Images/dialog-windows.bmp");
             if(!out.getParentFile().exists())
@@ -127,12 +129,18 @@ public class SSMTestCase extends CheckerDesktopTestCase {
             }
         }
 
-        while (handle == null || !handle.equals(this.rootWindowHandle)) {
-            WinDef.HWND temp = User32.INSTANCE.GetForegroundWindow();
+        while (handle != null && !handle.equals(this.rootWindowHandle)) {
+            WinDef.HWND temp = handle;
             Element el = assertDoesNotThrow(() -> UIAutomation.getInstance().getElementFromHandle(temp), "Не удалось получить активное окно");
-            assertDoesNotThrow(() -> new Window(new ElementBuilder().element(el)).close());
-            handle = temp;
-            assertDoesNotThrow(() -> Thread.sleep(1000));
+            try {
+                if (el.getControlType() == ControlType.Window.getValue()) {
+                    assertDoesNotThrow(() -> new Window(new ElementBuilder().element(el)).close());
+                    assertDoesNotThrow(() -> Thread.sleep(1000));
+                    handle = User32.INSTANCE.GetForegroundWindow();
+                }else {handle = null;}
+            } catch (AutomationException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         log.info("Окна закрыты");
