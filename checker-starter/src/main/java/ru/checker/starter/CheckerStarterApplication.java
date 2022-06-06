@@ -44,10 +44,6 @@ public class CheckerStarterApplication implements CommandLineRunner {
 
     public static void main(String[] args) {
         application = SpringApplication.run(CheckerStarterApplication.class, args);
-    }
-
-    @Override
-    public void run(String... args) {
         String root = new File("").getAbsolutePath();
         File out = new File(root + "/Reports/TestNG");
         if (!out.exists())
@@ -60,6 +56,11 @@ public class CheckerStarterApplication implements CommandLineRunner {
         test.setListenerClasses(List.of(CheckerNGListener.class));
         test.setOutputDirectory(out.getAbsolutePath());
         test.run();
+    }
+
+    @Override
+    public void run(String... args) {
+
         /*if((boolean) System.getProperties().getOrDefault("localTest", false))
             return;
         String testCase = args[0];

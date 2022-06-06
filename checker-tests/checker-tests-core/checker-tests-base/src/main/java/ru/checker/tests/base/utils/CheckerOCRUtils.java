@@ -181,7 +181,7 @@ public final class CheckerOCRUtils {
      */
     public static String getTextFromRectangle(Rectangle rectangle, CheckerOCRLanguage language) {
         return assertDoesNotThrow(
-                () -> beautifyOutput(getTesseract(language).doOCR(prepareImage(getImageFromScreen(rectangle)))),
+                () -> /*beautifyOutput*/(getTesseract(language).doOCR(prepareImage(getImageFromScreen(rectangle)))),
                 "Не удалось распознать текст в области - " + rectangle);
     }
 

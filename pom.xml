@@ -25,6 +25,7 @@
 
     <properties>
         <java.version>11</java.version>
+        <start-class>ru.checker.starter.CheckerStarterApplication</start-class>
     </properties>
 
     <repositories>
