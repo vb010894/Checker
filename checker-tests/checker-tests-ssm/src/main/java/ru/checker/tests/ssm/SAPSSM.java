@@ -1,9 +1,9 @@
 package ru.checker.tests.ssm;
 
 import lombok.extern.log4j.Log4j2;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.*;
 import org.springframework.stereotype.Component;
 import ru.checker.tests.ssm.base.SSMTestCase;
 import ru.checker.tests.ssm.tests.SSMSapTests;
@@ -30,12 +30,6 @@ public class SAPSSM extends SSMTestCase {
     @Test
     void ssm01() {
         SSMSapTests.SSM01(this.getRootWindow(), this.getForm());
-      /*  SSMToolsMenu menu = new SSMToolsMenu(filterPZ);
-        menu.clickOnField("Закрытые");*/
-       /* CheckerDesktopWindow prb = getSApplication().window("sap_oreder_prb_form");
-        Button b = prb.getControl().getButton("Отмена");
-        b.click();*/
-     //   prb.getWindow().close();
     }
 
     /**
@@ -45,6 +39,35 @@ public class SAPSSM extends SSMTestCase {
     @Test
     void ssm02() {
         SSMSapTests.SSM02(this.getRootWindow(), this.getForm());
+    }
+
+    /**
+     * ТС.SSM.03 test
+     */
+    @DisplayName("ТС.SSM.01.Заказы SAP. Работа с фильтрами")
+    @Test
+    void ssm03() {
+        SSMSapTests.SSM03(this.getRootWindow(), this.getForm());
+    }
+
+    /**
+     * ТС.SSM.04 test
+     */
+    @DisplayName("ТС.ССМ.4.Заказы SAP. Ручное назначение мастера на операцию")
+    @Test
+    @Disabled
+    void ssm04() {
+        SSMSapTests.SSM04(this.getRootWindow(), this.getForm());
+    }
+
+    /**
+     * Draft
+     */
+    @DisplayName("ТС.SSM.01.Заказы SAP. Работа с фильтрами")
+    @Test
+    //@Disabled
+    void draft() {
+
     }
 
 

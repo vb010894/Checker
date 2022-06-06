@@ -13,6 +13,7 @@ import mmarquee.automation.controls.Button;
 import mmarquee.automation.controls.Panel;
 import ru.checker.tests.base.test.app.CheckerControl;
 import ru.checker.tests.base.utils.CheckerTools;
+import ru.checker.tests.desktop.base.robot.CheckerFieldsUtils;
 
 import java.awt.*;
 import java.util.*;
@@ -277,6 +278,13 @@ public abstract class CheckerDesktopControl<T extends AutomationBase> extends Ch
         return assertDoesNotThrow(() ->
                         new EditBox(new ElementBuilder().element(this.element(ID, index).getElement())),
                 "Не удалось конвертировать в кнопку. ID - " + ID);
+    }
+
+    public EditBox labelEdit(String ID) {
+        Map<String, Object> definition = this.getElement(ID);
+        assertTrue(definition.containsKey("label"), "Не заполнен ключ 'label'");
+        String label = CheckerTools.castDefinition(definition.get("label"));
+        return new EditBox(new ElementBuilder().element(CheckerFieldsUtils.filterFieldsByLabel(this.element(ID), label).getElement()));
     }
 
     /**

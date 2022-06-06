@@ -32,7 +32,7 @@ public class SSMNavigationController {
     /**
      * Root navigation item.
      */
-    final String ROOT = "Тяжмаш MES - PREPROD";
+    final String ROOT = "Тяжмаш";
 
     /**
      * Item 'Выпуск продукции'.
@@ -95,6 +95,10 @@ public class SSMNavigationController {
     public void selectSapOrders() {
         Rectangle place = this.widget.getRectangle();
         String node = CheckerOCRUtils.getTextFromRectangle(place, CheckerOCRLanguage.ENG_RUS);
+        if(!node.contains(SAP_ORDERS) & !node.contains(SAP_ORDERS_RUS))
+            this.selectRoot();
+
+        node = CheckerOCRUtils.getTextFromRectangle(place, CheckerOCRLanguage.ENG_RUS);
         if(node.contains(SAP_ORDERS))
             this.selectNode(SAP_ORDERS);
         else
@@ -146,6 +150,8 @@ public class SSMNavigationController {
         System.out.println(node);
         if(!node.contains(name))
             this.selectRoot();
+
+        assertDoesNotThrow(() -> Thread.sleep(1000), "Не удалось выждать открытие корневого пункта навигации");
         Rectangle foundRectangle = CheckerOCRUtils.getTextAndMove(place, name, CheckerOCRLanguage.ENG_RUS);
         AutomationMouse.getInstance().setLocation((int) foundRectangle.getCenterX(), foundRectangle.y + 5 );
         AutomationMouse.getInstance().rightClick();
@@ -202,6 +208,7 @@ public class SSMNavigationController {
         Rectangle foundRectangle = CheckerOCRUtils.getTextAndMove(place, ROOT, CheckerOCRLanguage.ENG_RUS);
         AutomationMouse.getInstance().setLocation((int) foundRectangle.getCenterX(), foundRectangle.y + 5 );
         AutomationMouse.getInstance().rightClick();
+        assertDoesNotThrow(() -> Thread.sleep(1000), "Не удалось выждать открытие корневого пункта навигации");
         CheckerDesktopTestCase.getSApplication().waitApp();
     }
 

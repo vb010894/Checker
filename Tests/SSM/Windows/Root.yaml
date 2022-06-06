@@ -13,3 +13,4 @@ forms:
 widgets:
   - path: SSM_TOOLS.yaml
   - path: SSM_NAVIGATION.yaml
+  - path: SSM_PAGING.yaml
