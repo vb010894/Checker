@@ -1,6 +1,5 @@
 package ru.checker.starter.test;
 
-import io.qameta.allure.Attachment;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.testng.annotations.AfterClass;

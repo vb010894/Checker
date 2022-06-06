@@ -1,17 +1,12 @@
 package ru.checker.starter.listener;
 
-import io.qameta.allure.Attachment;
 import lombok.Getter;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
-import org.testng.Reporter;
 import ru.checker.reporter.junit.CheckerJunitReportGenerator;
 import ru.checker.reporter.nunit.models.*;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -80,7 +75,6 @@ public class CheckerNGListener implements ITestListener {
         test.setExecuted("False");
         NUnitReason reason = new NUnitReason();
         reason.setMessage(result.getThrowable().getMessage());
-        String root = new File("").getAbsolutePath();
         caseList.add(test);
     }
 
