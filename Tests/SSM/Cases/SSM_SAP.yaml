@@ -5,8 +5,8 @@ constants:
 app:
   location: Z:\bin\SSM.exe
   arguments: [-pp]
-  preStart: false
-  stayAlive: true
+  preStart: true
+  stayAlive: false
   windows:
     - path: ORDER_MASTER_PRB.yaml
     - path: ORDER_PRB.yaml
