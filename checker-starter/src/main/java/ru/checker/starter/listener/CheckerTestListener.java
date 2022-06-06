@@ -108,7 +108,7 @@ public class CheckerTestListener implements TestExecutionListener {
                             log.warn("Не удалось удалить видео - " + file.getAbsolutePath());
                     });
                 }
-            String path = root.substring(0, root.indexOf("Checker")) + "/Checker/Reports/Video" + testIdentifier.getDisplayName();
+            String path = root.substring(0, root.indexOf("Checker")) + "/Checker/Reports/Video/" + testIdentifier.getDisplayName();
             File pathFile = new File(path);
             if (!pathFile.exists()) {
                 if (!pathFile.mkdirs())
