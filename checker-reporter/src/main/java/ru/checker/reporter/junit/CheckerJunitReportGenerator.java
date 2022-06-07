@@ -6,9 +6,8 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.logging.log4j.core.util.FileUtils;
 import ru.checker.reporter.junit.models.JunitReportModel;
-import ru.checker.reporter.nunit.models.NUnitTestResults;
+import ru.checker.reporter.nunit.models.NUnitTestRun;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +39,7 @@ public final class CheckerJunitReportGenerator {
         generateReport(model);
     }
 
-    public static void generateNUnitReport(NUnitTestResults model) throws IOException {
+    public static void generateNUnitReport(NUnitTestRun model) throws IOException {
         generateReport(model);
     }
 
