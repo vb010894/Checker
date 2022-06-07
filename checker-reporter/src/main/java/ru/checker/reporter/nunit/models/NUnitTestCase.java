@@ -12,24 +12,40 @@ import java.util.List;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@JacksonXmlRootElement(localName = "test-case")
 public class NUnitTestCase {
 
     @JacksonXmlProperty(isAttribute = true)
-    String name;
+    String id = "0";
+
     @JacksonXmlProperty(isAttribute = true)
-    String executed;
+    String name = "case 1";
+
     @JacksonXmlProperty(isAttribute = true)
-    String success;
+    String fullname = "case 1";
+
     @JacksonXmlProperty(isAttribute = true)
-    String time;
+    String methodname = "method 1";
+
+    @JacksonXmlProperty(isAttribute = true, localName = "runstate")
+    String runState = "Runnable";
+
+    @JacksonXmlProperty(isAttribute = true)
+    String result = "Passed";
+
+    @JacksonXmlProperty(isAttribute = true)
+    String asserts = "0";
+
+    @JacksonXmlProperty(isAttribute = true)
+    String duration = "40";
+
+    @JacksonXmlProperty(isAttribute = true)
+    String classname = "";
 
     NUnitFailure failure;
 
     NUnitReason reason;
 
     @JacksonXmlElementWrapper(localName = "attachments")
-    @JacksonXmlProperty(localName = "attachment")
-    List<String> attachment;
+    List<NUnitAttachments> attachment;
 
 }

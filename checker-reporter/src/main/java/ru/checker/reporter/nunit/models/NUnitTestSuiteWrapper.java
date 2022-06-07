@@ -1,30 +1,27 @@
 package ru.checker.reporter.nunit.models;
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
-
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JacksonXmlRootElement(localName = "test-suite")
-public class NUnitTestSuite {
+public class NUnitTestSuiteWrapper {
+
+    @JacksonXmlProperty(isAttribute = true)
+    String type = "Assembly";
 
     @JacksonXmlProperty(isAttribute = true)
     String id = "0";
 
     @JacksonXmlProperty(isAttribute = true)
-    String type = "TestSuite";
+    String name = "Run 1";
 
     @JacksonXmlProperty(isAttribute = true)
-    String name = "Suite 1";
-
-    @JacksonXmlProperty(isAttribute = true)
-    String fullname = "Suite 1";
+    String fullname = "Run 1";
 
     @JacksonXmlProperty(isAttribute = true)
     String testcasecount = "1";
@@ -36,10 +33,10 @@ public class NUnitTestSuite {
     String result = "Passed";
 
     @JacksonXmlProperty(isAttribute = true)
-    String passed = "0";
+    String total;
 
     @JacksonXmlProperty(isAttribute = true)
-    String total;
+    String passed = "0";
 
     @JacksonXmlProperty(isAttribute = true)
     String failed = "0";
@@ -65,8 +62,7 @@ public class NUnitTestSuite {
     @JacksonXmlProperty(isAttribute = true)
     String duration = "40";
 
-    @JacksonXmlElementWrapper(useWrapping = false)
-    @JacksonXmlProperty(localName = "test-case")
-    List<NUnitTestCase> cases;
+    @JacksonXmlProperty(localName = "test-suite")
+    NUnitTestSuite suite;
 
 }
