@@ -1,0 +1,8 @@
+location: Z:\bin\SSM.exe
+arguments: [ -pp ]
+preStart: true
+stayAlive: false
+windows:
+  - path: ORDER_MASTER_PRB.yaml
+  - path: ORDER_PRB.yaml
+  - path: Root.yaml

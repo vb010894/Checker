@@ -3,7 +3,7 @@ package ru.checker.tests.ssm;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.testng.annotations.Test;
 import org.springframework.stereotype.Component;
 import ru.checker.tests.ssm.base.SSMTestCase;
 import ru.checker.tests.ssm.tests.SSMSapTests;
@@ -17,11 +17,6 @@ import ru.checker.tests.ssm.tests.SSMSapTests;
 @Component("SAP_SSM")
 @Log4j2(topic = "TEST CASE")
 public class SAPSSM extends SSMTestCase {
-
-    // prepare test case.
-    static {
-        prepare("SSM_SAP");
-    }
 
     /**
      * ТС.SSM.01 test

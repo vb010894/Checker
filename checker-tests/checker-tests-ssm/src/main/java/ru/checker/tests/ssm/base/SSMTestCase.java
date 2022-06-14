@@ -14,6 +14,9 @@ import mmarquee.automation.controls.ElementBuilder;
 import mmarquee.automation.controls.Window;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Parameters;
 import ru.checker.tests.base.utils.CheckerTools;
 import ru.checker.tests.desktop.test.CheckerDesktopTestCase;
 import ru.checker.tests.desktop.test.app.CheckerDesktopForm;
@@ -43,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @Log4j2(topic = "TEST CASE")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SSMTestCase extends CheckerDesktopTestCase {
+public abstract class SSMTestCase extends CheckerDesktopTestCase {
 
     List<String> popupWindowTitles = List.of(
             "Ssm"
@@ -78,17 +81,16 @@ public class SSMTestCase extends CheckerDesktopTestCase {
      * 2) storage form
      * 3) storage window
      */
-    @BeforeEach
-    @Override
-    public void beforeEach() {
+    @Parameters({"constants.environment"})
+    @BeforeMethod
+    public void beforeEach(String environment) {
         assertDoesNotThrow(() -> {
             this.robot = new Robot();
             this.rootWindow = getSApplication().window("ssm_main");
             this.rootWindowHandle = rootWindow.getControl().getNativeWindowHandle();
             this.rootWindow.maximize();
 
-            assertTrue(getConstants().containsKey("environment"), "Не задан путь к главной форме");
-            String env = CheckerTools.castDefinition(getConstants().get("environment"));
+            String env = CheckerTools.castDefinition(environment);
             SSMNavigationController.SSMNavigation nav = SSMNavigationController.SSMNavigation.valueOf(env);
             SSMNavigationController navigation = this.rootWindow.widget("ssm_navigation", SSMNavigationController.class);
             navigation.selectNode(nav);
@@ -102,7 +104,7 @@ public class SSMTestCase extends CheckerDesktopTestCase {
      *
      * 1) close app
      */
-    @AfterEach
+    @AfterMethod
     @Override
     public void afterEach() {
         this.closePopupWindows();

@@ -59,7 +59,7 @@ public class NUnitTestSuiteWrapper {
     @JacksonXmlProperty(isAttribute = true, localName = "end-time")
     String endTime;
 
-    @JacksonXmlProperty(isAttribute = true)
+    @JacksonXmlProperty(isAttribute = true, localName = "duration-ms")
     String duration = "40";
 
     @JacksonXmlProperty(localName = "test-suite")

@@ -2,33 +2,37 @@ package ru.checker.starter.test;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.testng.SkipException;
+import org.testng.annotations.*;
 
-public class TestClass {
+public class TestClass extends AbstractTestClass {
 
-    @BeforeClass
-    public static void init() {
-        System.out.println("start");
+
+    @BeforeMethod()
+    public void beforeEach() {
+        System.out.println("beforeEach");
     }
 
-    @Test
+    @Test(testName = "Тест Успешно")
     public void test() {
-        System.out.println("test");
+        System.out.println("app");
     }
 
-    @Test
+    @Test(testName = "Тест Пропущено")
     public void test2() {
         Assumptions.assumeFalse(true, "Не выполнено");
     }
 
+    @Test(testName = "Тест Ошибка")
     public void test3() {
         Assertions.fail("Ошибка");
     }
 
-    @AfterClass
-    public static void end() {
-        System.out.println("end");
+    @Test(testName = "Тест Пропущено программно", description = "descr")
+    public void test4() {
+        System.out.println("test");
+        throw new SkipException("Пропуск");
     }
+
+
 }

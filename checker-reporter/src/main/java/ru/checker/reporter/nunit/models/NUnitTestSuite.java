@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
+import java.util.LinkedList;
 import java.util.List;
 
 @Data
@@ -62,11 +63,11 @@ public class NUnitTestSuite {
     @JacksonXmlProperty(isAttribute = true, localName = "end-time")
     String endTime;
 
-    @JacksonXmlProperty(isAttribute = true)
+    @JacksonXmlProperty(isAttribute = true, localName = "duration-ms")
     String duration = "40";
 
     @JacksonXmlElementWrapper(useWrapping = false)
     @JacksonXmlProperty(localName = "test-case")
-    List<NUnitTestCase> cases;
+    List<NUnitTestCase> cases = new LinkedList<>();
 
 }

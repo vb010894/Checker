@@ -35,7 +35,7 @@ public class NUnitTestCase {
     @JacksonXmlProperty(isAttribute = true)
     String asserts = "0";
 
-    @JacksonXmlProperty(isAttribute = true)
+    @JacksonXmlProperty(isAttribute = true, localName = "duration-ms")
     String duration = "40";
 
     @JacksonXmlProperty(isAttribute = true)

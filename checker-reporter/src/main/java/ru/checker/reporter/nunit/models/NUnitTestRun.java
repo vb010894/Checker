@@ -24,6 +24,12 @@ public class NUnitTestRun {
     String clrVersion = "4.0.30319.42000";
 
     @JacksonXmlProperty(isAttribute = true)
+    String name = "Checker.jar";
+
+    @JacksonXmlProperty(isAttribute = true)
+    String fullname = "Checker tests";
+
+    @JacksonXmlProperty(isAttribute = true)
     String testcasecount = "1";
 
     @JacksonXmlProperty(isAttribute = true, localName = "runstate")
@@ -59,7 +65,7 @@ public class NUnitTestRun {
     @JacksonXmlProperty(isAttribute = true, localName = "end-time")
     String endTime;
 
-    @JacksonXmlProperty(isAttribute = true)
+    @JacksonXmlProperty(isAttribute = true, localName = "duration-ms")
     String duration = "40";
 
     @JacksonXmlProperty(localName = "test-suite")

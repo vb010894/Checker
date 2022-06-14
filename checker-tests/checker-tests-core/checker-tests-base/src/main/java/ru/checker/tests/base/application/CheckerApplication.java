@@ -1,8 +1,12 @@
 package ru.checker.tests.base.application;
 
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
+import lombok.experimental.FieldDefaults;
 
 import java.io.Closeable;
+import java.util.Map;
 
 /**
  * Checker app base.
@@ -12,6 +16,7 @@ import java.io.Closeable;
  * 1) YAML
  */
 @Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public abstract class CheckerApplication implements Closeable, Runnable {
 
    public abstract String getName();
