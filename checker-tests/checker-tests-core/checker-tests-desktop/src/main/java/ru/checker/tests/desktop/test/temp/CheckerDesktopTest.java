@@ -22,6 +22,7 @@ public class CheckerDesktopTest extends CheckerTestCase {
     @BeforeClass
     public void startApp(String appName) {
         System.out.println("Запуск приложения");
+        System.out.println(CheckerTools.getRootPath() + "/Tests/" + appName + "/application/config.yaml");
         Map<String, Object> definition = CheckerTools.convertYAMLToMap("/Tests/" + appName + "/application/config.yaml");
         currentApp = new CheckerDesktopApplication(definition);
         setApplication(currentApp);

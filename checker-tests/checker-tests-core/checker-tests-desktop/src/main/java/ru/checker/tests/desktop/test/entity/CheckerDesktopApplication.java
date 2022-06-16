@@ -95,6 +95,7 @@ public class CheckerDesktopApplication extends CheckerApplication {
         Assertions.assertDoesNotThrow(() -> {
             String location;
             assertNotNull((location = (String) this.definition.get("location")), "Не заполнено местоположение приложения. Ключ - 'location'");
+            System.out.println("Местоположение - " + location);
             if(isPreStart) {
                 String[] arguments;
                 ArrayList<String> args = CheckerTools.castDefinition(this.definition.getOrDefault("arguments", null));

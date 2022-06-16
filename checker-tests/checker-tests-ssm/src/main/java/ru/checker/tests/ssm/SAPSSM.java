@@ -1,8 +1,10 @@
 package ru.checker.tests.ssm;
 
 import lombok.extern.log4j.Log4j2;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
-import org.springframework.stereotype.Component;
+import org.testng.SkipException;
+import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import ru.checker.tests.ssm.temp.test.SSMTest;
 import ru.checker.tests.ssm.tests.SSM01;
@@ -14,7 +16,6 @@ import ru.checker.tests.ssm.tests.SSM02;
  * @author vd.zinovev
  */
 @DisplayName("Тесты ССМ. Форма Заказы SAP")
-@Component("SAP_SSM")
 @Log4j2(topic = "TEST CASE")
 public class SAPSSM extends SSMTest {
 
@@ -38,6 +39,26 @@ public class SAPSSM extends SSMTest {
     public void ssm02() {
         SSM02 test = new SSM02(getRootWindow());
         test.run();
+    }
+
+    /**
+     * ТС.SSM.03 test
+     */
+    @Test(
+            testName = "ТС.SSM.03",
+            description = "ТС.SSM.03.Error")
+    public void ssm03() {
+        Assertions.fail("Тестовая ошибка");
+    }
+
+    /**
+     * ТС.SSM.04 test
+     */
+    @Test(
+            testName = "ТС.SSM.04",
+            description = "ТС.SSM.04.Skip")
+    public void ssm04() {
+        throw new SkipException("Skipped");
     }
 
 
