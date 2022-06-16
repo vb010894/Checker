@@ -13,7 +13,6 @@
   <modules>
       <module>checker-tests-ssm</module>
       <module>checker-tests-core</module>
-    <module>checker-tests-notepad</module>
   </modules>
   <packaging>pom</packaging>
 

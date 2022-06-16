@@ -1,0 +1,17 @@
+<suite name = "SSM">
+    <listeners>
+        <listener class-name = "ru.checker.starter.listener.CheckerNGListener"/>
+    </listeners>
+    <test name = "SAP">
+        <parameter name = "app" value = "SSM"/>
+        <parameter name = "form.id" value = "mf"/>
+        <parameter name = "form.navigation" value = "SAP_ORDERS"/>
+        <classes>
+            <class name = "ru.checker.tests.ssm.SAPSSM">
+                <methods>
+                    <include name = "ssm02"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+</suite>

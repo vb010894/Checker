@@ -3,6 +3,9 @@ name: Заказы SAP
 search:
   ClassName: TcxTabSheet
   Name: Тяжмаш MES - PREPROD-Заказы SAP
+widgets:
+  - path: SSM_PAGING.yaml
+  - path: SSM_TOOLS.yaml
 elements:
   - element:
         id: ssm_01_04
