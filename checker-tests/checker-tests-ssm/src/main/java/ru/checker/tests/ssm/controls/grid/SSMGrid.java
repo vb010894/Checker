@@ -23,7 +23,7 @@ import ru.checker.tests.base.enums.CheckerOCRLanguage;
 import ru.checker.tests.base.utils.CheckerOCRUtils;
 import ru.checker.tests.base.utils.CheckerTools;
 import ru.checker.tests.desktop.base.robot.CheckerDesktopMarker;
-import ru.checker.tests.desktop.test.CheckerDesktopTestCase;
+import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
 
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
@@ -156,7 +156,7 @@ public class SSMGrid {
             this.robot.keyRelease(KeyEvent.VK_CONTROL);
             this.robot.keyRelease(KeyEvent.VK_C);
 
-            CheckerDesktopTestCase.getSApplication().waitApp();
+            CheckerDesktopTest.getCurrentApp().waitApp();
 
             stringData = assertDoesNotThrow(() -> Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor).toString(), "Не удалось получить данные из буфера");
             if (stringData.equals("")) {

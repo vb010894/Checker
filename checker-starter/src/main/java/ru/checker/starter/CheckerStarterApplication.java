@@ -1,14 +1,10 @@
 package ru.checker.starter;
 
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.testng.TestNG;
-import ru.checker.starter.listener.CheckerTestListener;
 
 import java.io.File;
 import java.util.List;
@@ -27,7 +23,8 @@ public class CheckerStarterApplication {
                 log.warn("Не удалось создать папку с отчетами NG");
             }
 
-        String XML = root + "/Tests/SSM/Plans/Test.xml";
+        String plan = args[0];
+        String XML = root + "/Tests/SSM/Plans/" + plan + ".xml";
         TestNG test = new TestNG();
         test.setTestSuites(List.of(XML));
         test.setOutputDirectory(out.getAbsolutePath());

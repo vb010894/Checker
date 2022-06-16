@@ -1,23 +1,17 @@
-package ru.checker.tests.ssm.widgets.controllers;
+package ru.checker.tests.ssm.temp.widgets;
 
-import lombok.AccessLevel;
-import lombok.experimental.FieldDefaults;
 import mmarquee.automation.AutomationException;
 import mmarquee.automation.controls.AutomationBase;
-import mmarquee.automation.controls.ElementBuilder;
-import mmarquee.automation.controls.Panel;
 import mmarquee.automation.controls.mouse.AutomationMouse;
 import net.sourceforge.tess4j.ITessAPI;
 import ru.checker.tests.base.utils.CheckerOCRUtils;
-import ru.checker.tests.desktop.test.app.CheckerDesktopApplication;
-import ru.checker.tests.desktop.test.app.CheckerDesktopWidget;
+import ru.checker.tests.desktop.test.entity.CheckerDesktopWidget;
 
-import java.awt.Rectangle;
+import java.awt.*;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-@FieldDefaults(level = AccessLevel.PRIVATE)
-public class SSMPageController {
+public class SSMPage {
 
     final CheckerDesktopWidget widget;
     final AutomationBase control;
@@ -27,7 +21,7 @@ public class SSMPageController {
      *
      * @param widget widget
      */
-    public SSMPageController(CheckerDesktopWidget widget) {
+    public SSMPage (CheckerDesktopWidget widget) {
         this.widget = widget;
         this.control = assertDoesNotThrow(() -> widget.getControl().getChildren(true).parallelStream().filter(control -> {
             try {

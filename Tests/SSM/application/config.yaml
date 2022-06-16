@@ -1,3 +1,4 @@
+name: SSM
 location: Z:\bin\SSM.exe
 arguments: [ -pp ]
 preStart: true

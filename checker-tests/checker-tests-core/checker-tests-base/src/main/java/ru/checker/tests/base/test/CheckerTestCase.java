@@ -3,6 +3,7 @@ package ru.checker.tests.base.test;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.AfterEach;
@@ -20,6 +21,7 @@ import ru.checker.tests.base.application.CheckerApplication;
 public abstract class CheckerTestCase {
 
     @Getter
+    @Setter
     static CheckerApplication application;
 
     @BeforeEach

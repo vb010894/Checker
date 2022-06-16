@@ -4,6 +4,20 @@ search:
   ClassName: TdxRibbonGroupsDockControl
 elements:
   - element:
+      id: ssm_07
+      name: Кнопка 'Обновить'
+      buttonName: Обновить
+      search:
+        ClassName: TdxRibbonGroupBarControl
+        Name: ПРОИЗВОДСТВЕННЫЕ ЗАКАЗЫ
+  - element:
+      id: ssm_06
+      name: Фильтр 'Год'
+      buttonName: Год
+      search:
+        ClassName: TdxRibbonGroupBarControl
+        Name: ФИЛЬТР ПО ДАТЕ
+  - element:
       id: ssm_05
       name: Кнопка 'Добавить'
       buttonName: Добавить

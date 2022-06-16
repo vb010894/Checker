@@ -60,6 +60,8 @@ public class CheckerNGListener implements ITestListener {
     public void onTestFailure(ITestResult result) {
         this.stopVideo(result.id(), result.getTestName(), true);
         this.createScreenshot(result.id(), result.getTestName());
+        System.out.println("##[error] " + result.getThrowable().getMessage());
+        result.getThrowable().printStackTrace();
     }
 
     @Override

@@ -1,33 +1,27 @@
-package ru.checker.tests.ssm.widgets.controllers;
+package ru.checker.tests.ssm.temp.widgets;
 
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import mmarquee.automation.controls.mouse.AutomationMouse;
 import ru.checker.tests.base.enums.CheckerOCRLanguage;
 import ru.checker.tests.base.utils.CheckerOCRUtils;
-import ru.checker.tests.desktop.test.CheckerDesktopTestCase;
-import ru.checker.tests.desktop.test.app.CheckerDesktopWidget;
+import ru.checker.tests.desktop.test.entity.CheckerDesktopWidget;
+import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-/**
- * SSM Navigation widget controller.
- * file - Widget/SSM_NAVIGATION.yaml
- * @author vd.zinovev
- */
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Getter
-@SuppressWarnings("unused")
-public class SSMNavigationController {
+public class SSMNavigation {
 
-    /**
-     * Current widget.
-     */
-    final CheckerDesktopWidget widget;
+    CheckerDesktopWidget widget;
+
+    public SSMNavigation(CheckerDesktopWidget widget) {
+        this.widget = widget;
+    }
+
 
     /**
      * Root navigation item.
@@ -74,13 +68,6 @@ public class SSMNavigationController {
      */
     final String TASK_MANAGEMENT = "Управление заданиями";
 
-    /**
-     * Constructor.
-     * @param widget Widget
-     */
-    public SSMNavigationController(CheckerDesktopWidget widget) {
-        this.widget = widget;
-    }
 
     /**
      * select item 'Выпуск продукции'.
@@ -95,7 +82,7 @@ public class SSMNavigationController {
     public void selectSapOrders() {
         Rectangle place = this.widget.getRectangle();
         String node = CheckerOCRUtils.getTextFromRectangle(place, CheckerOCRLanguage.ENG_RUS);
-        if(!node.contains(SAP_ORDERS) & !node.contains(SAP_ORDERS_RUS))
+        if(!node.contains(SAP_ORDERS) && !node.contains(SAP_ORDERS_RUS))
             this.selectRoot();
 
         node = CheckerOCRUtils.getTextFromRectangle(place, CheckerOCRLanguage.ENG_RUS);
@@ -166,7 +153,7 @@ public class SSMNavigationController {
      * Select navigation node.
      * @param node Node
      */
-    public void selectNode (SSMNavigation node) {
+    public void selectNode (SSMNavigationEnum node) {
         switch (node) {
             default:
                 this.selectRoot();
@@ -204,10 +191,10 @@ public class SSMNavigationController {
         AutomationMouse.getInstance().setLocation((int) foundRectangle.getCenterX(), foundRectangle.y + 5 );
         AutomationMouse.getInstance().rightClick();
         assertDoesNotThrow(() -> Thread.sleep(1000), "Не удалось выждать открытие корневого пункта навигации");
-        CheckerDesktopTestCase.getSApplication().waitApp();
+        CheckerDesktopTest.getCurrentApp().waitApp();
     }
 
-    public enum SSMNavigation {
+    public enum SSMNavigationEnum {
 
         /**
          * Root navigation item.
