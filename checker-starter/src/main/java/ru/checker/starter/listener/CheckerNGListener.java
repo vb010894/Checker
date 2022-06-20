@@ -215,6 +215,7 @@ public class CheckerNGListener implements ITestListener {
             this.recorder.getCreatedMovieFiles().forEach(file -> {
                 if (needSave) {
                     attachment.add(file.getAbsolutePath());
+                    attachments.put(testID, attachment);
                 } else {
                     if(!file.delete())
                         System.out.printf("##vso[task.logissue type=warning;] Не удалось удалить видео '%s'.\n", file.getAbsolutePath());
