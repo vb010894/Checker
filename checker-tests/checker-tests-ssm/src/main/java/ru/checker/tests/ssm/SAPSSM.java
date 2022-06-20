@@ -9,6 +9,7 @@ import org.testng.annotations.Test;
 import ru.checker.tests.ssm.temp.test.SSMTest;
 import ru.checker.tests.ssm.tests.SSM01;
 import ru.checker.tests.ssm.tests.SSM02;
+import ru.checker.tests.ssm.tests.SSM03;
 
 /**
  * SSM 'SAP Orders' form testing.
@@ -42,25 +43,24 @@ public class SAPSSM extends SSMTest {
     }
 
     /**
-     * ТС.SSM.03 test
+     * ТС.SSM.03. Заказы SAP. Назначение мастера на операции
      */
     @Test(
             testName = "ТС.SSM.03",
-            description = "ТС.SSM.03.Error")
+            description = "ТС.SSM.03. Заказы SAP. Назначение мастера на операции")
     public void ssm03() {
-        Assertions.fail("Тестовая ошибка");
+        new SSM03(getRootWindow()).run();
     }
 
     /**
      * ТС.SSM.04 test
      */
-    @Test(
+    /*@Test(
             testName = "ТС.SSM.04",
             description = "ТС.SSM.04.Skip")
     public void ssm04() {
         throw new SkipException("Skipped");
-    }
-
+    }*/
 
 
     /**
