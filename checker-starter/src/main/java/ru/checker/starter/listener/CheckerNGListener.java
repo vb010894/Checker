@@ -60,7 +60,7 @@ public class CheckerNGListener implements ITestListener {
     public void onTestFailure(ITestResult result) {
         this.stopVideo(result.id(), result.getTestName(), true);
         this.createScreenshot(result.id(), result.getTestName());
-        System.out.println("##[error] " + result.getThrowable().getMessage());
+        System.out.println("##vso[task.logissue type=error;] " + result.getThrowable().getMessage());
         result.getThrowable().printStackTrace();
     }
 
@@ -86,7 +86,7 @@ public class CheckerNGListener implements ITestListener {
             File[] files = file.listFiles();
             Stream.of(files).parallel().forEach(file1 -> {
                 if(!file1.delete())
-                    System.out.println("##[warning] Не удалось отчистить файл - " + file1.getAbsolutePath());
+                    System.out.println("##vso[task.logissue type=warning;] Не удалось отчистить файл - " + file1.getAbsolutePath());
             });
         });
     }
@@ -160,7 +160,7 @@ public class CheckerNGListener implements ITestListener {
         File videoPathFile = new File(videoPath);
         if (!videoPathFile.exists())
             if (!videoPathFile.mkdirs()) {
-                System.out.println("##[warning] Не удалось создать папки для записи видео");
+                System.out.println("##vso[task.logissue type=warning;] Не удалось создать папки для записи видео");
                 return;
             }
 
@@ -182,7 +182,7 @@ public class CheckerNGListener implements ITestListener {
                     videoPathFile);
             this.recorder.start();
         } catch (Exception ex) {
-            System.out.printf("##[warning] Не записать видео для теста '%s'. Сообщение:\n%s\n",testName, ex.getMessage());
+            System.out.printf("##vso[task.logissue type=warning;] Не записать видео для теста '%s'. Сообщение:\n%s\n",testName, ex.getMessage());
         }
 
     }
@@ -191,7 +191,7 @@ public class CheckerNGListener implements ITestListener {
         File imageFile = new File(imagePath + "/" + testID + ".bmp");
         if(!imageFile.getParentFile().exists()) {
             if(!imageFile.getParentFile().mkdirs()) {
-                System.out.printf("##[warning] Не удалось создать папку для сохранения изображений.\n");
+                System.out.printf("##vso[task.logissue type=warning;] Не удалось создать папку для сохранения изображений.\n");
                 return;
             }
         }
@@ -204,7 +204,7 @@ public class CheckerNGListener implements ITestListener {
             attachment.add(imageFile.getAbsolutePath());
             attachments.put(testID, attachment);
         } catch (Exception ex) {
-            System.out.printf("##[warning] Не удалось создать скриншот для теста '%s'. Сообщение:\n%s\n",testName, ex.getMessage());
+            System.out.printf("##vso[task.logissue type=warning;] Не удалось создать скриншот для теста '%s'. Сообщение:\n%s\n",testName, ex.getMessage());
         }
     }
 
@@ -217,11 +217,11 @@ public class CheckerNGListener implements ITestListener {
                     attachment.add(file.getAbsolutePath());
                 } else {
                     if(!file.delete())
-                        System.out.printf("##[warning] Не удалось удалить видео '%s'.\n", file.getAbsolutePath());
+                        System.out.printf("##vso[task.logissue type=warning;] Не удалось удалить видео '%s'.\n", file.getAbsolutePath());
                 }
             });
         } catch (Exception ex) {
-            System.out.printf("##[warning] Не удалось остановить и сохранить видео для теста '%s'. Сообщение:\n%s\n",testName, ex.getMessage());
+            System.out.printf("##vso[task.logissue type=warning;] Не удалось остановить и сохранить видео для теста '%s'. Сообщение:\n%s\n",testName, ex.getMessage());
         }
 
 
