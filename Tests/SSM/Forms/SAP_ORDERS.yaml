@@ -8,6 +8,12 @@ widgets:
   - path: SSM_TOOLS.yaml
 elements:
   - element:
+      id: ssm_01_05
+      name: Таблица 'Операции'
+      index: 1
+      search:
+        ClassName: TcxGridSite
+  - element:
         id: ssm_01_04
         name: Таблица 'Задания ПРБ'
         index: 0

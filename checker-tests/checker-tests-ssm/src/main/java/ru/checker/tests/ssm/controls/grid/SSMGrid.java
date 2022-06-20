@@ -418,8 +418,7 @@ public class SSMGrid {
         };
         log.debug("Выделено");
 
-        SSMGridData data = this.readData(run, true);
-        return data;
+        return this.readData(run, true);
 
     }
 
@@ -468,29 +467,43 @@ public class SSMGrid {
      * @param unFocused Unfocused columns
      */
     public void filterByGUI(ConditionConfigurer config, String... unFocused) {
-        log.info("Производится фильтрация через интерфейс");
-        if (unFocused == null)
-            unFocused = new String[0];
-        AtomicReference<Rectangle> atomicCellRectangle = new AtomicReference<>();
-        SSMGridData data = this.getDataFromRow(0, atomicCellRectangle);
-        assertNotNull(atomicCellRectangle.get(), "Не удалось получить расположение ячейки локатора");
+        for (int i = 0; i < 4; i++) {
+            try {
+                log.info("Производится фильтрация через интерфейс");
+                if (unFocused == null)
+                    unFocused = new String[0];
+                AtomicReference<Rectangle> atomicCellRectangle = new AtomicReference<>();
+                SSMGridData data = this.getDataFromRow(0, atomicCellRectangle);
+                assertNotNull(atomicCellRectangle.get(), "Не удалось получить расположение ячейки локатора");
 
-        Rectangle cellRectangle = this.moveToCell(
-                new Point(atomicCellRectangle.get().x, (int) atomicCellRectangle.get().getMinY()),
-                data,
-                config.column,
-                unFocused
-        );
+                Rectangle cellRectangle = this.moveToCell(
+                        new Point(atomicCellRectangle.get().x, (int) atomicCellRectangle.get().getMinY()),
+                        data,
+                        config.column,
+                        unFocused
+                );
 
-        this.findAndClickFilterButton(cellRectangle);
-        this.callFilterWindow();
+                this.findAndClickFilterButton(cellRectangle);
+                this.callFilterWindow();
 
-        Element focused = assertDoesNotThrow(() -> {
-            Thread.sleep(8000);
-            return UIAutomation.getInstance().getFocusedElement();
-        }, "Не удалось найти ячейку-локатор строки");
-        this.fillFilterDialog(focused, config);
-        log.info("Фильтрация выполнена");
+                Element focused = assertDoesNotThrow(() -> {
+                    Thread.sleep(8000);
+                    return UIAutomation.getInstance().getFocusedElement();
+                }, "Не удалось найти ячейку-локатор строки");
+                this.fillFilterDialog(focused, config);
+                log.info("Фильтрация выполнена");
+                break;
+            } catch (Exception | Error ex) {
+                log.warn("Повторная попытка фильтрации. Так как была прервана по ошибке");
+                if(i != 3) {
+                    assertDoesNotThrow(() -> Thread.sleep(1000));
+                } else {
+                    fail(ex);
+                }
+            }
+
+        }
+
     }
 
     private Rectangle moveToCell(Point rowPoint, SSMGridData data, String targetCell, String... unFocused) {
@@ -503,7 +516,6 @@ public class SSMGrid {
 
         this.robot.keyPress(KeyEvent.VK_ESCAPE);
         this.robot.keyRelease(KeyEvent.VK_ESCAPE);
-
 
         for (String header: data.getHeaders()) {
             if (!unFocusedList.contains(header)) {
@@ -529,9 +541,7 @@ public class SSMGrid {
                     int width = this.getRectangle().width;
                     int height = 20;
                     Rectangle headersRectangle = new Rectangle(x, y, width, height);
-                    new CheckerDesktopMarker(headersRectangle).draw();
                     Rectangle r = CheckerOCRUtils.getTextAndMove(headersRectangle, Pattern.compile("^" + targetCell + "$"), CheckerOCRLanguage.RUS, ITessAPI.TessPageIteratorLevel.RIL_WORD);
-                    new CheckerDesktopMarker(headersRectangle).draw();
 
                     int cellMaxX = 0;
                     for (int i = (int) r.getMaxX() + 2; i < this.getRectangle().getMaxX(); i++) {
@@ -549,6 +559,7 @@ public class SSMGrid {
 
                     Rectangle cell = new Rectangle(x, y, width, height);
                     out.set(cell);
+                    break;
                 }
             }
         }
@@ -712,18 +723,20 @@ public class SSMGrid {
      * and the mouse selection button is color-coded
      * in the variable 'filterColor'.
      *
-     * @param cellRectangle Cell -locator rectangle
+     * @param cellRectangle Cell-locator rectangle
      */
     private void findAndClickFilterButton(Rectangle cellRectangle) {
         log.info("Поиск фильтра в таблице");
+        AutomationMouse.getInstance().setLocation(this.getRectangle().x, this.getRectangle().y);
+        assertDoesNotThrow(() -> Thread.sleep(500), "Не удалось дождаться перемещения мыши");
         boolean found = false;
         for (int i = cellRectangle.y; i > this.getRectangle().y; i--) {
-            int x = (int) cellRectangle.getMaxX() - 8;
+            int x = (int) cellRectangle.getMaxX() - 4;
             AutomationMouse.getInstance().setLocation(x, i);
             assertDoesNotThrow(() -> Thread.sleep(5), "Не удалось подождать мышь");
             if (this.robot.getPixelColor(x, i).equals(this.filterColor)) {
-                System.out.println(this.robot.getPixelColor(x, i).toString());
                 AutomationMouse.getInstance().setLocation(x, i - 5);
+                assertDoesNotThrow(() -> Thread.sleep(500));
                 AutomationMouse.getInstance().leftClick();
                 found = true;
                 assertDoesNotThrow(() -> Thread.sleep(500), "Не удалось подождать список фильтрации");
@@ -742,7 +755,9 @@ public class SSMGrid {
                         UIAutomation.getInstance().getFocusedElement(),
                 "Не удалось найти список фильтрации таблицы");
         Rectangle searchRectangle = assertDoesNotThrow(() -> searchList.getBoundingRectangle().toRectangle(), "Не удалось найти положения листа фильтрации");
-        CheckerOCRUtils.getTextAndMove(searchRectangle, "Выб", ITessAPI.TessPageIteratorLevel.RIL_WORD);
+        CheckerOCRUtils.getTextAndMove(
+                new Rectangle(searchRectangle.x - 5, searchRectangle.y, searchRectangle.width + 5, searchRectangle.height),
+                        "Выб", ITessAPI.TessPageIteratorLevel.RIL_WORD);
         AutomationMouse.getInstance().leftClick();
         log.info("Окно фильтрации вызвано");
     }

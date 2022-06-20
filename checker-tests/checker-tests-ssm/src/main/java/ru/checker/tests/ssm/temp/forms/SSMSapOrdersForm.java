@@ -58,6 +58,10 @@ public class SSMSapOrdersForm {
         return this.form.custom("ssm_01_02", -1, SSMGrid.class);
     }
 
+    public SSMGrid getOperationGrid() {
+        return this.form.custom("ssm_01_05", -1, SSMGrid.class);
+    }
+
     public SSMGrid getProductionReleaseGrid() {
         return this.form.custom("ssm_01_03", -1, SSMGrid.class);
     }

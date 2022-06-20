@@ -95,13 +95,14 @@ public class CheckerNGListener implements ITestListener {
     public void onFinish(ITestContext context) {
         String caseName = context.getSuite().getName();
         String endTime = new SimpleDateFormat("yyyy-MM-dd HH:ss:SSS'Z'").format(context.getEndDate());
+        String startTime = new SimpleDateFormat("yyyy-MM-dd HH:ss:SSS'Z'").format(context.getStartDate());
         String total = String.valueOf(context.getSuite().getAllMethods().size());
         String passed = String.valueOf(context.getPassedTests().size());
         String warnings = "0";
         String failed = String.valueOf(context.getFailedTests().size());
         String inconclusive = String.valueOf(context.getFailedButWithinSuccessPercentageTests().size());
         String skipped = String.valueOf(context.getSkippedTests().size());
-        String duration = String.valueOf(context.getEndDate().getTime() - context.getStartDate().getTime());
+        String duration = String.valueOf(Math.round(context.getEndDate().getTime() - context.getStartDate().getTime() / 1000));
 
 
         result.setTotal(total);
@@ -111,6 +112,7 @@ public class CheckerNGListener implements ITestListener {
         result.setInconclusive(inconclusive);
         result.setSkipped(skipped);
         result.setEndTime(endTime);
+        result.setStartTime(startTime);
         result.setDuration(duration);
         result.setResult("Passed");
 
@@ -124,6 +126,7 @@ public class CheckerNGListener implements ITestListener {
         wrapper.setInconclusive(inconclusive);
         wrapper.setSkipped(skipped);
         wrapper.setEndTime(endTime);
+        wrapper.setStartTime(startTime);
         wrapper.setDuration(duration);
         wrapper.setResult("Passed");
 
@@ -135,6 +138,7 @@ public class CheckerNGListener implements ITestListener {
         suite.setInconclusive(inconclusive);
         suite.setSkipped(skipped);
         suite.setEndTime(endTime);
+        suite.setStartTime(startTime);
         suite.setDuration(duration);
         suite.setResult("Passed");
 
@@ -306,7 +310,7 @@ public class CheckerNGListener implements ITestListener {
         NUnitTestCase test = new NUnitTestCase();
         test.setId(resultContext.id());
         test.setName(resultContext.getMethod().getDescription());
-        test.setDuration(String.valueOf(resultContext.getEndMillis() - resultContext.getStartMillis()));
+        test.setDuration(String.valueOf(Math.round(resultContext.getEndMillis() - resultContext.getStartMillis()) / 1000));
         test.setFullname(resultContext.getMethod().getQualifiedName());
         test.setAsserts("0");
         test.setMethodname(resultContext.getMethod().getQualifiedName());
