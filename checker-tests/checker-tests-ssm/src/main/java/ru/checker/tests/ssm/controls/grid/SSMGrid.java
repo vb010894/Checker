@@ -159,7 +159,10 @@ public class SSMGrid {
 
             CheckerDesktopTest.getCurrentApp().waitApp();
 
-            stringData = assertDoesNotThrow(() -> Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor).toString(), "Не удалось получить данные из буфера");
+            stringData = assertDoesNotThrow(() -> {
+                Thread.sleep(1000);
+                return Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor).toString();
+            }, "Не удалось получить данные из буфера");
             if (stringData.equals("")) {
                 assertDoesNotThrow(() -> Thread.sleep(1000), "Не удалось выдержать паузу");
                 limit -= 1000;
