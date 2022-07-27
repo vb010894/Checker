@@ -41,7 +41,7 @@ public class SSMTest extends CheckerDesktopTest {
      * Init test case.
      * @param id From ID.
      */
-    @Parameters({"form.id", "form.navigation"})
+    @Parameters({"form.id"})
     @BeforeMethod
     public void before(String id) {
         log.info("Инициализация тестового случая");
