@@ -9,6 +9,11 @@ import org.testng.TestNG;
 import java.io.File;
 import java.util.List;
 
+/**
+ * Main class.
+ * Starting production tests.
+ * @author vd.zinovev
+ */
 @ComponentScan("ru.checker.tests")
 @SpringBootApplication
 @Log4j2(topic = "root")

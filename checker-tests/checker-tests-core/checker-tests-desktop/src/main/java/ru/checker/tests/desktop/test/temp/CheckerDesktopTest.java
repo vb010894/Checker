@@ -4,20 +4,32 @@ import lombok.Getter;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
 import ru.checker.tests.base.test.CheckerTestCase;
 import ru.checker.tests.base.utils.CheckerTools;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopApplication;
-import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 
 import java.util.Map;
 
+/**
+ * Checker desktop test.
+ *
+ * @author vd.zinovev
+ */
 public class CheckerDesktopTest extends CheckerTestCase {
 
-
+    /**
+     * Current app.
+     */
     @Getter
     static CheckerDesktopApplication currentApp;
 
+    /**
+     * Start app method.
+     *
+     * @param appName App name parameter
+     *                in testNG config file
+     *                need to add parameter 'app'
+     */
     @Parameters({"app"})
     @BeforeClass
     public void startApp(String appName) {
@@ -31,12 +43,13 @@ public class CheckerDesktopTest extends CheckerTestCase {
         System.out.println("Приложение запущено");
     }
 
-
+    /**
+     * Close app.
+     */
     @AfterClass
     public void end() {
         System.out.println("Закрытие приложения");
         getApplication().close();
         System.out.println("Закрытие приложения");
     }
-
 }

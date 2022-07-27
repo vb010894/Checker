@@ -1,5 +1,5 @@
 
-package ru.checker.reporter.junit;
+package ru.checker.reporter;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -14,37 +14,39 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
+/**
+ * Output report generator.
+ * @author vd.zinovev
+ */
 @Log4j2
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CheckerJunitReportGenerator {
 
-    public static List<Throwable> generateJunitReports(List<JunitReportModel> models) {
-        return models.parallelStream().map(model -> {
-            try {
-                generateJunitReport(model);
-                return null;
-            } catch (IOException e) {
-                log.error("Не удалось создать отчет", e);
-                return e;
-
-            }
-        }).collect(Collectors.toList());
-    }
-
+    /**
+     * Generate JUNIT report
+     * @param model JUNIT model
+     * @throws IOException Writing exceptions
+     */
     public static void generateJunitReport(JunitReportModel model) throws IOException {
         generateReport(model);
     }
 
+    /**
+     * Generate NUNIT report
+     * @param model NUNIT model
+     * @throws IOException Writing exceptions
+     */
     public static void generateNUnitReport(NUnitTestRun model) throws IOException {
         generateReport(model);
     }
 
-
-
+    /**
+     * Generate abstract report.
+     * @param model Report model
+     * @throws IOException Writing exceptions
+     */
     public static void generateReport(Object model) throws IOException {
         XmlMapper mapper = new XmlMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -63,5 +65,4 @@ public final class CheckerJunitReportGenerator {
                 throw new IOException("Не удалось создать директорию с отчетами");
         mapper.writeValue(pathFile, model);
     }
-
 }

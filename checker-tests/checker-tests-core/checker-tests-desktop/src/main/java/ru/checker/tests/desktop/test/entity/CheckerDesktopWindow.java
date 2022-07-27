@@ -27,8 +27,15 @@ import static org.junit.jupiter.api.Assertions.*;
 @Getter
 public class CheckerDesktopWindow extends CheckerBaseEntity<Window, Application> {
 
-    Map<String, Map<String, Object>> formsDefinitions = new HashMap<>();
-    Map<String, Map<String, Object>> widgetsDefinitions = new HashMap<>();
+    /**
+     * Form definitions.
+     */
+    final Map<String, Map<String, Object>> formsDefinitions = new HashMap<>();
+
+    /**
+     * Widget definition.
+     */
+    final Map<String, Map<String, Object>> widgetsDefinitions = new HashMap<>();
 
     /**
      * Constructor.
@@ -40,6 +47,33 @@ public class CheckerDesktopWindow extends CheckerBaseEntity<Window, Application>
         super(root, definition);
         this.addChildrenDefinition("widgets", widgetsDefinitions);
         this.addChildrenDefinition("forms", formsDefinitions);
+    }
+
+
+    /**
+     * Get window form.
+     * @param ID Form ID
+     * @return Form
+     */
+    public CheckerDesktopForm form(String ID) {
+        return this.form(ID, true);
+    }
+
+    public boolean checkFormExist(String ID) {
+        CheckerDesktopForm form = new CheckerDesktopForm(this.getControl(), this.formsDefinitions.get(ID));
+        form.setWaitTimeout(3);
+        return form.findMySelf(false);
+    }
+
+    /**
+     * Get window form.
+     * @param ID Form ID
+     * @return Form
+     */
+    public CheckerDesktopForm form(String ID, boolean needToThrow) {
+        assertTrue(formsDefinitions.containsKey(ID), String.format("Форма с ID - %s не описана", ID));
+        CheckerDesktopForm form = new CheckerDesktopForm(this.getControl(), this.formsDefinitions.get(ID));
+        return form.findMySelf(needToThrow) ? form : null;
     }
 
     /**
@@ -70,7 +104,7 @@ public class CheckerDesktopWindow extends CheckerBaseEntity<Window, Application>
      * Find and save self-control.
      */
     @Override
-    public void findMySelf() {
+    public boolean findMySelf() {
         if(this.getDefinition().containsKey("deep")) {
             if(CheckerTools.castDefinition(this.getDefinition().get("deep"))) {
                 AtomicReference<String> ID = new AtomicReference<>();
@@ -79,10 +113,10 @@ public class CheckerDesktopWindow extends CheckerBaseEntity<Window, Application>
                 this.setID(ID.get());
                 this.setName(name.get());
                 this.setControl(this.deepSearch());
-                return;
+                return true;
             }
         }
-        super.findMySelf();
+        return super.findMySelf();
     }
 
     private Window deepSearch() {

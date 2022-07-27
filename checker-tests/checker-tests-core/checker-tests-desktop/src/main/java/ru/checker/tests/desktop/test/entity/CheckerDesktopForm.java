@@ -11,9 +11,16 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Checker Desktop form.
+ * @author vd.zinovev
+ */
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CheckerDesktopForm extends CheckerBaseEntity<Panel, Window> {
 
+    /**
+     * Widget definition.
+     */
     Map<String, Map<String, Object>> widgetsDefinitions = new HashMap<>();
     /**
      * Constructor.

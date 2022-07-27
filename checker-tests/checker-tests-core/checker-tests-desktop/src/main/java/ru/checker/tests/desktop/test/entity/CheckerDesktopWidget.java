@@ -5,7 +5,13 @@ import mmarquee.automation.controls.Panel;
 
 import java.util.Map;
 
-public class CheckerDesktopWidget extends CheckerBaseEntity <Panel, AutomationBase>{
+/**
+ * Checker desktop widget.
+ *
+ * @author vd.zinovev
+ */
+public class CheckerDesktopWidget extends CheckerBaseEntity<Panel, AutomationBase> {
+
     /**
      * Constructor.
      *
