@@ -40,11 +40,10 @@ public class SSMTest extends CheckerDesktopTest {
     /**
      * Init test case.
      * @param id From ID.
-     * @param nav Form navigation
      */
     @Parameters({"form.id", "form.navigation"})
     @BeforeMethod
-    public void before(String id, String nav) {
+    public void before(String id) {
         log.info("Инициализация тестового случая");
         this.rootWindow = getCurrentApp().window("ssm_main");
         this.rootWindow.maximize();
