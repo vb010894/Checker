@@ -111,7 +111,7 @@ public class CheckerTFSListener implements ITestListener {
      */
     @Override
     public void onTestSuccess(ITestResult result) {
-        this.stopVideo(result.id(), result.getTestName(), false);
+        this.stopVideo(result.id(), result.getTestName(), true);
     }
 
     /**
