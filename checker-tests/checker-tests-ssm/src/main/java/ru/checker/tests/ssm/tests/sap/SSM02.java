@@ -1,4 +1,4 @@
-package ru.checker.tests.ssm.tests;
+package ru.checker.tests.ssm.tests.sap;
 
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;

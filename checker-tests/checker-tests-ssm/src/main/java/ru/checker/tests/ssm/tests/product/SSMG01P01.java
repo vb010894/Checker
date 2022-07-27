@@ -1,4 +1,4 @@
-package ru.checker.tests.ssm.tests.templates;
+package ru.checker.tests.ssm.tests.product;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -6,20 +6,19 @@ import ru.checker.tests.base.enums.CheckerOCRLanguage;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
 import ru.checker.tests.ssm.controls.grid.SSMGridData;
-import ru.checker.tests.ssm.temp.forms.TemplatesFilteredFormTemplate;
+import ru.checker.tests.ssm.temp.forms.templates.FilteredFormTemplate;
 
-import java.util.Calendar;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class FilterCheckTemplate implements Runnable {
+public class SSMG01P01 implements Runnable {
 
     CheckerDesktopWindow ROOT_WINDOW;
     String FORM_ID;
 
-    public FilterCheckTemplate(CheckerDesktopWindow root, String formID) {
+    public SSMG01P01(CheckerDesktopWindow root, String formID) {
         this.ROOT_WINDOW = root;
         this.FORM_ID = formID;
     }
@@ -32,7 +31,7 @@ public class FilterCheckTemplate implements Runnable {
 
     @Override
     public void run() {
-        TemplatesFilteredFormTemplate template = this.ROOT_WINDOW.form(FORM_ID, TemplatesFilteredFormTemplate.class);
+        FilteredFormTemplate template = this.ROOT_WINDOW.form(FORM_ID, FilteredFormTemplate.class);
         //template.selectYear(String.valueOf(Calendar.getInstance().get(Calendar.YEAR)));
         template.toggleOpened(false);
         SSMGrid grid = template.getFilteredGrid();
@@ -61,7 +60,7 @@ public class FilterCheckTemplate implements Runnable {
 
     }
 
-    private void checkShop(TemplatesFilteredFormTemplate template, SSMGrid grid, String shop) {
+    private void checkShop(FilteredFormTemplate template, SSMGrid grid, String shop) {
         template.selectShop(shop);
         SSMGridData data = grid.getAllData();
         data.getColumnData("Цех")

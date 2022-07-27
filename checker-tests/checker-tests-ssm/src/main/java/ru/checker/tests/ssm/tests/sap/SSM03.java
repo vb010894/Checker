@@ -1,4 +1,4 @@
-package ru.checker.tests.ssm.tests;
+package ru.checker.tests.ssm.tests.sap;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;

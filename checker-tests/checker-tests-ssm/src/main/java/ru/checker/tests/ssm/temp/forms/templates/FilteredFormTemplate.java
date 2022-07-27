@@ -1,4 +1,4 @@
-package ru.checker.tests.ssm.temp.forms;
+package ru.checker.tests.ssm.temp.forms.templates;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -10,12 +10,12 @@ import ru.checker.tests.ssm.temp.widgets.SSMTools;
 @Log4j2
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @SuppressWarnings("unused")
-public class TemplatesFilteredFormTemplate {
+public class FilteredFormTemplate {
 
     CheckerDesktopForm FORM;
     SSMTools TOOLS;
 
-    public TemplatesFilteredFormTemplate(CheckerDesktopForm form) {
+    public FilteredFormTemplate(CheckerDesktopForm form) {
         log.info("Инициализация шаблона формы для проверки фильтров");
         this.FORM = form;
         this.TOOLS = form.widget("ssm_menu", SSMTools.class);

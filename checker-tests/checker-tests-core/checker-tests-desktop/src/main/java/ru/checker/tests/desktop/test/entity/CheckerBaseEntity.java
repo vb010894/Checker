@@ -155,7 +155,7 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
         else
             panel = this.convertControlByIndex(ID, Panel.class, index, this.usedPanels);
 
-        return assertDoesNotThrow(() -> wrapper.getConstructor(Panel.class).newInstance(panel),
+        return assertDoesNotThrow(() -> wrapper.getConstructor(Panel.class, Map.class).newInstance(panel, this.elements.get(ID)),
                 "Не удалось обернуть пользовательский элемент с ID - " + ID);
 
     }
@@ -177,7 +177,7 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
        return panels
                 .parallelStream()
                 .map(
-                        panel -> assertDoesNotThrow(() -> wrapper.getConstructor(Panel.class).newInstance(panel),
+                        panel -> assertDoesNotThrow(() -> wrapper.getConstructor(Panel.class, Map.class).newInstance(panel, this.elements.get(ID)),
                                 "Не удалось обернуть пользовательский элемент с ID - " + ID))
                 .collect(Collectors.toList());
     }

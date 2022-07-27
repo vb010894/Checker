@@ -2,10 +2,7 @@ package ru.checker.tests.ssm.controls.grid;
 
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 import mmarquee.automation.AutomationException;
@@ -24,6 +21,7 @@ import ru.checker.tests.base.utils.CheckerOCRUtils;
 import ru.checker.tests.base.utils.CheckerTools;
 import ru.checker.tests.desktop.base.robot.CheckerDesktopMarker;
 import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
+import ru.checker.tests.ssm.annotations.CheckerDefinitionValue;
 
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
@@ -32,6 +30,7 @@ import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
@@ -46,21 +45,22 @@ import static org.junit.jupiter.api.Assertions.*;
 @SuppressWarnings({"ConstantConditions", "unused"})
 public class SSMGrid {
 
-    final Color headerColor = new Color(244, 244, 244);
-    final Color acceptedRowColor = new Color(255, 85, 85);
-    final Color filterColor = new Color(181, 181, 181);
-    final Color clearFilterColor = new Color(244, 244, 244);
-    final Color enabledFilterColor = new Color(179, 215, 244);
-
     final Panel control;
     final Robot robot;
+    final Map<String, Object> DEFINITION;
 
     SSMGridData data;
     Rectangle headerRectangle;
 
+    @Getter
+    @Setter
+    Config config;
 
-    public SSMGrid(Panel control) {
+
+    public SSMGrid(Panel control, Map<String, Object> definition) {
         this.control = control;
+        this.DEFINITION = definition;
+        this.config = definition.containsKey("config") ? new Config(CheckerTools.castDefinition(definition.get("config"))) : new Config();
         this.robot = assertDoesNotThrow((ThrowingSupplier<Robot>) Robot::new, "Не удалось получить доступ к клавиатуре");
     }
 
@@ -93,7 +93,6 @@ public class SSMGrid {
                     limit -= 1000;
                 }
             }
-
         });
         log.debug("Таблица сфокусирована");
     }
@@ -272,7 +271,7 @@ public class SSMGrid {
             log.info("Проверка выделения");
             boolean found = false;
             for (int i = cellRectangle.get().x; i < (int) this.control.getBoundingRectangle().toRectangle().getMaxX(); i++) {
-                if (this.robot.getPixelColor(i, (int) cellRectangle.get().getCenterY()).equals(this.acceptedRowColor)) {
+                if (this.robot.getPixelColor(i, (int) cellRectangle.get().getCenterY()).equals(this.config.acceptedRowColor)) {
                     found = true;
                     break;
                 }
@@ -429,7 +428,7 @@ public class SSMGrid {
     public void clearFilter() {
         log.info("Очистка фильтра");
         int top = (int) this.getRectangle().getMinY();
-        int bottom = (int) this.getRectangle().getMaxY() - 20;
+        int bottom = (int) this.getRectangle().getMaxY() - ((this.config.hasBottomScroll) ? 20 : 2);
         int x = this.getRectangle().x + 5;
         boolean startFound = false;
         boolean endFound = false;
@@ -440,7 +439,7 @@ public class SSMGrid {
         for (int i = bottom; i > top; i--) {
             AutomationMouse.getInstance().setLocation(x, i);
             Color color = this.robot.getPixelColor(x, i);
-            if (color.equals(enabledFilterColor)) {
+            if (color.equals(this.config.enabledFilterColor)) {
                 AutomationMouse.getInstance().setLocation(x, i - 5);
                 AutomationMouse.getInstance().leftClick();
                 break;
@@ -573,7 +572,6 @@ public class SSMGrid {
      * @param focused Focused element after filter button was pressed
      */
     private void fillFilterDialog(Element focused, ConditionConfigurer config) {
-
         // поиск родительского окна фильтра
         Element focusedEl = focused;
         AtomicReference<Element> temp = new AtomicReference<>(focusedEl);
@@ -734,8 +732,8 @@ public class SSMGrid {
         for (int i = cellRectangle.y; i > this.getRectangle().y; i--) {
             int x = (int) cellRectangle.getMaxX() - 4;
             AutomationMouse.getInstance().setLocation(x, i);
-            assertDoesNotThrow(() -> Thread.sleep(5), "Не удалось подождать мышь");
-            if (this.robot.getPixelColor(x, i).equals(this.filterColor)) {
+            assertDoesNotThrow(() -> Thread.sleep(10), "Не удалось подождать мышь");
+            if (this.robot.getPixelColor(x, i).equals(this.config.filterColor)) {
                 AutomationMouse.getInstance().setLocation(x, i - 5);
                 assertDoesNotThrow(() -> Thread.sleep(500));
                 AutomationMouse.getInstance().leftClick();
@@ -830,16 +828,32 @@ public class SSMGrid {
     }
 
     @FieldDefaults(level = AccessLevel.PRIVATE)
-    public class Config {
+    @Data
+    @NoArgsConstructor
+    public static class Config {
         Color headerColor = new Color(244, 244, 244);
         Color acceptedRowColor = new Color(255, 85, 85);
         Color filterColor = new Color(181, 181, 181);
         Color clearFilterColor = new Color(244, 244, 244);
         Color enabledFilterColor = new Color(179, 215, 244);
+
+        @CheckerDefinitionValue("unfocused")
         String[] unFocused;
+
+        @CheckerDefinitionValue("has_scroll_bar")
         boolean hasBottomScroll = true;
+        @CheckerDefinitionValue("column_count")
         int columnCount = 1;
+        @CheckerDefinitionValue("has_selection_bar")
+        boolean hasSelectionBar = true;
+
+        public Config(Map<String, Object> definition) {
+            definition.entrySet().parallelStream().forEach(entry -> Arrays
+                    .stream(this.getClass().getDeclaredFields()).parallel()
+                    .filter(field ->
+                            field.isAnnotationPresent(CheckerDefinitionValue.class)
+                                    && field.getAnnotation(CheckerDefinitionValue.class).value().equalsIgnoreCase(entry.getKey()))
+                    .findFirst().ifPresent(found -> assertDoesNotThrow(() -> found.set(this, entry.getValue()), "Не удалось настроить таблицу")));
+        }
     }
-
-
 }

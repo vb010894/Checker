@@ -1,12 +1,9 @@
-package ru.checker.tests.ssm;
+package ru.checker.tests.ssm.tests.sap;
 
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.DisplayName;
 import org.testng.annotations.Test;
 import ru.checker.tests.ssm.temp.test.SSMTest;
-import ru.checker.tests.ssm.tests.SSM01;
-import ru.checker.tests.ssm.tests.SSM02;
-import ru.checker.tests.ssm.tests.SSM03;
 
 /**
  * SSM 'SAP Orders' form testing.
