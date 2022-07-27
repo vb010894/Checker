@@ -8,7 +8,9 @@ import ru.checker.tests.ssm.tests.product.SSMG01P01;
 @Log4j2
 public class SSMProductReleaseTest extends SSMTest {
 
-    @Test
+    @Test(
+            testName = "ТС.SSM.G.01.01.P.01",
+            description = "Выпуск продукции SAP. Работа с фильтрами")
     public void SSMG0101P01() {
        new SSMG01P01(getRootWindow(), "product_release").run();
     }
