@@ -49,7 +49,8 @@ public class SSMGrid {
     final Color headerColor = new Color(244, 244, 244);
     final Color acceptedRowColor = new Color(255, 85, 85);
     final Color filterColor = new Color(181, 181, 181);
-    final Color clearFilterColor = new Color(160, 160, 160);
+    final Color clearFilterColor = new Color(244, 244, 244);
+    final Color enabledFilterColor = new Color(179, 215, 244);
 
     final Panel control;
     final Robot robot;
@@ -428,8 +429,8 @@ public class SSMGrid {
     public void clearFilter() {
         log.info("Очистка фильтра");
         int top = (int) this.getRectangle().getMinY();
-        int bottom = (int) this.getRectangle().getMaxY();
-        int x = this.getRectangle().x + 1;
+        int bottom = (int) this.getRectangle().getMaxY() - 20;
+        int x = this.getRectangle().x + 5;
         boolean startFound = false;
         boolean endFound = false;
 
@@ -437,26 +438,14 @@ public class SSMGrid {
         int end = 0;
 
         for (int i = bottom; i > top; i--) {
+            AutomationMouse.getInstance().setLocation(x, i);
             Color color = this.robot.getPixelColor(x, i);
-            if (!startFound & color.equals(clearFilterColor)) {
-                startFound = true;
-                start = i;
-            }
-
-            if (startFound) {
-                if (!color.equals(clearFilterColor)) {
-                    endFound = true;
-                    end = i;
-                }
-            }
-
-            if (startFound & endFound)
+            if (color.equals(enabledFilterColor)) {
+                AutomationMouse.getInstance().setLocation(x, i - 5);
+                AutomationMouse.getInstance().leftClick();
                 break;
+            }
         }
-
-        int y = ((end - start) / 2) + start;
-        AutomationMouse.getInstance().setLocation(x + 5, y);
-        AutomationMouse.getInstance().leftClick();
         log.info("Фильтр очищен");
     }
 
@@ -467,6 +456,16 @@ public class SSMGrid {
      * @param unFocused Unfocused columns
      */
     public void filterByGUI(ConditionConfigurer config, String... unFocused) {
+        this.filterByGUI(config, CheckerOCRLanguage.RUS, unFocused);
+    }
+
+    /**
+     * Filter table by GUI.
+     *
+     * @param config    Condition configurer
+     * @param unFocused Unfocused columns
+     */
+    public void filterByGUI(ConditionConfigurer config, CheckerOCRLanguage language, String... unFocused) {
         for (int i = 0; i < 4; i++) {
             try {
                 log.info("Производится фильтрация через интерфейс");
@@ -480,6 +479,8 @@ public class SSMGrid {
                         new Point(atomicCellRectangle.get().x, (int) atomicCellRectangle.get().getMinY()),
                         data,
                         config.column,
+                        config.columnCondition,
+                        language,
                         unFocused
                 );
 
@@ -506,7 +507,7 @@ public class SSMGrid {
 
     }
 
-    private Rectangle moveToCell(Point rowPoint, SSMGridData data, String targetCell, String... unFocused) {
+    private Rectangle moveToCell(Point rowPoint, SSMGridData data, String targetCell, String columnCondition, CheckerOCRLanguage language, String... unFocused) {
         List<String> unFocusedList = Arrays.asList(unFocused);
         AtomicReference<Rectangle> out = new AtomicReference<>();
 
@@ -536,13 +537,12 @@ public class SSMGrid {
                 this.robot.keyRelease(KeyEvent.VK_RIGHT);
             } else {
                 if (header.equals(targetCell)) {
-                    int x = this.getRectangle().x;
+                    int x = this.getRectangle().x - 2;
                     int y = rowPoint.y - 20;
                     int width = this.getRectangle().width;
                     int height = 20;
                     Rectangle headersRectangle = new Rectangle(x, y, width, height);
-                    Rectangle r = CheckerOCRUtils.getTextAndMove(headersRectangle, Pattern.compile("^" + targetCell + "$"), CheckerOCRLanguage.RUS, ITessAPI.TessPageIteratorLevel.RIL_WORD);
-
+                    Rectangle r = CheckerOCRUtils.getTextAndMove(headersRectangle, Pattern.compile("^" + ((columnCondition != null) ? columnCondition : targetCell) + "$"), language, ITessAPI.TessPageIteratorLevel.RIL_WORD);
                     int cellMaxX = 0;
                     for (int i = (int) r.getMaxX() + 2; i < this.getRectangle().getMaxX(); i++) {
                         if (this.robot.getPixelColor(i, (int) r.getMaxY()).equals(Color.BLACK)) {
@@ -555,7 +555,7 @@ public class SSMGrid {
                     x = r.x;
                     y = (int) r.getMaxY();
                     width = (int) (cellMaxX - r.getMaxX());
-                    height = 2;
+                    height = 3;
 
                     Rectangle cell = new Rectangle(x, y, width, height);
                     out.set(cell);
@@ -692,6 +692,7 @@ public class SSMGrid {
         assertDoesNotThrow(() -> {
             Thread.sleep(1000);
             firstConditionField.setValue(configurer.condition1.value);
+            Thread.sleep(1000);
         }, "Не удалось вставить значение в первое условие фильтрации");
 
         if (configurer.separator != null && configurer.separator != Separator.NONE) {
@@ -773,6 +774,7 @@ public class SSMGrid {
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class ConditionConfigurer {
         String column;
+        String columnCondition;
         String value1;
         String value2;
         Condition condition1;
@@ -825,6 +827,18 @@ public class SSMGrid {
         Condition(String value) {
             this.value = value;
         }
+    }
+
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public class Config {
+        Color headerColor = new Color(244, 244, 244);
+        Color acceptedRowColor = new Color(255, 85, 85);
+        Color filterColor = new Color(181, 181, 181);
+        Color clearFilterColor = new Color(244, 244, 244);
+        Color enabledFilterColor = new Color(179, 215, 244);
+        String[] unFocused;
+        boolean hasBottomScroll = true;
+        int columnCount = 1;
     }
 
 

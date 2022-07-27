@@ -4,10 +4,9 @@
     </listeners>
     <test name = "SAP">
         <parameter name = "app" value = "SSM"/>
-        <parameter name = "form.id" value = "mf"/>
-        <parameter name = "form.navigation" value = "SAP_ORDERS"/>
+        <parameter name = "form.id" value = "product_release"/>
         <classes>
-            <class name = "ru.checker.tests.ssm.SAPSSM">
+            <class name = "ru.checker.tests.ssm.SSMProductReleaseTest">
                 <methods>
                     <include name = "ssm02"/>
                 </methods>

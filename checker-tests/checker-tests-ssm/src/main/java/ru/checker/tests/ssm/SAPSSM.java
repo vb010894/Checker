@@ -1,10 +1,7 @@
 package ru.checker.tests.ssm;
 
 import lombok.extern.log4j.Log4j2;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
-import org.testng.SkipException;
-import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import ru.checker.tests.ssm.temp.test.SSMTest;
 import ru.checker.tests.ssm.tests.SSM01;

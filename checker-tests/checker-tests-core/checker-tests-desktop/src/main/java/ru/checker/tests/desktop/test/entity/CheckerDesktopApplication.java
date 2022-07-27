@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import mmarquee.automation.UIAutomation;
 import mmarquee.automation.controls.Application;
-import mmarquee.automation.controls.Window;
 import org.junit.jupiter.api.Assertions;
 import ru.checker.tests.base.application.CheckerApplication;
 import ru.checker.tests.base.utils.CheckerTools;
@@ -20,6 +19,10 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Checker Desktop application.
+ * @author vd.zinovev
+ */
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CheckerDesktopApplication extends CheckerApplication {
 
@@ -35,12 +38,26 @@ public class CheckerDesktopApplication extends CheckerApplication {
      */
     static Process appProcess;
 
+    /**
+     * App name.
+     */
     final String name;
+
+    /**
+     * App definition.
+     */
     @Getter
     final Map<String, Object> definition;
 
+    /**
+     * Window definition cache.
+     */
     final Map<String, Map<String, Object>> windowDefinitions = new HashMap<>();
 
+    /**
+     * App constructor.
+     * @param definition App definition
+     */
     public CheckerDesktopApplication(Map<String, Object> definition) {
         this.definition = definition;
         assertTrue(definition.containsKey("name"), "Не задан ключ 'name' в конфигурации приложения");
@@ -58,8 +75,7 @@ public class CheckerDesktopApplication extends CheckerApplication {
                 Map<String, Object> childDefinition;
                 if (n.containsKey("path")) {
                     String path = String.format("/Tests/%s/%s/%s", this.name, "Windows", n.get("path"));
-                    Map<String, Object> definition = CheckerTools.convertYAMLToMap(String.format(path));
-                    childDefinition = definition;
+                    childDefinition = CheckerTools.convertYAMLToMap(path);
                 } else {
                     childDefinition = n;
                 }
@@ -77,6 +93,11 @@ public class CheckerDesktopApplication extends CheckerApplication {
         }
     }
 
+    /**
+     * Get app window.
+     * @param ID Window ID.
+     * @return App window
+     */
     public CheckerDesktopWindow window(String ID) {
         assertTrue(this.windowDefinitions.containsKey(ID), "Не найдено описание окна приложения с ID - " + ID);
         CheckerDesktopWindow window = new CheckerDesktopWindow(application, this.windowDefinitions.get(ID));
@@ -84,11 +105,21 @@ public class CheckerDesktopApplication extends CheckerApplication {
         return window;
     }
 
+    /**
+     * Get app name.
+     * @return App name
+     */
     @Override
     public String getName() {
         return this.name;
     }
 
+    /**
+     * Run app.
+     * If config file has key 'preStart' with value 'true',
+     * app will start with help process futures and then UI Automation attach process
+     * else UI automation start app directly.
+     */
     @Override
     public void run() {
         boolean isPreStart = (Boolean) this.definition.getOrDefault("preStart", false);
@@ -119,6 +150,11 @@ public class CheckerDesktopApplication extends CheckerApplication {
         });
     }
 
+    /**
+     * Close app.
+     * if the config file has key 'stayAlive' with value 'true',
+     * app will not be close.
+     */
     @Override
     public void close() {
         Boolean isStayAlive = (Boolean) this.definition.getOrDefault("stayAlive", false);
@@ -130,6 +166,9 @@ public class CheckerDesktopApplication extends CheckerApplication {
         }
     }
 
+    /**
+     * Wait app.
+     */
     public void waitApp() {
         application.waitForInputIdle();
     }

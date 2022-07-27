@@ -11,7 +11,7 @@ elements:
         ClassName: TdxRibbonGroupBarControl
         Name: ПРОИЗВОДСТВЕННЫЕ ЗАКАЗЫ
   - element:
-      id: ssm_06
+      id: year
       name: Фильтр 'Год'
       buttonName: Год
       search:
@@ -32,26 +32,26 @@ elements:
         ClassName: TdxRibbonGroupBarControl
         Name: ЗАДАНИЯ ПРБ
   - element:
-      id: ssm_03
+      id: shop
       name: Фильтр 'Цех'
       buttonName: Цех
       search:
         ClassName: TdxRibbonGroupBarControl
-        Name: ФИЛЬТР ПЗ
+        Name: ФИЛЬТР ЗАДАНИЙ
   - element:
-      id: ssm_02
+      id: closed
       name: Фильтр 'Закрытые'
       buttonName: Закрытые
       search:
         ClassName: TdxRibbonGroupBarControl
-        Name: ФИЛЬТР ПЗ
+        Name: ФИЛЬТР ЗАДАНИЙ
   - element:
-      id: ssm_01
+      id: opened
       name: Фильтр 'Открытые'
       buttonName: Открытые
       search:
         ClassName: TdxRibbonGroupBarControl
-        Name: ФИЛЬТР ПЗ
+        Name: ФИЛЬТР ЗАДАНИЙ
   - element:
       id: info_exit
       name: Кнопка выход

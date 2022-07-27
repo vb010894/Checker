@@ -1,15 +1,15 @@
-id: mf
-name: Заказы SAP
+id: product_release
+name: Выпуск продукции
 search:
-  ClassName: TcxTabSheet
-  Name: Тяжмаш MES - PREPROD-Заказы SAP
-navigation: SAP_ORDERS
+  ClassName: TMainForm
+  Name: Выпуск продукции33
+navigation: PRODUCT_RELEASE
 widgets:
   - path: SSM_PAGING.yaml
   - path: SSM_TOOLS.yaml
 elements:
   - element:
-      id: ssm_01_05
+      id: filtered_table
       name: Таблица 'Операции'
       index: 1
       search:

@@ -33,6 +33,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @SuppressWarnings("unused")
 public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends AutomationBase> {
 
+    @Setter
+    private int waitTimeout = 60;
+
     /**
      * Elements definition reference.
      */
@@ -314,8 +317,13 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
         return result.get(0);
     }
 
+    /**
+     * Get element definition.
+     * @param ID Element ID
+     * @return Element definition
+     */
     public Map<String, Object> getElementDefinition(String ID) {
-        assertTrue(this.elements.containsKey(ID), String.format("Элемент с ID не описан", ID));
+        assertTrue(this.elements.containsKey(ID), String.format("Элемент с ID '%s' не описан", ID));
         return this.elements.get(ID);
     }
 
@@ -337,6 +345,11 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
         return result;
     }
 
+    /**
+     * Get found elements.
+     * @param ID Element ID.
+     * @return Found automation controls
+     */
     private List<AutomationBase> getFound(String ID) {
         assertTrue(this.elements.containsKey(ID), String.format("Элемент с ID - '%s' не описан в файлах конфигураций", ID));
         Map<String, Object> definition = this.getElements().get(ID);
@@ -421,8 +434,7 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
                 if (n.containsKey("path")) {
                     String app = CheckerDesktopTest.getApplication().getName();
                     String path = String.format("/Tests/%s/%s/%s", app, this.references.get(node), n.get("path"));
-                    Map<String, Object> definition = CheckerTools.convertYAMLToMap(String.format(path));
-                    childDefinition = definition;
+                    childDefinition = CheckerTools.convertYAMLToMap(String.format(path));
                 } else {
                     childDefinition = (Map<String, Object>) n.get(node.substring(0, node.length() - 1));
                 }
@@ -440,13 +452,20 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
         }
     }
 
+    public boolean findMySelf() {
+        return this.findMySelf(true);
+    }
+
     /**
      * Find and save self-control.
      */
-    public void findMySelf() {
+    public boolean findMySelf(boolean throwIfNotFound) {
         AtomicReference<String> ID = new AtomicReference<>();
         AtomicReference<String> name = new AtomicReference<>();
         List<AutomationBase> found = this.findControl(this.root, definition, ID, name);
+        if(!throwIfNotFound && found.isEmpty())
+            return false;
+
         assertFalse(found.isEmpty(), String.format("Не найден ни один элемент управления с ID - '%s', именем - '%s' по условиям поиска", ID.get(), name.get()));
         this.ID = ID.get();
         this.name = ID.get();
@@ -465,6 +484,8 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
             System.out.printf("##[warning] Найдено несколько элементов управления с ID - '%s', именем - '%s'. Выбран первый - ''\n", ID.get(), name.get());
             this.control = CheckerTools.castDefinition(found.get(0));
         }
+
+        return true;
     }
 
     /**
@@ -530,7 +551,10 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
      * @param name       Control name atomic
      * @return List of children control
      */
-    protected List<AutomationBase> findControl(AutomationBase root, Map<String, Object> definition, AtomicReference<String> ID, AtomicReference<String> name) {
+    protected List<AutomationBase> findControl(AutomationBase root,
+                                               Map<String, Object> definition,
+                                               AtomicReference<String> ID,
+                                               AtomicReference<String> name) {
         this.getIndicators(ID, name);
         String currentID = ID.get();
         String currentName = name.get();
@@ -538,7 +562,7 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
         Map<String, Object> search = CheckerTools.castDefinition(definition.get("search"));
 
         List<AutomationBase> result = new LinkedList();
-        int limit = 60;
+        int limit = this.waitTimeout;
 
         while (result.isEmpty() && limit >= 0) {
             try {
@@ -553,13 +577,6 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
                 assertDoesNotThrow(() -> Thread.sleep(1000), "Не удалось выполнить ожидание элемента");
             }
         }
-
-        assertFalse(result.isEmpty(), "Элементы по описанию не найдены. Описание \n"
-                + definition
-                .entrySet()
-                .stream()
-                .map(entry -> entry.getKey() + ":" + entry.getValue())
-                .collect(Collectors.toList()));
 
         return result;
     }
@@ -599,7 +616,7 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
         assertTrue(definition.containsKey("id"), "В описании не найден ключ 'id', который задает ID элемента");
         String currentID = CheckerTools.castDefinition(definition.get("id"));
         ID.set(currentID);
-        String currentName = "";
+        String currentName;
         if (!definition.containsKey("name")) {
             System.out.printf("##[warning] Не задано имя компонента управления с ID - '%s'. Задание имени по умолчанию - ''\n", currentID);
             currentName = "";
