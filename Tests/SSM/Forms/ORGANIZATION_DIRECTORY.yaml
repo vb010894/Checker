@@ -1,0 +1,15 @@
+id: organization_directory
+name: Справочник организации
+search:
+  ClassName: TMainForm
+  Name: Справочник организации33
+navigation: ORGANIZATION_DIRECTORY
+widgets:
+  - path: SSM_PAGING.yaml
+  - path: SSM_TOOLS.yaml
+elements:
+  - element:
+      id: data_table
+      name: Таблица
+      search:
+        ClassName: TcxGridSite
