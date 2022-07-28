@@ -56,7 +56,6 @@ public class SSMGrid {
     @Setter
     Config config;
 
-
     public SSMGrid(Panel control, Map<String, Object> definition) {
         this.control = control;
         this.DEFINITION = definition;

@@ -323,7 +323,7 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
      * @return Element definition
      */
     public Map<String, Object> getElementDefinition(String ID) {
-        assertTrue(this.elements.containsKey(ID), String.format("Элемент с ID '%s' не описан", ID));
+        assertTrue(this.elements.containsKey(ID), String.format("Элемент с ID '%s' не описан\n %s", ID, this.elements.keySet().stream().collect(Collectors.joining(","))));
         return this.elements.get(ID);
     }
 
