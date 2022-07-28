@@ -25,6 +25,8 @@ import ru.checker.tests.ssm.temp.widgets.SSMTools;
 
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 @Log4j2
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SSMTest extends CheckerDesktopTest {
@@ -107,11 +109,23 @@ public class SSMTest extends CheckerDesktopTest {
      */
     private void closePopUps() {
         log.info("Закрытие всплывающих окон");
+        //System.out.println(" ---- this.rootHandle = " + this.rootHandle);
         if(this.rootHandle == null) {
             return;
         }
 
+        assertDoesNotThrow(() -> Thread.sleep(1000));
         WinDef.HWND popUpHandle = User32.INSTANCE.GetForegroundWindow();
+/*        System.out.println(" ---- popUpHandle = " + popUpHandle);
+        try {
+            Element el0 = UIAutomation.getInstance().getElementFromHandle(popUpHandle);
+            System.out.println(" ---- el0.getName() = " + el0.getName());
+            System.out.println(" ---- el0.getClassName() = " + el0.getClassName());
+            System.out.println(" ---- ControlType = " + ControlType.fromValue(el0.getControlType()).name());
+        } catch (AutomationException e) {
+            throw new RuntimeException(e);
+        }*/
+
         if(popUpHandle == null)
             return;
 
@@ -121,6 +135,9 @@ public class SSMTest extends CheckerDesktopTest {
                 if(el.getControlType() == ControlType.Window.getValue()) {
                     log.debug("Закрытие окна с handle - " + popUpHandle);
                     new Window(new ElementBuilder().element(el)).close();
+
+                    assertDoesNotThrow(() -> Thread.sleep(500));
+                    popUpHandle = User32.INSTANCE.GetForegroundWindow();
                 } else {
                     break;
                 }
