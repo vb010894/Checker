@@ -1,6 +1,7 @@
 package ru.checker.tests.ssm.temp.forms.templates;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopForm;
@@ -13,6 +14,7 @@ import ru.checker.tests.ssm.temp.widgets.SSMTools;
 public class FilteredFormTemplate {
 
     CheckerDesktopForm FORM;
+    @Getter
     SSMTools TOOLS;
 
     public FilteredFormTemplate(CheckerDesktopForm form) {

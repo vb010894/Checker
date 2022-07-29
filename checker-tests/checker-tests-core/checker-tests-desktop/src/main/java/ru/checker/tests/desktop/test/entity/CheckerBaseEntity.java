@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends AutomationBase> {
 
     @Setter
+    @Getter
     private int waitTimeout = 60;
 
     /**

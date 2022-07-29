@@ -10,8 +10,10 @@ widgets:
 elements:
   - element:
       id: filtered_table
-      name: Таблица 'Операции'
+      name: Таблица 'Задания ОТК'
       index: 1
+      config:
+        unfocused: [C]
       search:
         ClassName: TcxGridSite
   - element:

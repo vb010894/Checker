@@ -28,9 +28,8 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
@@ -454,6 +453,20 @@ public class SSMGrid {
      * Filter table by GUI.
      *
      * @param config    Condition configurer
+     */
+    public void filterByGUI(ConditionConfigurer config) {
+        String[] columns = new String[this.config.unFocused.size()];
+        AtomicInteger index = new AtomicInteger(0);
+        this.config.unFocused.forEach(membder -> {
+            columns[index.getAndIncrement()] = membder.toString();
+        });
+        this.filterByGUI(config, CheckerOCRLanguage.RUS, (columns));
+    }
+
+    /**
+     * Filter table by GUI.
+     *
+     * @param config    Condition configurer
      * @param unFocused Unfocused columns
      */
     public void filterByGUI(ConditionConfigurer config, String... unFocused) {
@@ -840,7 +853,7 @@ public class SSMGrid {
         Color enabledFilterColor = new Color(179, 215, 244);
 
         @CheckerDefinitionValue("unfocused")
-        String[] unFocused;
+        ArrayList<Object> unFocused = new ArrayList<>();
 
         @CheckerDefinitionValue("has_scroll_bar")
         boolean hasBottomScroll = true;

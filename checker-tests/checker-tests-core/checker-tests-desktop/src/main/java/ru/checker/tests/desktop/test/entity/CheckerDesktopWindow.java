@@ -5,9 +5,12 @@ import com.sun.jna.platform.win32.WinDef;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
+import mmarquee.automation.Element;
+import mmarquee.automation.UIAutomation;
 import mmarquee.automation.controls.Application;
 import mmarquee.automation.controls.ElementBuilder;
 import mmarquee.automation.controls.Window;
+import mmarquee.uiautomation.IUIAutomation;
 import ru.checker.tests.base.utils.CheckerTools;
 
 import java.awt.*;
@@ -128,10 +131,24 @@ public class CheckerDesktopWindow extends CheckerBaseEntity<Window, Application>
         String name = CheckerTools.castDefinition(search.getOrDefault("Name", null));
         String className = CheckerTools.castDefinition(search.getOrDefault("ClassName", null));
 
-        WinDef.HWND handle = User32.INSTANCE.FindWindow(className, name);
+        WinDef.HWND handle = null;
+        int limit = this.getWaitTimeout();
+        while (limit > 0 & handle == null) {
+            handle = assertDoesNotThrow(() -> {
+                Thread.sleep(1000);
+                return User32.INSTANCE.FindWindow(className, name);
+            }, "Не удалось дождаться окно");
+        if(handle == null)
+            limit--;
+        }
+
         assertNotNull(handle, "Не найден handle окна. Окно не найдено");
-        return new Window(new ElementBuilder().handle(handle));
+        WinDef.HWND h = handle;
+        Element el = assertDoesNotThrow(()-> UIAutomation.getInstance().getElementFromHandle(h), "Не удалось получить элемент из handle");
+        Window window = new Window(new ElementBuilder().element(el));
+        return window;
     }
+
 
     /**
      * Maximize window.
