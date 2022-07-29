@@ -12,21 +12,14 @@ public class SSMProductReleaseTest extends SSMTest {
             testName = "ТС.SSM.G.01.01.P.01",
             description = "Выпуск продукции SAP. Работа с фильтрами")
     public void SSMG0101P01() {
-       new SSMG01P01(getRootWindow(), "product_release").run();
-    }
-
-    @Test(
-            testName = "ТС.SSM.G.01.01.P.01",
-            description = "Выпуск продукции SAP. Работа с фильтрами 2")
-    public void SSMG0101P012() {
         new SSMG01P01(getRootWindow(), "product_release").run();
     }
 
     @Test(
-            testName = "ТС.SSM.G.01.01.P.01",
-            description = "Выпуск продукции SAP. Работа с фильтрами 3")
-    public void SSMG0101P013() {
-        new SSMG01P01(getRootWindow(), "product_release").run();
+            testName = "ТС.SSM.G.01.01.P.02",
+            description = "Выпуск продукции SAP. Выпуск")
+    public void SSMG0101P02() {
+        new SSMG01P02(getRootWindow(), "product_release").run();
     }
-
 }
+
