@@ -132,10 +132,10 @@ public final class CheckerOCRUtils {
                 System.out.println(r.getText());
                 if(pattern.matcher(r.getText()).find()) {
                     Rectangle bounding = r.getBoundingBox();
-                    int x = rectangle.x + (bounding.x / 3);
-                    int y = rectangle.y + (bounding.y / 3);
-                    int width = bounding.width / 3;
-                    int height = bounding.height / 3;
+                    int x = rectangle.x + (bounding.x / 4);
+                    int y = rectangle.y + (bounding.y / 4);
+                    int width = bounding.width / 4;
+                    int height = bounding.height / 4;
                     robot.mouseMove(x + 5, y + 5);
                     out.set(new Rectangle(x, y, width, height));
                 }
@@ -161,10 +161,10 @@ public final class CheckerOCRUtils {
                 System.out.println(r.getText());
                 if(r.getText().contains(text)) {
                     Rectangle bounding = r.getBoundingBox();
-                    int x = rectangle.x + (bounding.x / 3);
-                    int y = rectangle.y + (bounding.y / 3);
-                    int width = bounding.width / 3;
-                    int height = bounding.height / 3;
+                    int x = rectangle.x + (bounding.x / 4);
+                    int y = rectangle.y + (bounding.y / 4);
+                    int width = bounding.width / 4;
+                    int height = bounding.height / 4;
                     robot.mouseMove(x + 5, y + 5);
                     out.set(new Rectangle(x, y, width, height));
                 }
@@ -210,7 +210,7 @@ public final class CheckerOCRUtils {
      * @return Output image
      */
     private static BufferedImage prepareImage(BufferedImage image) {
-        return ImageHelper.convertImageToGrayscale(ImageHelper.getScaledInstance(image, image.getWidth() * 3, image.getHeight() * 3));
+        return ImageHelper.convertImageToGrayscale(ImageHelper.getScaledInstance(image, image.getWidth() * 4, image.getHeight() * 4));
     }
 
     /**

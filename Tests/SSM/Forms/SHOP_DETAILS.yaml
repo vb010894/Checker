@@ -1,0 +1,25 @@
+id: shop_details
+name: Цех
+deep: true
+search:
+  ClassName: TfCexs
+  Name: Цех...
+elements:
+  - element:
+      id: button_cancel
+      name: Кнопка 'Отмена'
+      search:
+        ClassName: TcxButton
+        Name: Отмена
+  - element:
+      id: button_ok
+      name: Кнопка 'OK'
+      search:
+        ClassName: TcxButton
+        Name: OK
+  - element:
+      id: edit_name
+      name: Поле 'Наименование'
+      search:
+        ClassName: TcxCustomInnerTextEdit
+        index: 1
