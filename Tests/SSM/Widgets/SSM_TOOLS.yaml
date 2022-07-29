@@ -4,6 +4,13 @@ search:
   ClassName: TdxRibbonGroupsDockControl
 elements:
   - element:
+      id: product_release
+      name: Кнопка 'Выпуск продукции'
+      buttonName: Выпуск
+      search:
+        ClassName: TdxRibbonGroupBarControl
+        Name: ОПЕРАЦИИ
+  - element:
       id: ssm_07
       name: Кнопка 'Обновить'
       buttonName: Обновить

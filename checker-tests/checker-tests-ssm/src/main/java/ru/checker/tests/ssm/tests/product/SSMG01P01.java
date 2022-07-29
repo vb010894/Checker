@@ -6,6 +6,7 @@ import ru.checker.tests.base.enums.CheckerOCRLanguage;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
 import ru.checker.tests.ssm.controls.grid.SSMGridData;
+import ru.checker.tests.ssm.temp.forms.SSMProductReleaseForm;
 import ru.checker.tests.ssm.temp.forms.templates.FilteredFormTemplate;
 
 import java.util.List;
@@ -31,7 +32,7 @@ public class SSMG01P01 implements Runnable {
 
     @Override
     public void run() {
-        FilteredFormTemplate template = this.ROOT_WINDOW.form(FORM_ID, FilteredFormTemplate.class);
+        SSMProductReleaseForm template = this.ROOT_WINDOW.form(FORM_ID, SSMProductReleaseForm.class);
         //template.selectYear(String.valueOf(Calendar.getInstance().get(Calendar.YEAR)));
         template.toggleOpened(false);
         SSMGrid grid = template.getFilteredGrid();
