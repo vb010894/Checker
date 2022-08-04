@@ -6,24 +6,13 @@ search:
 elements:
   - element:
       id: product01
+      label: fff
       name: Поле 'Количество'
       search:
         ClassName: TcxCustomInnerTextEdit
   - element:
-      id: prb_03
+      id: ok_button
       name: Кнопка 'Ок'
       search:
         ClassName: TcxButton
         Name: OK
-  - element:
-      id: prb_02
-      name: Панель 'Мастер'
-      search:
-        ClassName: TcxGroupBox
-        Name:           МАСТЕР
-  - element:
-      id: prb_01
-      name: Поле 'Планируемое'
-      label: Планируемое
-      search:
-        ClassName: TcxCustomInnerTextEdit
