@@ -568,7 +568,7 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
         while (result.isEmpty() && limit >= 0) {
             try {
                 result = root.getChildren(true)
-                        .parallelStream()
+                        .stream()
                         .filter(control -> this.isSearchingControl(control, search))
                         .collect(Collectors.toList());
             } catch (Exception ex) {

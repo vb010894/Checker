@@ -66,4 +66,10 @@ elements:
       search:
         ClassName: TdxRibbonGroupBarControl
         Name: ИНФОРМАЦИЯ
-
+  - element:
+      id: org_01
+      name: Кнопка 'Добавить'
+      buttonName: Добавить
+      search:
+        ClassName: TdxRibbonGroupBarControl
+        Name: ОПЕРАЦИИ

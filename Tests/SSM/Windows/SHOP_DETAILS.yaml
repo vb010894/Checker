@@ -1,0 +1,48 @@
+id: shop_details
+name: Цех
+deep: true
+search:
+  ClassName: TfCexs
+elements:
+  - element:
+      id: button_cancel
+      name: Кнопка 'Отмена'
+      search:
+        ClassName: TcxButton
+        Name: Отмена
+  - element:
+      id: button_ok
+      name: Кнопка 'OK'
+      search:
+        ClassName: TcxButton
+        Name: OK
+  - element:
+      id: edit_number
+      name: Поле 'Номер'
+      index: 1
+      search:
+        ClassName: TcxCustomInnerTextEdit
+  - element:
+      id: edit_name
+      name: Поле 'Наименование'
+      index: 4
+      search:
+        ClassName: TcxCustomInnerTextEdit
+  - element:
+      id: edit_full_name
+      name: Поле 'Полное наименование'
+      index: 3
+      search:
+        ClassName: TcxCustomInnerTextEdit
+  - element:
+      id: edit_number_sap
+      name: Поле 'Номер SAP'
+      index: 2
+      search:
+        ClassName: TcxCustomInnerTextEdit
+  - element:
+      id: edit_otkl
+      name: Поле 'Отклонение'
+      index: 0
+      search:
+        ClassName: TcxCustomInnerTextEdit

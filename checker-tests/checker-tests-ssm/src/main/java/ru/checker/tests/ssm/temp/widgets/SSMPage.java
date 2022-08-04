@@ -23,6 +23,7 @@ public class SSMPage {
      */
     public SSMPage (CheckerDesktopWidget widget) {
         this.widget = widget;
+        if(widget.getClassName().equalsIgnoreCase("TcxPageControl")) {this.control = widget.getControl(); return;}
         this.control = assertDoesNotThrow(() -> widget.getControl().getChildren(true).parallelStream().filter(control -> {
             try {
                 return control.getClassName().equals("TcxPageControl");
