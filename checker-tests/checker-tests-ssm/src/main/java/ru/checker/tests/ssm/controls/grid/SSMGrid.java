@@ -747,8 +747,8 @@ public class SSMGrid {
         for (int i = cellRectangle.y; i > this.getRectangle().y; i--) {
             int x = (int) cellRectangle.getMaxX() - 4;
             AutomationMouse.getInstance().setLocation(x, i);
-            assertDoesNotThrow(() -> Thread.sleep(10), "Не удалось подождать мышь");
-            if (this.robot.getPixelColor(x, i).equals(this.config.filterColor)) {
+            assertDoesNotThrow(() -> Thread.sleep(15), "Не удалось подождать мышь");
+            if (this.robot.getPixelColor(x, i + 3).equals(this.config.filterColor)) {
                 AutomationMouse.getInstance().setLocation(x, i - 5);
                 assertDoesNotThrow(() -> Thread.sleep(500));
                 AutomationMouse.getInstance().leftClick();

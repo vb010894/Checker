@@ -13,6 +13,7 @@ import ru.checker.tests.ssm.temp.widgets.SSMTools;
 @SuppressWarnings("unused")
 public class FilteredFormTemplate {
 
+    @Getter
     CheckerDesktopForm FORM;
     @Getter
     SSMTools TOOLS;
