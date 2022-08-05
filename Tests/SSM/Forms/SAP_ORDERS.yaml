@@ -1,9 +1,10 @@
 id: mf
 name: Заказы SAP
+needCheck: false
+navigation: SAP_ORDERS
 search:
   ClassName: TcxTabSheet
   Name: Тяжмаш MES - PREPROD-Заказы SAP
-navigation: SAP_ORDERS
 widgets:
   - path: SSM_PAGING.yaml
   - path: SSM_TOOLS.yaml
