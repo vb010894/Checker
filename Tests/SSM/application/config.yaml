@@ -1,0 +1,11 @@
+name: SSM
+location: Z:\bin\SSM.exe
+arguments: [ -pp ]
+preStart: false
+stayAlive: true
+windows:
+  - path: RELEASE_PRODUCT_POPUP.yaml
+  - path: ORDER_MASTER_PRB.yaml
+  - path: ORDER_PRB.yaml
+  - path: Root.yaml
+  - path: SHOP_DETAILS.yaml

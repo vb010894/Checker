@@ -9,7 +9,9 @@ elements:
         Name: ИНФОРМАЦИЯ
         ClassName: TdxRibbonGroupBarControl
 forms:
+  - path: PRODUCT_RELEASE.yaml
   - path: SAP_ORDERS.yaml
+  - path: ORGANIZATION_DIRECTORY.yaml
 widgets:
   - path: SSM_TOOLS.yaml
   - path: SSM_NAVIGATION.yaml

@@ -13,8 +13,15 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Generator test.
+ * @author vd.zinovev
+ */
 class CheckerJunitReportGeneratorTest {
 
+    /**
+     * Test report generation test.
+     */
     @Test
     void testGeneratedReport() {
         JunitReportModel model = JunitReportModel
@@ -74,8 +81,6 @@ class CheckerJunitReportGeneratorTest {
         if (!pathFile.getParentFile().exists())
             assertTrue(pathFile.getParentFile().mkdirs(), "Не удалось создать директорию для тестов - " + pathFile.getParentFile().getAbsolutePath());
 
-
         assertDoesNotThrow(() -> mapper.writeValue(pathFile, model), "Не удалось сохранить отчет");
     }
-
 }

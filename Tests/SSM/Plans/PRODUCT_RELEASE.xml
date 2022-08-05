@@ -1,0 +1,16 @@
+<suite name = "SSM">
+    <listeners>
+        <listener class-name = "ru.checker.starter.listener.CheckerTFSListener"/>
+    </listeners>
+    <test name = "SAP">
+        <parameter name = "app" value = "SSM"/>
+        <parameter name = "form.id" value = "product_release"/>
+        <classes>
+            <class name = "ru.checker.tests.ssm.tests.product.SSMProductReleaseTest">
+                <methods>
+                    <include name = "SSMG0101P01"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+</suite>

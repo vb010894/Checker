@@ -1,0 +1,24 @@
+id: product_release
+name: Выпуск продукции
+search:
+  ClassName: TMainForm
+  Name: Выпуск продукции33
+navigation: PRODUCT_RELEASE
+widgets:
+  - path: SSM_PAGING.yaml
+  - path: SSM_TOOLS.yaml
+elements:
+  - element:
+      id: filtered_table
+      name: Таблица 'Задания ОТК'
+      index: 1
+      config:
+        unfocused: [C]
+      search:
+        ClassName: TcxGridSite
+  - element:
+        id: operation_table
+        name: Таблица 'Подтвержденые операции'
+        index: 0
+        search:
+          ClassName: TcxGridSite
