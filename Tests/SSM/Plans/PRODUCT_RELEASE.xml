@@ -9,6 +9,7 @@
             <class name = "ru.checker.tests.ssm.tests.product.SSMProductReleaseTest">
                 <methods>
                     <include name = "SSMG0101P01"/>
+                    <include name = "SSMG0101P02"/>
                 </methods>
             </class>
         </classes>
