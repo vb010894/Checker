@@ -22,7 +22,7 @@ public class SAPSSM extends SSMTest {
             description = "ТС.SSM.01.Заказы SAP. Работа с фильтрами")
     public void ssm01() {
         SSM01 test = new SSM01(getRootWindow());
-        test.run();
+        //test.run();
     }
 
     /**

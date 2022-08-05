@@ -56,30 +56,49 @@ public class SSMTest extends CheckerDesktopTest {
             System.out.println("##[warning] не удалось получить handle главного окна");
         }
 
-        log.info("Проверка активности формы");
-        try {
-            if(!this.rootWindow.checkFormExist(id))
-                throw new AutomationException("Открытие через навигацию");
-        } catch (AssertionFailedError | AutomationException ex) {
+        if(!this.getFormNeedCheckActivity(id)) {
+            log.info("Открытие формы без проверки активности");
             Assertions.assertDoesNotThrow(() -> this.openFormByNavigation(id), "Не удалось открыть форму с помощью навигации");
-            boolean enabled = Assertions.assertDoesNotThrow(() -> this.rootWindow.form(id).getControl().isEnabled(), "Не удалось получить состояние главной формы");
-            Assertions.assertTrue(enabled, "Главная форма не доступна");
-        }
+            log.info("Навигация к форме успешно выполнена. Начало тестового случая");
+            return;
+        } else {
 
-        log.info("Главная форма активна. Начало тестового случая");
+            log.info("Проверка активности формы");
+            try {
+                if (!this.rootWindow.checkFormExist(id))
+                    throw new AutomationException("Открытие через навигацию");
+            } catch (AssertionFailedError | AutomationException ex) {
+                log.info("Открытие формы через навигацию");
+                Assertions.assertDoesNotThrow(() -> this.openFormByNavigation(id), "Не удалось открыть форму с помощью навигации");
+                log.info("Повторная проверка активности формы");
+                boolean enabled = Assertions.assertDoesNotThrow(() -> this.rootWindow.form(id).getControl().isEnabled(), "Не удалось получить состояние главной формы");
+                Assertions.assertTrue(enabled, "Главная форма не доступна");
+            }
+
+            log.info("Главная форма активна. Начало тестового случая");
+        }
     }
 
     /**
      * Open form by navigation.
-     * @param fromID Form ID
+     * @param formID Form ID
      */
-    private void openFormByNavigation(String fromID) {
-        Assertions.assertTrue(this.rootWindow.getFormsDefinitions().containsKey(fromID), "Не найдена форма с ID - " + fromID);
-        Map<String, Object> formDefinition = this.rootWindow.getFormsDefinitions().get(fromID);
+    private void openFormByNavigation(String formID) {
+        Map<String, Object> formDefinition = this.getFormDefinition(formID);
         Assertions.assertTrue(formDefinition.containsKey("navigation"), "Не найден ключ 'navigation' в описании формы. Не удалось открыть форму с помощью навигации");
         String navigation = CheckerTools.castDefinition(formDefinition.get("navigation"));
         this.navigation = this.rootWindow.widget("ssm_navigation", SSMNavigation.class);
         this.navigation.selectNode(SSMNavigation.SSMNavigationEnum.valueOf(navigation));
+    }
+
+    private boolean getFormNeedCheckActivity(String formID) {
+        Map<String, Object> formDefinition = this.getFormDefinition(formID);
+        return CheckerTools.castDefinition(formDefinition.getOrDefault("needCheck", true));
+    }
+
+    private Map<String, Object> getFormDefinition(String formID) {
+        Assertions.assertTrue(this.rootWindow.getFormsDefinitions().containsKey(formID), "Не найдена форма с ID - " + formID);
+        return this.rootWindow.getFormsDefinitions().get(formID);
     }
 
     /**
