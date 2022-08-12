@@ -22,6 +22,10 @@ public class SSMSapOrdersForm {
         this.tools = this.form.widget("ssm_menu", SSMTools.class);
     }
 
+    public void callFilter() {
+        this.tools.clickButton("sap_filter");
+    }
+
     public void clickAdd() {
         System.out.println("Нажатие кнопки 'Добавить', ID - 'SSM_05'");
         this.tools.clickButton("ssm_05");
@@ -38,17 +42,10 @@ public class SSMSapOrdersForm {
     }
 
     public void clickAssign() {
-        System.out.println("Нажатие кнопки 'аНазначить', ID - 'SSM_04'");
+        System.out.println("Нажатие кнопки 'Назначить', ID - 'SSM_04'");
         this.tools.clickButton("ssm_04");
     }
 
-    public void toggleClosed(boolean state) {
-        this.tools.toggle("ssm_02", state);
-    }
-
-    public void toggleOpened(boolean state) {
-        this.tools.toggle("ssm_01", state);
-    }
 
     public SSMGrid getSapOrderGrid() {
         return this.form.custom("ssm_01_01", -1, SSMGrid.class);
@@ -66,9 +63,6 @@ public class SSMSapOrdersForm {
         return this.form.custom("ssm_01_03", -1, SSMGrid.class);
     }
 
-    public void selectShop(String name) {
-        this.tools.selectCombobox("ssm_03", name);
-    }
 
     public void selectPage(String pageName) {
         SSMPage pages = this.form.widget("ssm_paging", SSMPage.class);

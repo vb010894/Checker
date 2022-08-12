@@ -60,7 +60,6 @@ public class SSMTest extends CheckerDesktopTest {
             log.info("Открытие формы без проверки активности");
             Assertions.assertDoesNotThrow(() -> this.openFormByNavigation(id), "Не удалось открыть форму с помощью навигации");
             log.info("Навигация к форме успешно выполнена. Начало тестового случая");
-            return;
         } else {
 
             log.info("Проверка активности формы");

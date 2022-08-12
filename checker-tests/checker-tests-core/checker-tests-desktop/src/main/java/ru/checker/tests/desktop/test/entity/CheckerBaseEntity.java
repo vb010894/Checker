@@ -11,6 +11,7 @@ import mmarquee.automation.controls.Button;
 import mmarquee.automation.controls.Panel;
 import mmarquee.automation.controls.*;
 import ru.checker.tests.base.utils.CheckerTools;
+import ru.checker.tests.desktop.base.robot.CheckerFieldsUtils;
 import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
 
 import java.awt.*;
@@ -139,7 +140,20 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
      * @return Custom
      */
     public <C> C custom(String ID, Class<C> wrapper) {
-        return this.custom(ID, 0, wrapper);
+        Map<String, Object> definition = this.getElementDefinition(ID);
+        if(definition.containsKey("index")) {
+            return this.custom(ID, CheckerTools.castDefinition(definition.get("index")), wrapper);
+        } else if(definition.containsKey("label")) {
+            Panel result = this.panels(ID)
+                    .parallelStream()
+                    .filter(p -> CheckerFieldsUtils.getLabel(p.getElement()).startsWith(CheckerTools.castDefinition(definition.get("label"))))
+                    .findFirst()
+                    .orElseThrow();
+            return assertDoesNotThrow(() -> wrapper.getConstructor(Panel.class, Map.class).newInstance(result, definition),
+                    "Не удалось обернуть пользовательский элемент с ID - " + ID);
+        } else {
+            return this.custom(ID, 0, wrapper);
+        }
     }
 
     /**
@@ -227,7 +241,21 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
      * @return Edit
      */
     public EditBox edit(String ID) {
-        return this.edit(ID, 0);
+        Map<String, Object> definition = this.getElementDefinition(ID);
+        if(definition.containsKey("index")) {
+            return this.edit(ID, CheckerTools.castDefinition(definition.get("index")));
+        } else if(definition.containsKey("label")) {
+            String label = CheckerTools.castDefinition(definition.get("label"));
+            EditBox result = this.edits(ID)
+                    .parallelStream()
+                    .filter(edit -> CheckerFieldsUtils.getLabel(edit.getElement()).trim().startsWith(label))
+                    .findFirst()
+                    .orElseThrow();
+            return result;
+
+        } else {
+            return this.edit(ID, 0);
+        }
     }
 
     /**

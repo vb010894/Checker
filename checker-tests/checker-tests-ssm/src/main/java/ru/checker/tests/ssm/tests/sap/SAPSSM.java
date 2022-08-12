@@ -15,25 +15,23 @@ import ru.checker.tests.ssm.temp.test.SSMTest;
 public class SAPSSM extends SSMTest {
 
     /**
-     * ТС.SSM.01 test
+     * SSM.G.01.02.P.01. Работа с фильтрами. Настройки по умолчанию
      */
     @Test(
-            testName = "ТС.SSM.01",
-            description = "ТС.SSM.01.Заказы SAP. Работа с фильтрами")
-    public void ssm01() {
-        SSM01 test = new SSM01(getRootWindow());
-        //test.run();
+            testName = "SSM.G.01.02.P.01.01",
+            description = "SSM.G.01.02.P.01. Работа с фильтрами. Настройки по умолчанию")
+    public void SSMG0102P0101() {
+        new SSMG0102P0101(getRootWindow()).run();
     }
 
     /**
-     * ТС.SSM.02 test
+     * SSM.G.01.02.P.02. Работа с фильтрами. Фильтр 'ЦЕХ'
      */
     @Test(
-            testName = "ТС.SSM.02",
-            description = "ТС.SSM.02.Заказы SAP. Работа с фильтрами")
-    public void ssm02() {
-        SSM02 test = new SSM02(getRootWindow());
-        test.run();
+            testName = "SSM.G.01.02.P.01.02",
+            description = "SSM.G.01.02.P.02. Работа с фильтрами. Фильтр 'ЦЕХ'")
+    public void SSMG0102P0102() {
+        new SSMG0102P0102(getRootWindow()).run();
     }
 
     /**

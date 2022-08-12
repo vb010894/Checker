@@ -37,5 +37,7 @@ elements:
       id: ssm_01_01
       name: Таблица 'Производственные заказы'
       index: 3
+      config:
+        unfocused: [ С, Н, Т ]
       search:
         ClassName: TcxGridSite
