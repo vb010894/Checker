@@ -16,8 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Checker Desktop application.
@@ -103,6 +102,20 @@ public class CheckerDesktopApplication extends CheckerApplication {
         CheckerDesktopWindow window = new CheckerDesktopWindow(application, this.windowDefinitions.get(ID));
         window.findMySelf();
         return window;
+    }
+
+    /**
+     * Get app window.
+     * @param ID Window ID.
+     * @return App window
+     */
+    public <W> W window(String ID, Class<W> target) {
+        assertTrue(this.windowDefinitions.containsKey(ID), "Не найдено описание окна приложения с ID - " + ID);
+        CheckerDesktopWindow window = new CheckerDesktopWindow(application, this.windowDefinitions.get(ID));
+        window.findMySelf();
+        return assertDoesNotThrow(
+                () -> target.getConstructor(CheckerDesktopWindow.class).newInstance(window),
+                "Не удалось конвертировать окно в обертку - " + target.getSimpleName());
     }
 
     /**

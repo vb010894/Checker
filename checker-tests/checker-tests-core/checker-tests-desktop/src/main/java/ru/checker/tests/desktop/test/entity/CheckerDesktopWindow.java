@@ -5,11 +5,14 @@ import com.sun.jna.platform.win32.WinDef;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.log4j.Log4j2;
+import mmarquee.automation.AutomationException;
 import mmarquee.automation.Element;
 import mmarquee.automation.UIAutomation;
 import mmarquee.automation.controls.Application;
 import mmarquee.automation.controls.ElementBuilder;
 import mmarquee.automation.controls.Window;
+import mmarquee.automation.controls.mouse.AutomationMouse;
 import mmarquee.uiautomation.IUIAutomation;
 import ru.checker.tests.base.utils.CheckerTools;
 
@@ -25,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @author vd.zinovev
  */
+@Log4j2
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @SuppressWarnings("unused")
 @Getter
@@ -143,9 +147,40 @@ public class CheckerDesktopWindow extends CheckerBaseEntity<Window, Application>
         }
 
         assertNotNull(handle, "Не найден handle окна. Окно не найдено");
+        if(!User32.INSTANCE.SetForegroundWindow(handle))
+            log.warn("Не удалось выдвинуть окно вперед ");
+        if(User32.INSTANCE.SetFocus(handle) == null)
+            log.warn("Не удалось сфокусироваться на окне");
+
         WinDef.HWND h = handle;
         Element el = assertDoesNotThrow(()-> UIAutomation.getInstance().getElementFromHandle(h), "Не удалось получить элемент из handle");
         Window window = new Window(new ElementBuilder().element(el));
+
+        limit = this.getWaitTimeout();
+        boolean found = false;
+        while (!found & limit > 0) {
+            try {
+                found = window.isEnabled();
+                if(!found)
+                    window = new Window(new ElementBuilder().element(el));
+            } catch (AutomationException e) {
+                System.out.println("Не удалось получить состояние окна");
+            } finally {
+                assertDoesNotThrow(() -> Thread.sleep(1000), "Не удалось подождать активности формы - "  + this.getDefinition().get("id"));
+                limit--;
+            }
+        }
+
+        try {
+            AutomationMouse.getInstance().setLocation(window.getClickablePoint());
+            Thread.sleep(1000);
+        } catch (AutomationException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        assertTrue(found, "Найденное окно не активно");
+
         return window;
     }
 

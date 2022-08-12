@@ -45,6 +45,11 @@ public class SSMG01P02 implements Runnable {
             .condition1(SSMGrid.Condition.CONTAINS)
             .value1("Тест").build();
 
+    SSMGrid.ConditionConfigurer.ConditionConfigurerBuilder date_config = SSMGrid.ConditionConfigurer
+            .builder()
+            .column("Дата подтв.")
+            .condition1(SSMGrid.Condition.MORE_THEN);
+
     @Override
     public void run() {
         SSMProductReleaseForm template = this.ROOT_WINDOW.form(FORM_ID, SSMProductReleaseForm.class);
@@ -104,12 +109,18 @@ public class SSMG01P02 implements Runnable {
         log.info("Значения соответствуют введенным");
 
         log.info("Нажатие кнопки 'OK'");
+        Date date_start = new Date();
         assertDoesNotThrow(() -> productReleasePopup.button("ok_button").click(), "Не удалось нажать кнопку 'Ok'");
         log.info("Кнопка 'OK' нажата");
 
         log.info("Фильтрация таблицы 'Подтвержденные операции' по колонке 'Номер'");
         SSMGrid accepted_grid = template.getAcceptedGrid();
         accepted_grid.filterByGUI(accepted_number_config);
+
+        accepted_grid.filterByGUI(
+                date_config
+                .value1(new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(date_start))
+                .build());
         SSMGridData accepted_data = accepted_grid.getAllData();
 
         log.info("Проверка данных записи таблицы 'Подтвержденные операции'");
@@ -122,7 +133,7 @@ public class SSMG01P02 implements Runnable {
                 "Не найдена запись в колоне 'Кол-во' равной '1'");
 
         String date_now = new SimpleDateFormat("dd.MM.yyyy HH").format(new Date());
-        assertTrue(accepted_data.getColumnData("Дата подтв.").parallelStream().anyMatch(row -> row.startsWith(date_now)));
+        assertTrue(accepted_data.getColumnData("Дата подтв.").parallelStream().anyMatch(row -> row.startsWith(date_now)), "Найдены данные не начинающиеся на " + date_now);
         log.info("Данные соответствуют ожидаемым");
 
         log.info("Тест выполнился успешно");

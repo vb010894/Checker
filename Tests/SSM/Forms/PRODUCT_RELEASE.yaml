@@ -19,6 +19,8 @@ elements:
   - element:
         id: operation_table
         name: Таблица 'Подтвержденые операции'
+        config:
+          unfocused: [ СН ]
         index: 0
         search:
           ClassName: TcxGridSite

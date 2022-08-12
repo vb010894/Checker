@@ -571,7 +571,7 @@ public class SSMGrid {
                     width = (int) (cellMaxX - r.getMaxX());
                     height = 3;
 
-                    Rectangle cell = new Rectangle(x, y, width, height);
+                    Rectangle cell = new Rectangle(x, y + 5, width, height);
                     out.set(cell);
                     break;
                 }

@@ -106,13 +106,17 @@ public final class CheckerFieldsUtils {
     }
 
     public static String getLabel(Element element) {
+        String result;
         try {
             Rectangle rectangle = getLabelRectangle(element);
             if(rectangle == null)
-                return "";
-            return CheckerOCRUtils.getTextFromRectangle(rectangle);
+                result = "";
+            else
+                result = CheckerOCRUtils.getTextFromRectangle(rectangle);
         } catch (AutomationException e) {
-            return "";
+            result = "";
         }
+        log.info("Найдена надпись поля - " + result);
+        return result;
     }
 }

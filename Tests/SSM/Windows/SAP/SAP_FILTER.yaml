@@ -1,0 +1,55 @@
+id: SAP_FILTER_FORM
+name: Форма фильтрации заказов SAP
+deep: true
+search:
+  ClassName: TfFilter
+  Name: ФИЛЬТР
+elements:
+  - element:
+      id: field_shop
+      name: Комбобокс 'Цех'
+      label: Цех
+      search:
+        ClassName: TcxCustomComboBoxInnerEdit
+  - element:
+        id: field_year
+        name: Комбобокс 'Год'
+        label: Год
+        search:
+          ClassName: TcxCustomComboBoxInnerEdit
+  - element:
+      id: toggle_opened
+      name: Переключатель 'Открытые'
+      label: Открытые
+      search:
+        ClassName: TdxToggleSwitch
+  - element:
+      id: toggle_closed
+      name: Переключатель 'Закрытые'
+      label: Закрытые
+      search:
+        ClassName: TdxToggleSwitch
+  - element:
+      id: field_client
+      name: Поле 'Клиент'
+      label: Клиент
+      search:
+        ClassName: TcxCustomComboBoxInnerEdit
+  - element:
+      id: field_lotsman_oreder
+      name: Поле 'Заказ Лоцман'
+      label: Заказ Лоцман
+      search:
+        ClassName: TcxCustomInnerTextEdit
+  - element:
+      id: button_cancel
+      name: Кнопка 'Отмена'
+      search:
+        ClassName: TcxButton
+        Name: Отмена
+  - element:
+      id: button_ok
+      name:  Кнопка 'ОК'
+      search:
+        ClassName: TcxButton
+        Name: OK

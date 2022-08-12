@@ -1,6 +1,7 @@
 package ru.checker.tests.ssm.temp.widgets;
 
 import lombok.extern.log4j.Log4j2;
+import mmarquee.automation.AutomationException;
 import mmarquee.automation.UIAutomation;
 import mmarquee.automation.controls.List;
 import mmarquee.automation.controls.ListItem;
@@ -13,6 +14,7 @@ import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
 
 import java.awt.*;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -54,6 +56,16 @@ public class SSMTools {
         AutomationMouse.getInstance().doubleLeftClick();
         assertDoesNotThrow(() -> {
             List list = UIAutomation.getInstance().getDesktop().getList(0);
+            log.debug(
+                    "Найдены элементы листа:\n{}",
+                    list.getItems().parallelStream().map(i -> {
+                        try {
+                            return i.getName();
+                        } catch (AutomationException e) {
+                            return "*Без имени*";
+                        }
+                    }).collect(Collectors.joining("\n","Элемент - '", "'")));
+
             ListItem item = list.getItem(value);
             AutomationMouse.getInstance().setLocation(item.getClickablePoint());
             Thread.sleep(1000);

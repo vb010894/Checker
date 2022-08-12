@@ -4,6 +4,13 @@ search:
   ClassName: TdxRibbonGroupsDockControl
 elements:
   - element:
+      id: sap_filter
+      name: Кнопка 'Открыть'
+      buttonName: Открыть
+      search:
+        ClassName: TdxRibbonGroupBarControl
+        Name: ФИЛЬТР
+  - element:
       id: product_release
       name: Кнопка 'Выпуск продукции'
       buttonName: Выпуск
