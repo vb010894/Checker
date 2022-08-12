@@ -70,6 +70,7 @@ public class SSMG0102P0101 implements Runnable {
     @Override
     public void run() {
         SapFilterWindow filter_window = CheckerDesktopTest.getCurrentApp().window("SAP_FILTER_FORM", SapFilterWindow.class);
+        filter_window.refresh();
         log.info("Ожидание инициализации компонентов окна 'Фильтр'");
         assertDoesNotThrow(() -> Thread.sleep(2000), "Не удалось выполнить ожидание инициализации компонентов окна 'Фильтр'");
         log.info("Компоненты инициализированы.");
