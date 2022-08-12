@@ -13,7 +13,6 @@ import mmarquee.automation.controls.Application;
 import mmarquee.automation.controls.ElementBuilder;
 import mmarquee.automation.controls.Window;
 import mmarquee.automation.controls.mouse.AutomationMouse;
-import mmarquee.uiautomation.IUIAutomation;
 import ru.checker.tests.base.utils.CheckerTools;
 
 import java.awt.*;
@@ -59,6 +58,7 @@ public class CheckerDesktopWindow extends CheckerBaseEntity<Window, Application>
 
     /**
      * Get window form.
+     *
      * @param ID Form ID
      * @return Form
      */
@@ -74,6 +74,7 @@ public class CheckerDesktopWindow extends CheckerBaseEntity<Window, Application>
 
     /**
      * Get window form.
+     *
      * @param ID Form ID
      * @return Form
      */
@@ -85,6 +86,7 @@ public class CheckerDesktopWindow extends CheckerBaseEntity<Window, Application>
 
     /**
      * Get window form.
+     *
      * @param ID Form ID
      * @return Form
      */
@@ -97,6 +99,7 @@ public class CheckerDesktopWindow extends CheckerBaseEntity<Window, Application>
 
     /**
      * Get window widget.
+     *
      * @param ID Widget ID
      * @return Widget
      */
@@ -112,8 +115,8 @@ public class CheckerDesktopWindow extends CheckerBaseEntity<Window, Application>
      */
     @Override
     public boolean findMySelf() {
-        if(this.getDefinition().containsKey("deep")) {
-            if(CheckerTools.castDefinition(this.getDefinition().get("deep"))) {
+        if (this.getDefinition().containsKey("deep")) {
+            if (CheckerTools.castDefinition(this.getDefinition().get("deep"))) {
                 AtomicReference<String> ID = new AtomicReference<>();
                 AtomicReference<String> name = new AtomicReference<>();
                 this.getIndicators(ID, name);
@@ -127,59 +130,53 @@ public class CheckerDesktopWindow extends CheckerBaseEntity<Window, Application>
     }
 
     private Window deepSearch() {
-        assertTrue(this.getDefinition().containsKey("search"), "Не найден ключ 'search'");
+
+        Window window = null;
         Map<String, Object> search = CheckerTools.castDefinition(this.getDefinition().get("search"));
+        String name = CheckerTools.castDefinition(search.getOrDefault("Name", null));
+        String className = CheckerTools.castDefinition(search.getOrDefault("ClassName", null));
+        boolean found = false;
+
+        assertTrue(this.getDefinition().containsKey("search"), "Не найден ключ 'search'");
+
         assertTrue(
                 search.containsKey("ClassName") || search.containsKey("Name"),
                 String.format("Для глубокого поиска окна необходимо заполнить ключ %s или %s", "search -> ClassName", "search -> Name"));
-        String name = CheckerTools.castDefinition(search.getOrDefault("Name", null));
-        String className = CheckerTools.castDefinition(search.getOrDefault("ClassName", null));
+
 
         WinDef.HWND handle = null;
         int limit = this.getWaitTimeout();
-        while (limit > 0 & handle == null) {
+        while (limit > 0 & !found) {
             handle = assertDoesNotThrow(() -> {
                 Thread.sleep(1000);
                 return User32.INSTANCE.FindWindow(className, name);
             }, "Не удалось дождаться окно");
-        if(handle == null)
-            limit--;
-        }
-
-        assertNotNull(handle, "Не найден handle окна. Окно не найдено");
-        if(!User32.INSTANCE.SetForegroundWindow(handle))
-            log.warn("Не удалось выдвинуть окно вперед ");
-        if(User32.INSTANCE.SetFocus(handle) == null)
-            log.warn("Не удалось сфокусироваться на окне");
-
-        WinDef.HWND h = handle;
-        Element el = assertDoesNotThrow(()-> UIAutomation.getInstance().getElementFromHandle(h), "Не удалось получить элемент из handle");
-        Window window = new Window(new ElementBuilder().element(el));
-
-        limit = this.getWaitTimeout();
-        boolean found = false;
-        while (!found & limit > 0) {
-            try {
-                found = window.isEnabled();
-                if(!found)
-                    window = new Window(new ElementBuilder().element(el));
-            } catch (AutomationException e) {
-                System.out.println("Не удалось получить состояние окна");
-            } finally {
-                assertDoesNotThrow(() -> Thread.sleep(1000), "Не удалось подождать активности формы - "  + this.getDefinition().get("id"));
+            if (handle == null) {
                 limit--;
+            } else {
+                WinDef.HWND h = handle;
+                Element el = assertDoesNotThrow(() -> UIAutomation.getInstance().getElementFromHandle(h), "Не удалось получить элемент из handle");
+                window = new Window(new ElementBuilder().element(el));
+                try {
+                    found = window.isEnabled();
+                    if (!found) {
+                        window = new Window(new ElementBuilder().element(el));
+                        limit--;
+                    } else {
+                        break;
+                    }
+                } catch (AutomationException e) {
+                    log.debug("Не удалось получить состояние окна. Повторная итерация поиска");
+                } finally {
+                    assertDoesNotThrow(() -> Thread.sleep(1000), "Не удалось подождать активности формы - " + this.getDefinition().get("id"));
+                    limit--;
+                }
             }
         }
 
-        try {
-            AutomationMouse.getInstance().setLocation(window.getClickablePoint());
-            Thread.sleep(1000);
-        } catch (AutomationException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        assertNotNull(handle, "Не найден handle окна. Окно не найдено");
         assertTrue(found, "Найденное окно не активно");
+        assertNotNull(window, "Не удалось конвертировать в окно");
 
         return window;
     }
@@ -190,8 +187,8 @@ public class CheckerDesktopWindow extends CheckerBaseEntity<Window, Application>
      */
     public void maximize() {
         assertDoesNotThrow(() -> {
-            if(!this.getControl().getCanMaximize()) {
-                throw  new IllegalStateException(String.format("Окно c ID - '%s', имя - '%s' не может быть развернуто", this.getID(), this.getName()));
+            if (!this.getControl().getCanMaximize()) {
+                throw new IllegalStateException(String.format("Окно c ID - '%s', имя - '%s' не может быть развернуто", this.getID(), this.getName()));
             }
             this.getControl().maximize();
         });
@@ -202,8 +199,8 @@ public class CheckerDesktopWindow extends CheckerBaseEntity<Window, Application>
      */
     public void minimize() {
         assertDoesNotThrow(() -> {
-            if(!this.getControl().getCanMinimize()) {
-                throw  new IllegalStateException(String.format("Окно c ID - '%s', имя - '%s' не может быть свернуто", this.getID(), this.getName()));
+            if (!this.getControl().getCanMinimize()) {
+                throw new IllegalStateException(String.format("Окно c ID - '%s', имя - '%s' не может быть свернуто", this.getID(), this.getName()));
             }
             this.getControl().minimize();
         });
@@ -215,8 +212,8 @@ public class CheckerDesktopWindow extends CheckerBaseEntity<Window, Application>
     public void location(int X, int Y) {
         assertDoesNotThrow(() -> {
             Rectangle rect = this.getControl().getBoundingRectangle().toRectangle();
-            if(!User32.INSTANCE.MoveWindow(this.getControl().getNativeWindowHandle(), X, Y, rect.width, rect.height, true)) {
-                throw  new IllegalStateException(String.format("Окно c ID - '%s', имя - '%s' не может быть перенесено", this.getID(), this.getName()));
+            if (!User32.INSTANCE.MoveWindow(this.getControl().getNativeWindowHandle(), X, Y, rect.width, rect.height, true)) {
+                throw new IllegalStateException(String.format("Окно c ID - '%s', имя - '%s' не может быть перенесено", this.getID(), this.getName()));
             }
         });
     }
