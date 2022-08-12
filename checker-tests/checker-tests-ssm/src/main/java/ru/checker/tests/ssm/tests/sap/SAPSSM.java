@@ -35,13 +35,13 @@ public class SAPSSM extends SSMTest {
     }
 
     /**
-     * ТС.SSM.03. Заказы SAP. Назначение мастера на операции
+     * SSM.G.01.02.P.02. Работа с фильтрами. Фильтр 'Год'
      */
     @Test(
-            testName = "ТС.SSM.03",
-            description = "ТС.SSM.03. Заказы SAP. Назначение мастера на операции")
-    public void ssm03() {
-        new SSM03(getRootWindow()).run();
+            testName = "SSM.G.01.02.P.01.02",
+            description = "SSM.G.01.02.P.02. Работа с фильтрами. Фильтр 'Год'")
+    public void SSMG0102P0103() {
+        new SSMG0102P0103(getRootWindow()).run();
     }
 
     /**

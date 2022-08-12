@@ -525,7 +525,7 @@ public class SSMGrid {
         List<String> unFocusedList = Arrays.asList(unFocused);
         AtomicReference<Rectangle> out = new AtomicReference<>();
 
-        this.robot.setAutoDelay(500);
+        this.robot.setAutoDelay(50);
         this.robot.keyPress(KeyEvent.VK_HOME);
         this.robot.keyRelease(KeyEvent.VK_HOME);
 
@@ -720,7 +720,6 @@ public class SSMGrid {
             });
 
             EditBox secondField = lowerEdit.get();
-            new CheckerDesktopMarker(secondField).draw();
             assertDoesNotThrow(() -> dialog.getButton(configurer.separator.value).click(), "Не удалось переключить соединение условий - " + configurer.separator.getValue());
             assertNotNull(configurer.condition2.value, "В конфигурации фильтрации должна быть заполнена переменная 'condition2'");
             assertDoesNotThrow(() -> {
