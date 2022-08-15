@@ -2,6 +2,7 @@ package ru.checker.tests.ssm.temp.widgets;
 
 import lombok.extern.log4j.Log4j2;
 import mmarquee.automation.AutomationException;
+import mmarquee.automation.ControlType;
 import mmarquee.automation.UIAutomation;
 import mmarquee.automation.controls.List;
 import mmarquee.automation.controls.ListItem;
@@ -9,6 +10,7 @@ import mmarquee.automation.controls.mouse.AutomationMouse;
 import net.sourceforge.tess4j.ITessAPI;
 import ru.checker.tests.base.utils.CheckerOCRUtils;
 import ru.checker.tests.base.utils.CheckerTools;
+import ru.checker.tests.desktop.base.robot.CheckerDesktopMarker;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWidget;
 import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
 
@@ -55,7 +57,7 @@ public class SSMTools {
         AutomationMouse.getInstance().setLocation((int) rect.getMaxX() + 20, (int) rect.getCenterY());
         AutomationMouse.getInstance().doubleLeftClick();
         assertDoesNotThrow(() -> {
-            List list = UIAutomation.getInstance().getDesktop().getList(0);
+            List list = UIAutomation.getInstance().getDesktop().getList("");
             log.debug(
                     "Найдены элементы листа:\n{}",
                     list.getItems().parallelStream().map(i -> {
@@ -66,9 +68,10 @@ public class SSMTools {
                         }
                     }).collect(Collectors.joining("\n","Элемент - '", "'")));
 
+
             ListItem item = list.getItem(value);
             AutomationMouse.getInstance().setLocation(item.getClickablePoint());
-            Thread.sleep(1000);
+            Thread.sleep(50);
             AutomationMouse.getInstance().leftClick();
             CheckerDesktopTest.getCurrentApp().waitApp();
             Thread.sleep(1000);

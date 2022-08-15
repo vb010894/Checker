@@ -4,6 +4,10 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
+import mmarquee.automation.UIAutomation;
+import mmarquee.automation.controls.EditBox;
+import mmarquee.automation.controls.mouse.AutomationMouse;
+import ru.checker.tests.desktop.base.robot.CheckerDesktopMarker;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.ssm.controls.toogle.SSMToggle;
 
@@ -68,6 +72,20 @@ public class SapFilterWindow {
         log.info("Нажатие кнопки 'Отмена' окна 'Фильтр'");
         assertDoesNotThrow(() -> this.filter.button("button_cancel").click(), "Не удалось нажать кнопку 'Отмена' окна 'Фильтр'(Заказы SAP)");
         log.info("Кнопка 'Отмена' нажата");
+    }
+
+    public void clearClient() {
+        log.info("Очистка поля 'Клиент' окна 'Фильтр'");
+        assertDoesNotThrow(
+                () -> {
+                    EditBox client = this.filter.edit("field_client");
+                    client.setValue("");
+                    String val;
+                    if(!(val = this.filter.edit("field_client").getValue()).equals(""))
+                        throw new Exception("Фильтр 'Клиент' не был очищен. Текущее значение - '" + val + "'");
+                },
+                String.format("Не удалось получить значение поля 'клиент' окна 'Фильтр'(Заказы SAP) для проверки очистки"));
+        log.info("Поле 'Клиент' очищено");
     }
 
     public void refresh() {

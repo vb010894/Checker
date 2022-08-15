@@ -17,7 +17,7 @@ import java.util.Date;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * ТС.SSM.01. Заказы SAP. Работа с фильтрами.
+ * SSM.G.01.02.P.01. Работа с фильтрами. Настройки по умолчанию
  * @author vd.zinovev
  */
 @Log4j2
@@ -30,11 +30,6 @@ public class SSMG0102P0101 implements Runnable {
     final CheckerDesktopWindow root;
 
     /**
-     * Форма 'Заказы SAP'.
-     */
-    SSMSapOrdersForm form;
-
-    /**
      * Конструктор.
      * @param root Родительский элемент
      */
@@ -43,7 +38,7 @@ public class SSMG0102P0101 implements Runnable {
     }
 
     /**
-     * Фильтр 'C' со значением 'Открыт'.
+     * Фильтр 'C' со значением 'Закрыт'.
      */
     final SSMGrid.ConditionConfigurer open_close_filter = SSMGrid
             .ConditionConfigurer
@@ -128,5 +123,6 @@ public class SSMG0102P0101 implements Runnable {
                         " со значением менее текущего года при настройках по умолчанию");
         orders_grid.clearFilter();
         log.info("В таблице 'Прозводственные заказы SAP' отсутствуют записи со значением отличным от 'Открыт'");
+        log.info("Тестовый случай отрешался успешно");
     }
 }

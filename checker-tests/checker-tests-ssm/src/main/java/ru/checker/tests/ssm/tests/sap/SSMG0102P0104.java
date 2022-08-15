@@ -12,42 +12,49 @@ import ru.checker.tests.ssm.temp.windows.SapFilterWindow;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * SSM.G.01.02.P.03. Работа с фильтрами. Фильтр 'Год'
+ * SSM.G.01.02.P.01.04. Работа с фильтрами. Фильтр 'C'
  * @author vd.zinovev
  */
 @Log4j2
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class SSMG0102P0103 implements Runnable {
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class SSMG0102P0104 implements Runnable {
 
     /**
      * Главное окно ССМ.
      */
-    CheckerDesktopWindow root;
+    final CheckerDesktopWindow root;
 
     /**
-     * Фильтр колонки 'ДеБлок' со значениями в диапазоне от 01.01.{Текущий год} и 31.12.{Текущий год}.
+     * Фильтр 'C' со значением не равным 'Открыт'.
      */
-    SSMGrid.ConditionConfigurer year_filter = SSMGrid
+    final SSMGrid.ConditionConfigurer open_filter = SSMGrid
             .ConditionConfigurer
             .builder()
-            .condition1(SSMGrid.Condition.LESS_THEN)
-            .value1("01.01." + new SimpleDateFormat("yyyy").format(new Date()))
-            .separator(SSMGrid.Separator.AND)
-            .condition2(SSMGrid.Condition.MORE_THEN)
-            .value2("31.12." + new SimpleDateFormat("yyyy").format(new Date()))
-            .column("ДеБлок")
-            .build();
+            .condition1(SSMGrid.Condition.NOT_EQUAL)
+            .value1("Открыт")
+            .columnCondition("[CСсс]")
+            .column("С").build();
+
+    /**
+     * Фильтр 'C' со значением не равным 'Закрыт'.
+     */
+    final SSMGrid.ConditionConfigurer closed_filter = SSMGrid
+            .ConditionConfigurer
+            .builder()
+            .condition1(SSMGrid.Condition.NOT_EQUAL)
+            .value1("Закрыт")
+            .columnCondition("[CСсс]")
+            .column("С").build();
 
     /**
      * Конструктор.
      * @param root Родительский элемент
      */
-    public SSMG0102P0103(CheckerDesktopWindow root) {
+    public SSMG0102P0104(CheckerDesktopWindow root) {
         this.root = root;
     }
 
@@ -63,14 +70,9 @@ public class SSMG0102P0103 implements Runnable {
         log.info("Компоненты инициализированы.");
 
         log.info("Настройка фильтров");
-        log.info("Включение переключателя 'Открытые'");
         filter_window.toggleOpened(true);
-        log.info("Выбор значения 'КПЦ' поля 'Цех'");
         filter_window.selectShop("");
         filter_window.selectShop("КПЦ");
-        log.info("Выбор 2021 года поля 'Год'");
-        filter_window.selectYear("2021");
-        log.info("Нажатие на кнопку 'OK'");
         filter_window.clickOK();
         log.info("Фильтры настроены");
 
@@ -78,24 +80,29 @@ public class SSMG0102P0103 implements Runnable {
         SSMSapOrdersForm orders = this.root.form("mf", SSMSapOrdersForm.class);
         log.info("Форма 'Заказы SAP' успешно запущена");
         SSMGrid orders_grid = orders.getSapOrderGrid();
-        log.info("Фильтрация колонки 'ДеБлок' по условию меньше 01.01.2021 года или больше 31.12.2021");
-        orders_grid.filterByGUI(year_filter);
+        log.info("Фильтрация колонки 'C' не равной 'Открыт'");
+        orders_grid.filterByGUI(open_filter);
         log.info("Проверка данных");
         SSMGridData data = orders_grid.getDataFromRow(0);
-        assertEquals(data.getRowSize(), 0, "Найдены записи не соответствующие условию меньше 01.01.2021 года или больше 31.12.2021");
-        log.info("Данные колонки 'ДеБлок' соответствуют условию меньше 01.01.2021 года или больше 31.12.2021");
+        assertEquals(data.getRowSize(), 0, "Найдены записи не соответствующие условию: не равно 'Открыт'");
+        log.info("Данные колонки 'С' соответствуют условию: равно 'Открыт'");
         orders_grid.clearFilter();
         orders.callFilter();
 
         filter_window.refresh();
-        filter_window.selectYear("Все года");
+        log.info("Настройка фильтров");
+        filter_window.toggleOpened(false);
+        filter_window.toggleClosed(true);
+        filter_window.selectShop("");
+        filter_window.selectShop("КПЦ");
         filter_window.clickOK();
+        log.info("Фильтры настроены");
+
+        orders_grid.filterByGUI(closed_filter);
+        log.info("Проверка данных");
         data = orders_grid.getDataFromRow(0);
-        log.info("Проверка таблицы 'Производственные заказы SAP' на наличие данных");
-        assertNotEquals(
-                data.getRowSize(),
-                0, "После выбора значения 'Все года' поля 'Год' в таблице 'Производственные заказы SAP' отсутствуют данные");
-        log.info("Таблица содержит данные");
+        assertEquals(data.getRowSize(), 0, "Найдены записи не соответствующие условию: не равно 'Закрыт'");
+        log.info("Данные колонки 'С' соответствуют условию: равно 'Закрыт'");
         log.info("Тестовый случай выполнен");
     }
 }
