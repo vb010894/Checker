@@ -40,7 +40,7 @@ public class SSMToggle {
             AutomationMouse.getInstance().leftClick();
             assertDoesNotThrow(() -> {
                 Thread.sleep(1000);
-                if(!new Robot().getPixelColor((int) rectangle.getCenterX(), rectangle.y + 20).equals(FILTER_INDICATOR))
+                if(new Robot().getPixelColor(rectangle.x + 10, rectangle.y + 10).equals(FILTER_INDICATOR))
                     throw new IllegalStateException(String.format("Состояние переключателя '%s' не изменилось", this.definition.getOrDefault("name", "")));
             }, "Не удалось выполнить переключение");
             return;
@@ -52,7 +52,8 @@ public class SSMToggle {
             AutomationMouse.getInstance().leftClick();
             assertDoesNotThrow(() -> {
                 Thread.sleep(1000);
-                if(new Robot().getPixelColor((int) rectangle.getCenterX(), rectangle.y + 20).equals(FILTER_INDICATOR))
+                Color test = new Robot().getPixelColor(rectangle.x + 10, rectangle.y + 10);
+                if(!new Robot().getPixelColor(rectangle.x + 10, rectangle.y + 10).equals(FILTER_INDICATOR))
                     throw new IllegalStateException(String.format("Состояние переключателя '%s' не изменилось", this.definition.getOrDefault("name", "")));
             }, "Не удалось выполнить переключение");
             return;

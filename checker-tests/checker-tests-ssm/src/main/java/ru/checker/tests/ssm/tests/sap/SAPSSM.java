@@ -35,34 +35,46 @@ public class SAPSSM extends SSMTest {
     }
 
     /**
-     * ТС.SSM.03. Заказы SAP. Назначение мастера на операции
+     * SSM.G.01.02.P.02. Работа с фильтрами. Фильтр 'Год'
      */
     @Test(
-            testName = "ТС.SSM.03",
-            description = "ТС.SSM.03. Заказы SAP. Назначение мастера на операции")
-    public void ssm03() {
-        new SSM03(getRootWindow()).run();
+            testName = "SSM.G.01.02.P.01.03",
+            description = "SSM.G.01.02.P.03. Работа с фильтрами. Фильтр 'Год'")
+    public void SSMG0102P0103() {
+        new SSMG0102P0103(getRootWindow()).run();
     }
 
     /**
-     * ТС.SSM.04 test
+     * SSM.G.01.02.P.04. Работа с фильтрами. Фильтр 'C'
      */
-    /*@Test(
-            testName = "ТС.SSM.04",
-            description = "ТС.SSM.04.Skip")
-    public void ssm04() {
-        throw new SkipException("Skipped");
-    }*/
-
+    @Test(
+            testName = "SSM.G.01.02.P.01.04",
+            description = "SSM.G.01.02.P.01.04. Работа с фильтрами. Фильтр 'C'")
+    public void SSMG0102P0104() {
+        new SSMG0102P0104(getRootWindow()).run();
+    }
 
     /**
-     * ТС.SSM.02 test
+     * SSM.G.01.02.P.04. Работа с фильтрами. Фильтр 'Клиент'
      */
-   /* @DisplayName("ТС.SSM.01.Заказы SAP. Работа с фильтрами")
-    @Test
-    void ssm02() {
-        SSMSapTests.SSM02(this.getRootWindow(), this.getForm());
-    }*/
+    // TODO: 15.08.2022 Доделать после комментария от менеджеров
+    @Test(
+            testName = "SSM.G.01.02.P.01.05",
+            description = "SSM.G.01.02.P.01.05. Работа с фильтрами. Фильтр 'Клиент'",
+    enabled = false)
+    public void SSMG0102P0105() {
+        new SSMG0102P0105(getRootWindow()).run();
+    }
+
+    /**
+     * SSM.G.01.02.P.06. Работа с фильтрами. Фильтр 'Заказ Лоцман'
+     */
+    @Test(
+            testName = "SSM.G.01.02.P.01.06",
+            description = "SSM.G.01.02.P.01.06. Работа с фильтрами. Фильтр 'Заказ Лоцман'")
+    public void SSMG0102P0106() {
+        new SSMG0102P0106(getRootWindow()).run();
+    }
 
     /**
      * ТС.SSM.03 test

@@ -3,12 +3,14 @@ package ru.checker.tests.ssm.temp.forms;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.log4j.Log4j2;
 import mmarquee.automation.controls.Panel;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopForm;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
 import ru.checker.tests.ssm.temp.widgets.SSMPage;
 import ru.checker.tests.ssm.temp.widgets.SSMTools;
 
+@Log4j2
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SSMSapOrdersForm {
 
@@ -23,7 +25,9 @@ public class SSMSapOrdersForm {
     }
 
     public void callFilter() {
+        log.info("Вызов окна 'Фильтр' по кнопке 'Открыть'");
         this.tools.clickButton("sap_filter");
+        log.info("Кнопка 'Открыть' нажата");
     }
 
     public void clickAdd() {

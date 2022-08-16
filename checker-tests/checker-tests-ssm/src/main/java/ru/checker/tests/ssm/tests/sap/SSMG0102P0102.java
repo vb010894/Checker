@@ -20,11 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * ТС.SSM.01. Заказы SAP. Работа с фильтрами.
+ * SSM.G.01.02.P.02. Работа с фильтрами. Фильтр 'ЦЕХ'
  * @author vd.zinovev
  */
 @Log4j2
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SSMG0102P0102 implements Runnable {
 
     /**
@@ -32,10 +32,22 @@ public class SSMG0102P0102 implements Runnable {
      */
     final CheckerDesktopWindow root;
 
+
     /**
-     * Форма 'Заказы SAP'.
+     * Фильтр 'Цех' со значением тестируемого цеха.
+     * @see SSMG0102P0102#SHOPS
+     *
      */
-    SSMSapOrdersForm form;
+    SSMGrid.ConditionConfigurer.ConditionConfigurerBuilder shop_filter = SSMGrid
+            .ConditionConfigurer
+            .builder()
+            .condition1(SSMGrid.Condition.NOT_EQUAL)
+            .column("Цех");
+
+    /**
+     * Проверяемые цеха.
+     */
+    List<String> SHOPS = List.of("РМЦ-1", "ЦРМО-1", "КПЦ");
 
     /**
      * Конструктор.
@@ -44,27 +56,6 @@ public class SSMG0102P0102 implements Runnable {
     public SSMG0102P0102(CheckerDesktopWindow root) {
         this.root = root;
     }
-
-    /**
-     * Фильтр 'C' со значением 'Открыт'.
-     */
-    final SSMGrid.ConditionConfigurer.ConditionConfigurerBuilder shop_filter = SSMGrid
-            .ConditionConfigurer
-            .builder()
-            .condition1(SSMGrid.Condition.NOT_EQUAL)
-            .column("Цех");
-    /**
-     * Фильтр 'ДеБлок' со значением меньшим текущего года.
-     */
-    final SSMGrid.ConditionConfigurer year_filter = SSMGrid
-            .ConditionConfigurer
-            .builder()
-            .condition1(SSMGrid.Condition.LESS_THEN)
-            .value1("01.01." + new SimpleDateFormat("yyyy").format(new Date()))
-            .column("ДеБлок")
-            .build();
-
-    private final List<String> SHOPS = List.of("РМЦ-1", "ЦРМО-1", "КПЦ");
 
     /**
      * Запуск.
@@ -103,9 +94,6 @@ public class SSMG0102P0102 implements Runnable {
             orders.callFilter();
             filter_window.refresh();
         });
-
         filter_window.clickCancel();
-
     }
-
 }
