@@ -70,8 +70,6 @@ public class SSMG0102P0101 implements Runnable {
         assertDoesNotThrow(() -> Thread.sleep(2000), "Не удалось выполнить ожидание инициализации компонентов окна 'Фильтр'");
         log.info("Компоненты инициализированы.");
 
-        new CheckerDesktopMarker(filter_window.getFilter().getRectangle()).draw();
-
         log.info("Проверка фильтров с выключенным переключателем 'Открытые' и нажатием кнопки 'OK'");
         filter_window.toggleOpened(false);
         filter_window.clickOK();

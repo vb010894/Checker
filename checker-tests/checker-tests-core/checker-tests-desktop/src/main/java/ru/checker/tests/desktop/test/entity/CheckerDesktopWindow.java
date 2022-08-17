@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author vd.zinovev
  */
 @Log4j2
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @SuppressWarnings("unused")
 @Getter
 public class CheckerDesktopWindow extends CheckerBaseEntity<Window, Application> {
@@ -36,12 +36,17 @@ public class CheckerDesktopWindow extends CheckerBaseEntity<Window, Application>
     /**
      * Form definitions.
      */
-    final Map<String, Map<String, Object>> formsDefinitions = new HashMap<>();
+    Map<String, Map<String, Object>> formsDefinitions = new HashMap<>();
 
     /**
      * Widget definition.
      */
-    final Map<String, Map<String, Object>> widgetsDefinitions = new HashMap<>();
+    Map<String, Map<String, Object>> widgetsDefinitions = new HashMap<>();
+
+    /**
+     * Used forms.
+     */
+    Map<String, CheckerDesktopForm> usedForms = new HashMap<>();
 
     /**
      * Constructor.
@@ -79,9 +84,32 @@ public class CheckerDesktopWindow extends CheckerBaseEntity<Window, Application>
      * @return Form
      */
     public CheckerDesktopForm form(String ID, boolean needToThrow) {
+        CheckerDesktopForm form;
+        boolean isFound = true;
+
         assertTrue(formsDefinitions.containsKey(ID), String.format("Форма с ID - %s не описана", ID));
-        CheckerDesktopForm form = new CheckerDesktopForm(this.getControl(), this.formsDefinitions.get(ID));
-        return form.findMySelf(needToThrow) ? form : null;
+        log.debug("Получение формы. ID - '{}'", ID);
+
+        try {
+            if(this.usedForms.containsKey(ID) && this.usedForms.get(ID).getControl().isEnabled()) {
+                log.debug("Получение формы из кеша");
+                form = this.usedForms.get(ID);
+            } else {
+                throw new AutomationException("Форма из кеша не активна");
+            }
+        } catch (AutomationException e) {
+            log.debug("Не удалось получить форму из кеша.\n Получение нового экземпляра формы");
+            log.debug("****. Begin");
+            form = new CheckerDesktopForm(this.getControl(), this.formsDefinitions.get(ID));
+            log.debug("****. Middle");
+            isFound = form.findMySelf();
+            this.usedForms.put(ID, form);
+            log.debug("****. End");
+            if(needToThrow & !isFound)
+                fail(String.format("Не удалось найти форму. ID - '%s', имя - '%s'", ID));
+        }
+
+        return isFound ? form : null;
     }
 
     /**
@@ -92,8 +120,8 @@ public class CheckerDesktopWindow extends CheckerBaseEntity<Window, Application>
      */
     public <F> F form(String ID, Class<F> wrapper) {
         assertTrue(formsDefinitions.containsKey(ID), String.format("Форма с ID - %s не описана", ID));
-        CheckerDesktopForm form = new CheckerDesktopForm(this.getControl(), this.formsDefinitions.get(ID));
-        form.findMySelf();
+        CheckerDesktopForm form = this.form(ID, true);
+        log.debug("Конвертирование форы в обертку - '{}'", wrapper.getSimpleName());
         return assertDoesNotThrow(() -> wrapper.getConstructor(CheckerDesktopForm.class).newInstance(form), "Не удалось обернуть форму с ID - " + ID);
     }
 

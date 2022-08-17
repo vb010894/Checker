@@ -3,16 +3,17 @@
         <listener class-name = "ru.checker.starter.listener.CheckerTFSListener"/>
     </listeners>
     <test name = "SAP">
+        <groups>
+            <run>
+                <exclude name="broken"/>
+                <exclude name="inWork"/>
+            </run>
+        </groups>
         <parameter name = "app" value = "SSM"/>
         <parameter name = "form.id" value = "mf"/>
         <parameter name = "form.navigation" value = "SAP_ORDERS"/>
         <classes>
-            <class name = "ru.checker.tests.ssm.tests.sap.SAPSSM">
-                <methods>
-                    <include name = "SSMG0102P0101"/>
-                    <include name = "SSMG0102P0102"/>
-                </methods>
-            </class>
+            <class name = "ru.checker.tests.ssm.tests.sap.SAPSSM"/>
         </classes>
     </test>
 </suite>

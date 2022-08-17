@@ -1,8 +1,8 @@
 name: SSM
 location: Z:\bin\SSM.exe
 arguments: [ -pp ]
-preStart: false
-stayAlive: true
+preStart: true
+stayAlive: false
 windows:
   - path: SAP/SAP_FILTER.yaml
   - path: RELEASE_PRODUCT_POPUP.yaml
