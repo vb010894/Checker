@@ -6,7 +6,7 @@
     </Appenders>
 
     <Loggers>
-        <Root level="debug">
+        <Root level="${env:log.level}">
             <AppenderRef ref="out"/>
         </Root>
     </Loggers>

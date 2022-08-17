@@ -62,7 +62,7 @@ public class NUnitTestCase {
     /**
      * Test case duration in ms.
      */
-    @JacksonXmlProperty(isAttribute = true, localName = "duration-ms")
+    @JacksonXmlProperty(isAttribute = true, localName = "duration")
     String duration = "40";
 
     /**

@@ -65,8 +65,8 @@ public class SSMTest extends CheckerDesktopTest {
             log.info("Проверка активности формы");
             try {
                 if (!this.rootWindow.checkFormExist(id))
-                    throw new AutomationException("Открытие через навигацию");
-            } catch (AssertionFailedError | AutomationException ex) {
+                    throw new Exception("Открытие через навигацию");
+            } catch (Exception ex) {
                 log.info("Открытие формы через навигацию");
                 Assertions.assertDoesNotThrow(() -> this.openFormByNavigation(id), "Не удалось открыть форму с помощью навигации");
                 log.info("Повторная проверка активности формы");

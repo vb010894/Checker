@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.log4j.Log4j2;
 import mmarquee.automation.AutomationException;
 import mmarquee.automation.PropertyID;
 import mmarquee.automation.controls.Button;
@@ -31,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Log4j2
 @SuppressWarnings("unused")
 public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends AutomationBase> {
 
@@ -132,6 +134,11 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
             this.addChildrenDefinition("elements", this.elements);
     }
 
+    public void refresh() {
+        log.debug("Обновление элемента. ID - '{}', имя - '{}'", this.ID, this.getName());
+        this.findMySelf();
+        log.debug("Обновление прошло успешно");
+    }
 
     /**
      * Get first Custom
@@ -458,7 +465,7 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
         assertTrue(this.references.containsKey(node), "Нет задано отношение нода - папка. Нода - " + node);
         if (this.definition.containsKey(node)) {
             List<Map<String, Object>> nodes = CheckerTools.castDefinition(this.definition.get(node));
-            nodes.parallelStream().forEach(n -> {
+            nodes.stream().forEach(n -> {
                 Map<String, Object> childDefinition;
                 if (n.containsKey("path")) {
                     String app = CheckerDesktopTest.getApplication().getName();
