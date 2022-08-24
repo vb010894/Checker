@@ -4,16 +4,12 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
-import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
 import ru.checker.tests.ssm.controls.grid.SSMGridData;
-import ru.checker.tests.ssm.temp.forms.SSMSapOrdersForm;
-import ru.checker.tests.ssm.temp.windows.SapFilterWindow;
+import ru.checker.tests.ssm.forms.SSMSapOrdersForm;
+import ru.checker.tests.ssm.windows.SapFilterWindow;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * SSM.G.01.02.P.01.04. Работа с фильтрами. Фильтр 'C'
@@ -63,11 +59,7 @@ public class SSMG0102P0104 implements Runnable {
      */
     @Override
     public void run() {
-        SapFilterWindow filter_window = CheckerDesktopTest.getCurrentApp().window("SAP_FILTER_FORM", SapFilterWindow.class);
-        filter_window.refresh();
-        log.info("Ожидание инициализации компонентов окна 'Фильтр'");
-        assertDoesNotThrow(() -> Thread.sleep(2000), "Не удалось выполнить ожидание инициализации компонентов окна 'Фильтр'");
-        log.info("Компоненты инициализированы.");
+        SapFilterWindow filter_window = SAPSSM.getFilter();
 
         log.info("Настройка фильтров");
         filter_window.toggleOpened(true);

@@ -7,7 +7,7 @@ import lombok.extern.log4j.Log4j2;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
 import ru.checker.tests.ssm.controls.grid.SSMGridData;
-import ru.checker.tests.ssm.temp.forms.SSMSapOrdersForm;
+import ru.checker.tests.ssm.forms.SSMSapOrdersForm;
 
 import java.util.regex.Pattern;
 

@@ -3,7 +3,11 @@ package ru.checker.tests.ssm.tests.sap;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.DisplayName;
 import org.testng.annotations.Test;
-import ru.checker.tests.ssm.temp.test.SSMTest;
+import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
+import ru.checker.tests.ssm.test.SSMTest;
+import ru.checker.tests.ssm.windows.SapFilterWindow;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 /**
  * SSM 'SAP Orders' form testing.
@@ -13,6 +17,19 @@ import ru.checker.tests.ssm.temp.test.SSMTest;
 @DisplayName("Тесты ССМ. Форма Заказы SAP")
 @Log4j2(topic = "TEST CASE")
 public class SAPSSM extends SSMTest {
+
+    /**
+     * Получение окна фильтрации модуля "Заказы SAP".
+     * @return  окна фильтрации модуля "Заказы SAP"
+     */
+    public static SapFilterWindow getFilter() {
+        SapFilterWindow filter_window = CheckerDesktopTest.getCurrentApp().window("SAP_FILTER_FORM", SapFilterWindow.class);
+        filter_window.refresh();
+        log.info("Ожидание инициализации компонентов окна 'Фильтр'");
+        assertDoesNotThrow(() -> Thread.sleep(2000), "Не удалось выполнить ожидание инициализации компонентов окна 'Фильтр'");
+        log.info("Компоненты инициализированы.");
+        return filter_window;
+    }
 
     /**
      * SSM.G.01.02.P.01. Работа с фильтрами. Настройки по умолчанию
@@ -71,40 +88,20 @@ public class SAPSSM extends SSMTest {
      */
     @Test(
             testName = "SSM.G.01.02.P.01.06",
-            description = "SSM.G.01.02.P.01.06. Работа с фильтрами. Фильтр 'Заказ Лоцман'",
-    groups = {"inWork"})
+            description = "SSM.G.01.02.P.01.06. Работа с фильтрами. Фильтр 'Заказ Лоцман'")
     public void SSMG0102P0106() {
         new SSMG0102P0106(getRootWindow()).run();
     }
 
     /**
-     * ТС.SSM.03 test
+     * SSM.G.01.02.P.06. Работа с фильтрами. Фильтр 'Заказ Лоцман'
      */
-    /*@DisplayName("ТС.SSM.01.Заказы SAP. Работа с фильтрами")
-    @Test
-    void ssm03() {
-        SSMSapTests.SSM03(this.getRootWindow(), this.getForm());
-    }*/
-
-    /**
-     * ТС.SSM.04 test
-     */
-    /*@DisplayName("ТС.ССМ.4.Заказы SAP. Ручное назначение мастера на операцию")
-    @Test
-    @Disabled
-    void ssm04() {
-        SSMSapTests.SSM04(this.getRootWindow(), this.getForm());
-    }
-*/
-    /**
-     * Draft
-     */
-  /*  @DisplayName("ТС.SSM.01.Заказы SAP. Работа с фильтрами")
-    @Test
-    //@Disabled
-    void draft() {
-
+    @Test(
+            testName = "SSM.G.01.02.P.02",
+            description = "SSM.G.01.02.P.02. Назначение мастера на заказ",
+            groups = {"inWork"})
+    public void SSMG0102P02() {
+        new SSMG0102P02(getRootWindow()).run();
     }
 
-*/
 }

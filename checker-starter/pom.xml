@@ -25,13 +25,8 @@
 
         <dependency>
             <groupId>ru.checker</groupId>
-            <artifactId>checker-reporter</artifactId>
+            <artifactId>checker-tfs-adapter</artifactId>
             <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.stephenc.monte</groupId>
-            <artifactId>monte-screen-recorder</artifactId>
-            <version>0.7.7.0</version>
         </dependency>
     </dependencies>
     <build>

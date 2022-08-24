@@ -1,14 +1,13 @@
-package ru.checker.tests.ssm.temp.forms;
+package ru.checker.tests.ssm.forms;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
-import mmarquee.automation.controls.Panel;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopForm;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
-import ru.checker.tests.ssm.temp.widgets.SSMPage;
-import ru.checker.tests.ssm.temp.widgets.SSMTools;
+import ru.checker.tests.ssm.widgets.SSMPage;
+import ru.checker.tests.ssm.widgets.SSMTools;
 
 @Log4j2
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -56,10 +55,12 @@ public class SSMSapOrdersForm {
     }
 
     public SSMGrid getMasterGrid() {
+        log.info("Получение таблицы 'Мастера' формы 'Заказы SAP'");
         return this.form.custom("ssm_01_02", -1, SSMGrid.class);
     }
 
     public SSMGrid getOperationGrid() {
+        log.info("Получение таблицы 'Операции' формы 'Заказы SAP'");
         return this.form.custom("ssm_01_05", -1, SSMGrid.class);
     }
 
@@ -69,6 +70,7 @@ public class SSMSapOrdersForm {
 
 
     public void selectPage(String pageName) {
+
         SSMPage pages = this.form.widget("ssm_paging", SSMPage.class);
         pages.selectTab(pageName);
     }

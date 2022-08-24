@@ -1,7 +1,7 @@
 package ru.checker.tests.ssm.tests.org;
 
 import org.testng.annotations.Test;
-import ru.checker.tests.ssm.temp.test.SSMTest;
+import ru.checker.tests.ssm.test.SSMTest;
 
 public class SSMOrganizationDirectoryTest extends SSMTest {
     @Test(

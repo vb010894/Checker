@@ -18,7 +18,6 @@ import java.util.List;
 @SpringBootApplication
 @Log4j2(topic = "root")
 public class CheckerStarterApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(CheckerStarterApplication.class, args);
         String root = new File("").getAbsolutePath();

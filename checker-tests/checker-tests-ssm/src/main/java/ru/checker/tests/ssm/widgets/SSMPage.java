@@ -1,4 +1,4 @@
-package ru.checker.tests.ssm.temp.widgets;
+package ru.checker.tests.ssm.widgets;
 
 import mmarquee.automation.AutomationException;
 import mmarquee.automation.controls.AutomationBase;

@@ -1,4 +1,4 @@
-package ru.checker.tests.ssm.temp.test;
+package ru.checker.tests.ssm.test;
 
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
@@ -20,8 +20,8 @@ import org.testng.annotations.Parameters;
 import ru.checker.tests.base.utils.CheckerTools;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
-import ru.checker.tests.ssm.temp.widgets.SSMNavigation;
-import ru.checker.tests.ssm.temp.widgets.SSMTools;
+import ru.checker.tests.ssm.widgets.SSMNavigation;
+import ru.checker.tests.ssm.widgets.SSMTools;
 
 import java.util.Map;
 

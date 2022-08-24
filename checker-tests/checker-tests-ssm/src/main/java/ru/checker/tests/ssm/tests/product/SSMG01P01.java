@@ -6,8 +6,8 @@ import ru.checker.tests.base.enums.CheckerOCRLanguage;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
 import ru.checker.tests.ssm.controls.grid.SSMGridData;
-import ru.checker.tests.ssm.temp.forms.SSMProductReleaseForm;
-import ru.checker.tests.ssm.temp.forms.templates.FilteredFormTemplate;
+import ru.checker.tests.ssm.forms.SSMProductReleaseForm;
+import ru.checker.tests.ssm.forms.templates.FilteredFormTemplate;
 
 import java.util.List;
 

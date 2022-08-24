@@ -1,0 +1,35 @@
+id: SAP_FILTER_LOTSMAN_WINDOW
+name: Форма фильтрации заказов Лоцман
+deep: true
+search:
+  ClassName: TfSearchLoodOrder
+  Name: Выбор заказа Лоцман...
+elements:
+  - element:
+      id: field_search
+      name: Поле 'Поиск'
+      search:
+        ClassName: TcxCustomInnerTextEdit
+  - element:
+        id: grid_lotsman_order
+        name: Таблица 'Заказы Лоцман'
+        search:
+          ClassName: TcxGridSite
+  - element:
+      id: button_search
+      name: Кнопка 'Поиск'
+      search:
+        ClassName: TcxButton
+        Name:    Поиск
+  - element:
+      id: button_cancel
+      name: Кнопка 'Отмена'
+      search:
+        ClassName: TcxButton
+        Name: Отмена
+  - element:
+      id: button_ok
+      name:  Кнопка 'ОК'
+      search:
+        ClassName: TcxButton
+        Name: OK

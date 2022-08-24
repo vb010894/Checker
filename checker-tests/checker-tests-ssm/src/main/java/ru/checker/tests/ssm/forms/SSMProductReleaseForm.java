@@ -1,9 +1,9 @@
-package ru.checker.tests.ssm.temp.forms;
+package ru.checker.tests.ssm.forms;
 
 import lombok.extern.log4j.Log4j2;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopForm;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
-import ru.checker.tests.ssm.temp.forms.templates.FilteredFormTemplate;
+import ru.checker.tests.ssm.forms.templates.FilteredFormTemplate;
 
 @Log4j2
 public class SSMProductReleaseForm extends FilteredFormTemplate {

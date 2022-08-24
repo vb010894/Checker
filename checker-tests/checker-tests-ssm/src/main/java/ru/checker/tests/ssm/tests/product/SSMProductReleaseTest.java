@@ -2,8 +2,7 @@ package ru.checker.tests.ssm.tests.product;
 
 import lombok.extern.log4j.Log4j2;
 import org.testng.annotations.Test;
-import ru.checker.tests.ssm.temp.test.SSMTest;
-import ru.checker.tests.ssm.tests.product.SSMG01P01;
+import ru.checker.tests.ssm.test.SSMTest;
 
 @Log4j2
 public class SSMProductReleaseTest extends SSMTest {

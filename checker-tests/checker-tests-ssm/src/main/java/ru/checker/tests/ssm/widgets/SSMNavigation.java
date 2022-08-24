@@ -1,4 +1,4 @@
-package ru.checker.tests.ssm.temp.widgets;
+package ru.checker.tests.ssm.widgets;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
