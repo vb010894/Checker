@@ -19,7 +19,6 @@ import org.junit.jupiter.api.function.ThrowingSupplier;
 import ru.checker.tests.base.enums.CheckerOCRLanguage;
 import ru.checker.tests.base.utils.CheckerOCRUtils;
 import ru.checker.tests.base.utils.CheckerTools;
-import ru.checker.tests.desktop.base.robot.CheckerDesktopMarker;
 import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
 import ru.checker.tests.ssm.annotations.CheckerDefinitionValue;
 
@@ -28,8 +27,10 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
@@ -60,6 +61,16 @@ public class SSMGrid {
         this.DEFINITION = definition;
         this.config = definition.containsKey("config") ? new Config(CheckerTools.castDefinition(definition.get("config"))) : new Config();
         this.robot = assertDoesNotThrow((ThrowingSupplier<Robot>) Robot::new, "Не удалось получить доступ к клавиатуре");
+    }
+
+    public String getID() {
+        return CheckerTools.castDefinition(this.DEFINITION.get("ID"));
+    }
+
+    public String getName() {
+        return this.DEFINITION.containsKey("name")
+                ? CheckerTools.castDefinition(this.DEFINITION.get("name"))
+                : "*Нет Имени*";
     }
 
     /**
@@ -203,25 +214,132 @@ public class SSMGrid {
 
     /**
      * Check grid has data.
-     *
-     * @return Check result
      */
-    public boolean hasData() {
-        log.info("Проверка наличия данных в таблице");
-        SSMGridData data = this.getAllData();
-        log.debug("Обнаружено\nКолонок - '{}'\nСтрок - {}", data.getHeaderSize(), data.getRowSize());
-        return data.getRowSize() > 0L;
+    public void hasData() {
+        log.info("Проверка наличия данных в таблице '{}.{}'", this.getID(), this.getName());
+        log.debug("Обнаружено\nКолонок - '{}'\nСтрок - {}", this.data.getHeaderSize(), this.data.getRowSize());
+        assertNotEquals(
+                this.data.getRowSize(),
+                0,
+                String.format("Не найдено записей в таблице '%s.%s'", this.getID(), this.getName()));
+        log.info("В таблице '{}.{}' имеет записи", this.getID(), this.getName());
     }
 
     /**
      * Check grid hasn't data.
-     *
-     * @return Check result
      */
-    public boolean hasNotData() {
-        log.info("Проверка отсутствия данных в таблице");
-        SSMGridData data = this.getAllData();
-        return data.getRowSize() == 0L;
+    public void hasNotData() {
+        log.info("Проверка отсутствия данных в таблице '{}.{}'", this.getID(), this.getName());
+        assertEquals(this.data.getRowSize(), 0, String.format("Найдены записи в таблице '%s.%s'", this.getID(), this.getName()));
+        log.info("В таблице '{}.{}' отсутствуют данные", this.getID(), this.getName());
+    }
+
+    /**
+     * Check grid contains data.
+     *
+     * @param column Grid column
+     * @param value searching value
+     */
+    public void containsData(String column, String value) {
+        log.info(
+                "Проверка данных в таблице '{}.{}' по условию: 'Колонка '{}' содержит '{}''",
+                this.getID(),
+                this.getName(),
+                column,
+                value);
+        assertTrue(this.data.getColumnData(column).parallelStream().anyMatch(row -> row.contains(value)), String.format(
+                "Найдены записи в таблице '%s.%s', не удовлетворяющие условию: 'Колонка '%s' содержит '%s''",
+                this.getID(),
+                this.getName(),
+                column,
+                value));
+        log.info(
+                "В таблице '{}.{}' присутствуют данные, удовлетворяющие условию: 'Колонка '{}' содержит '{}''",
+                this.getID(),
+                this.getName(),
+                column,
+                value);
+    }
+
+    /**
+     * Check grid doesn't contains data.
+     *
+     * @param column Grid column
+     * @param value searching value
+     */
+    public void doesntContainsData(String column, String value) {
+        log.info(
+                "Проверка данных в таблице '{}.{}' по условию: 'Колонка '{}' не содержит '{}''",
+                this.getID(),
+                this.getName(),
+                column,
+                value);
+        assertFalse(this.data.getColumnData(column).parallelStream().anyMatch(row -> row.contains(value)), String.format(
+                "Найдены записи в таблице '%s.%s', не удовлетворяющие условию: 'Колонка '%s' не содержит '%s''",
+                this.getID(),
+                this.getName(),
+                column,
+                value));
+        log.info(
+                "В таблице '{}.{}' присутствуют данные, удовлетворяющие условию: 'Колонка '{}' не содержит '{}''",
+                this.getID(),
+                this.getName(),
+                column,
+                value);
+    }
+
+    /**
+     * Check grid column data equals value.
+     *
+     * @param column Grid column
+     * @param value searching value
+     */
+    public void columnDataEquals(String column, String value) {
+        log.info(
+                "Проверка данных в таблице '{}.{}' по условию: 'Данные колонки '{}' равны '{}''",
+                this.getID(),
+                this.getName(),
+                column,
+                value);
+        assertTrue(this.data.getColumnData(column).parallelStream().allMatch(row -> row.contains(value)), String.format(
+                "Найдены записи в таблице '%s.%s', не удовлетворяющие условию: 'Данные колонки  '%s' равны '%s''",
+                this.getID(),
+                this.getName(),
+                column,
+                value));
+        log.info(
+                "В таблице '{}.{}' присутствуют данные, удовлетворяющие условию: 'Данные колонки '{}' равны '{}''",
+                this.getID(),
+                this.getName(),
+                column,
+                value);
+    }
+
+    /**
+     * Check grid column data equals value.
+     *
+     * @param column Grid column
+     * @param value searching value
+     */
+    public void columnDataNotEquals(String column, String value) {
+        log.info(
+                "Проверка данных в таблице '{}.{}' по условию: 'Данные колонки '{}' не равны '{}''",
+                this.getID(),
+                this.getName(),
+                column,
+                value);
+        assertFalse(this.data.getColumnData(column).parallelStream().allMatch(row -> row.contains(value)), String.format(
+                "Найдены записи в таблице '%s.%s', не удовлетворяющие условию: 'Данные колонки  '%s' не равны '%s''",
+                this.getID(),
+                this.getName(),
+                column,
+                value));
+        log.info(
+                "В таблице '{}.{}' присутствуют данные, удовлетворяющие условию: 'Данные колонки '{}' не равны '{}''",
+                this.getID(),
+                this.getName(),
+                column,
+                value);
     }
 
     /**
@@ -246,7 +364,6 @@ public class SSMGrid {
             }
             log.info("Строка выбрана");
         }, "Не удалось выбрать строку");
-
     }
 
     /**
@@ -369,7 +486,6 @@ public class SSMGrid {
         return this.getDataFromRow(index, rectangleAtomicReference);
     }
 
-
     /**
      * Get data from row by index
      *
@@ -419,8 +535,8 @@ public class SSMGrid {
         };
         log.debug("Выделено");
 
-        return this.readData(run, true);
-
+        this.data = this.readData(run, true);
+        return this.data;
     }
 
     /**
@@ -457,9 +573,7 @@ public class SSMGrid {
     public void filterByGUI(ConditionConfigurer config) {
         String[] columns = new String[this.config.unFocused.size()];
         AtomicInteger index = new AtomicInteger(0);
-        this.config.unFocused.forEach(membder -> {
-            columns[index.getAndIncrement()] = membder.toString();
-        });
+        this.config.unFocused.forEach(member -> columns[index.getAndIncrement()] = member.toString());
         this.filterByGUI(config, CheckerOCRLanguage.RUS, (columns));
     }
 
@@ -518,7 +632,6 @@ public class SSMGrid {
             }
 
         }
-
     }
 
     private Rectangle moveToCell(Point rowPoint, SSMGridData data, String targetCell, String columnCondition, CheckerOCRLanguage language, String... unFocused) {
@@ -535,8 +648,8 @@ public class SSMGrid {
         for (String header: data.getHeaders()) {
             if (!unFocusedList.contains(header)) {
                 if (header.equals(targetCell)) {
-                    this.robot.keyPress(KeyEvent.VK_ENTER);
-                    this.robot.keyRelease(KeyEvent.VK_ENTER);
+                    this.robot.keyPress(KeyEvent.VK_SPACE);
+                    this.robot.keyRelease(KeyEvent.VK_SPACE);
 
                     Rectangle cell = assertDoesNotThrow(() -> {
                         Thread.sleep(5000);
@@ -774,6 +887,7 @@ public class SSMGrid {
         AutomationMouse.getInstance().leftClick();
         log.info("Окно фильтрации вызвано");
     }
+
 
     /**
      * GUI filter condition configurer.

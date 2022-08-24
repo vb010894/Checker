@@ -1,4 +1,4 @@
-package ru.checker.tests.ssm.temp.forms.templates;
+package ru.checker.tests.ssm.forms.templates;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -6,7 +6,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopForm;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
-import ru.checker.tests.ssm.temp.widgets.SSMTools;
+import ru.checker.tests.ssm.widgets.SSMTools;
 
 @Log4j2
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)

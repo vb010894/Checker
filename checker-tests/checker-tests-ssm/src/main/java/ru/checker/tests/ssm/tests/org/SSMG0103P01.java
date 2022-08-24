@@ -7,12 +7,7 @@ import mmarquee.automation.controls.EditBox;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopForm;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
-import ru.checker.tests.ssm.temp.widgets.SSMPage;
-import ru.checker.tests.ssm.temp.widgets.SSMTools;
-
-import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.util.List;
+import ru.checker.tests.ssm.widgets.SSMTools;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 

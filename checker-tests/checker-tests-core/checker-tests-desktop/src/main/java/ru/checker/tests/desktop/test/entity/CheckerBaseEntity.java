@@ -6,11 +6,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
-import mmarquee.automation.AutomationException;
-import mmarquee.automation.PropertyID;
+import mmarquee.automation.*;
 import mmarquee.automation.controls.Button;
 import mmarquee.automation.controls.Panel;
 import mmarquee.automation.controls.*;
+import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import ru.checker.tests.base.utils.CheckerTools;
 import ru.checker.tests.desktop.base.robot.CheckerFieldsUtils;
 import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
@@ -155,7 +155,7 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
                     .parallelStream()
                     .filter(p -> CheckerFieldsUtils.getLabel(p.getElement()).startsWith(CheckerTools.castDefinition(definition.get("label"))))
                     .findFirst()
-                    .orElseThrow();
+                    .orElseThrow(() -> new IllegalStateException("Не найден элемент по надписи - '" + definition.get("label") + "'"));
             return assertDoesNotThrow(() -> wrapper.getConstructor(Panel.class, Map.class).newInstance(result, definition),
                     "Не удалось обернуть пользовательский элемент с ID - " + ID);
         } else {
@@ -310,8 +310,20 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
      * @return Button
      */
     public Button button(String ID, int index) {
-        if (this.getUsedButtons().containsKey(ID))
-            return this.getUsedButtons().get(ID).get(0);
+        if (this.getUsedButtons().containsKey(ID)) {
+            try {
+                if(this.getUsedButtons().get(ID).get(0).isEnabled()) {
+                    log.debug(this.getUsedButtons().get(ID).get(0).getElement().getControlType() == ControlType.Button.getValue());
+                    log.debug("Кнопка '{}' активна. Продолжение действий из кеша", ID);
+                    return this.getUsedButtons().get(ID).get(0);
+                }
+                else
+                    throw new Exception("Кнопка не активна. Получение нового экземпляра");
+            } catch (Exception e) {
+                log.debug(e.getMessage());
+                return this.convertControlByIndex(ID, Button.class, index, this.usedButtons);
+            }
+        }
         else
             return this.convertControlByIndex(ID, Button.class, index, this.usedButtons);
     }
@@ -323,8 +335,9 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
      * @return Buttons
      */
     public List<Button> buttons(String ID) {
-        if (this.getUsedButtons().containsKey(ID))
+        if (this.getUsedButtons().containsKey(ID)) {
             return this.getUsedButtons().get(ID);
+        }
         else
             return this.convertControl(ID, Button.class, this.usedButtons);
     }
@@ -496,19 +509,25 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
      * Find and save self-control.
      */
     public boolean findMySelf(boolean throwIfNotFound) {
+        log.debug("Поиск компонента");
         AtomicReference<String> ID = new AtomicReference<>();
         AtomicReference<String> name = new AtomicReference<>();
         List<AutomationBase> found = this.findControl(this.root, definition, ID, name);
-        if(!throwIfNotFound && found.isEmpty())
+        if(!throwIfNotFound && found.isEmpty()) {
+            log.debug("Компоненты не найдены. Исключения при проверке выключены");
             return false;
+        }
 
         assertFalse(found.isEmpty(), String.format("Не найден ни один элемент управления с ID - '%s', именем - '%s' по условиям поиска", ID.get(), name.get()));
+        log.debug("Компоненты '{}. {}' найдены в количестве: {}", ID.get(), name.get(), found.size());
+
         this.ID = ID.get();
         this.name = ID.get();
 
         if (found.size() > 0) {
             if (this.definition.containsKey("index")) {
                 int index = CheckerTools.castDefinition(this.definition.get("index"));
+                log.debug("В описании элемента найден индекс('index') '{}'", index);
                 assertTrue(
                         index <= found.size() - 1,
                         String.format(
@@ -517,10 +536,16 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
                                 name.get()));
                 this.control = CheckerTools.castDefinition(found.get(index));
             }
-            System.out.printf("##[warning] Найдено несколько элементов управления с ID - '%s', именем - '%s'. Выбран первый - ''\n", ID.get(), name.get());
+
+            if(found.size() > 1)
+                log.debug("Найдено несколько элементов управления с ID - '{}', именем - '{}'. Выбран первый.", ID.get(), name.get());
             this.control = CheckerTools.castDefinition(found.get(0));
+        } else {
+            fail(String.format("Не найдено элементов управления для '%s. %s'", ID.get(), name.get()));
+            return false;
         }
 
+        log.debug("Элемент управления найден и присвоен текущей сущности");
         return true;
     }
 
@@ -594,20 +619,30 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
         this.getIndicators(ID, name);
         String currentID = ID.get();
         String currentName = name.get();
-        assertTrue(definition.containsKey("search"), String.format("Не задан ключ поиска компонента управления c ID - '%s', name - '%s'", currentID, currentName));
+        log.debug("Чтение условий поиска элемента '{}. {}'", currentID, currentName);
+        assertTrue(
+                definition.containsKey("search"),
+                String.format(
+                        "Не задан ключ поиска компонента управления c ID - '%s', name - '%s'",
+                        currentID,
+                        currentName));
         Map<String, Object> search = CheckerTools.castDefinition(definition.get("search"));
+        log.debug("Условия прочитаны");
 
         List<AutomationBase> result = new LinkedList();
         int limit = this.waitTimeout;
 
+        log.debug("Поиск элемента '{}. {}'", currentID, currentName);
         while (result.isEmpty() && limit >= 0) {
             try {
-                result = root.getChildren(true)
+                List<AutomationBase> temp = root.getChildren(true);
+                log.debug("Найдено неотсортированных элементов - '{}'", temp.size());
+                result = temp
                         .stream()
                         .filter(control -> this.isSearchingControl(control, search))
                         .collect(Collectors.toList());
             } catch (Exception ex) {
-                System.out.println("Повторная попытка найти элемент. Осталось - " + limit);
+                log.debug("Повторная попытка найти элемент '{}. {}'. Осталось - {}",currentID, currentName,  limit);
             } finally {
                 limit--;
                 assertDoesNotThrow(() -> Thread.sleep(1000), "Не удалось выполнить ожидание элемента");
@@ -627,15 +662,13 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
     private boolean isSearchingControl(AutomationBase control, Map<String, Object> definition) {
         return definition.entrySet().parallelStream().allMatch(entry -> {
             try {
-                Object test = control.getElement().getPropertyValue(PropertyID.valueOf(entry.getKey()).getValue());
-                if (test == null)
+                Object property = control.getElement().getPropertyValue(PropertyID.valueOf(entry.getKey()).getValue());
+                if (property == null)
                     return false;
+
                 return Objects.equals(
-                        control
-                                .getElement()
-                                .getPropertyValue(PropertyID.valueOf(entry.getKey()).getValue())
-                                .toString().trim(),
-                        entry.getValue().toString());
+                        property.toString().trim(),
+                        entry.getValue().toString().trim());
             } catch (AutomationException e) {
                 return false;
             }

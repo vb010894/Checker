@@ -159,6 +159,7 @@ public class CheckerDesktopWindow extends CheckerBaseEntity<Window, Application>
 
     private Window deepSearch() {
 
+        log.debug("Глубокий поиск окна");
         Window window = null;
         Map<String, Object> search = CheckerTools.castDefinition(this.getDefinition().get("search"));
         String name = CheckerTools.castDefinition(search.getOrDefault("Name", null));
@@ -172,21 +173,36 @@ public class CheckerDesktopWindow extends CheckerBaseEntity<Window, Application>
                 String.format("Для глубокого поиска окна необходимо заполнить ключ %s или %s", "search -> ClassName", "search -> Name"));
 
 
+        log.debug("Поиск по параметрам: Name - '{}', ClassName - '{}'", name, className);
         WinDef.HWND handle = null;
         int limit = this.getWaitTimeout();
         while (limit > 0 & !found) {
             handle = assertDoesNotThrow(() -> {
+                log.debug("Поиск окна...");
                 Thread.sleep(1000);
                 return User32.INSTANCE.FindWindow(className, name);
             }, "Не удалось дождаться окно");
             if (handle == null) {
+                log.debug("Не удалось получить handle окна");
                 limit--;
             } else {
+                log.debug("handle ('{}') окна получен.", handle.toString());
                 WinDef.HWND h = handle;
+                log.debug("Конвертирование окна");
                 Element el = assertDoesNotThrow(() -> UIAutomation.getInstance().getElementFromHandle(h), "Не удалось получить элемент из handle");
                 window = new Window(new ElementBuilder().element(el));
                 try {
-                    found = window.isEnabled();
+                    log.debug("Окно конвертировано. " +
+                            "Параметры:\n " +
+                            "Активно: '{}',\n " +
+                            "Положение: '{}'\n, " +
+                            "Имя: '{}'\n," +
+                            "Класс - '{}'",
+                            window.isEnabled(),
+                            window.getBoundingRectangle().toRectangle(),
+                            window.getName(),
+                            window.getClassName());
+                    found = window.isEnabled() && !window.getBoundingRectangle().toRectangle().equals(new Rectangle(0, 0, 0 ,0));
                     if (!found) {
                         window = new Window(new ElementBuilder().element(el));
                         limit--;

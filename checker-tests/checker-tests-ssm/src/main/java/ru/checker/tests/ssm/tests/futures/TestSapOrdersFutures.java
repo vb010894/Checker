@@ -5,8 +5,8 @@ import lombok.experimental.FieldDefaults;
 import org.testng.annotations.Test;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
 import ru.checker.tests.ssm.controls.grid.SSMGridData;
-import ru.checker.tests.ssm.temp.forms.SSMSapOrdersForm;
-import ru.checker.tests.ssm.temp.test.SSMTest;
+import ru.checker.tests.ssm.forms.SSMSapOrdersForm;
+import ru.checker.tests.ssm.test.SSMTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 

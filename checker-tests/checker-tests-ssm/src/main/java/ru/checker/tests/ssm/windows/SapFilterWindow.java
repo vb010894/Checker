@@ -1,4 +1,4 @@
-package ru.checker.tests.ssm.temp.windows;
+package ru.checker.tests.ssm.windows;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -7,21 +7,25 @@ import lombok.extern.log4j.Log4j2;
 import mmarquee.automation.UIAutomation;
 import mmarquee.automation.controls.EditBox;
 import mmarquee.automation.controls.mouse.AutomationMouse;
-import ru.checker.tests.desktop.base.robot.CheckerDesktopMarker;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
+import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
 import ru.checker.tests.ssm.controls.toogle.SSMToggle;
+import ru.checker.tests.ssm.windows.templates.OkCancelWindow;
+
+import java.awt.*;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @Log4j2
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SapFilterWindow {
+public class SapFilterWindow extends OkCancelWindow {
 
     @Getter
     final CheckerDesktopWindow filter;
 
 
     public SapFilterWindow(CheckerDesktopWindow window) {
+        super(window);
         this.filter = window;
     }
 
@@ -61,19 +65,6 @@ public class SapFilterWindow {
         log.info("Клиент успешно выбран");
     }
 
-    public void clickOK() {
-        log.info("Нажатие кнопки 'ОК' окна 'Фильтр'");
-        assertDoesNotThrow(() -> this.filter.button("button_ok").click(), "Не удалось нажать кнопку 'OK' окна 'Фильтр'(Заказы SAP)");
-        log.info("Кнопка 'ОК' нажата");
-
-    }
-
-    public void clickCancel() {
-        log.info("Нажатие кнопки 'Отмена' окна 'Фильтр'");
-        assertDoesNotThrow(() -> this.filter.button("button_cancel").click(), "Не удалось нажать кнопку 'Отмена' окна 'Фильтр'(Заказы SAP)");
-        log.info("Кнопка 'Отмена' нажата");
-    }
-
     public void clearClient() {
         log.info("Очистка поля 'Клиент' окна 'Фильтр'");
         assertDoesNotThrow(
@@ -88,9 +79,42 @@ public class SapFilterWindow {
         log.info("Поле 'Клиент' очищено");
     }
 
-    public void refresh() {
-        log.info("Обновление состояния окна 'Фильтр'");
-        this.filter.findMySelf();
-        log.info("Окно 'Фильтр' обновлено");
+    public void clearLotsmanOrder() {
+        log.info("Очистка поля 'Заказ Лоцман' окна 'Фильтр'");
+        assertDoesNotThrow(
+                () -> {
+                    EditBox client = this.filter.edit("field_lotsman_order");
+                    Rectangle parent = UIAutomation.getInstance()
+                            .getControlViewWalker()
+                            .getParentElement(client.getElement())
+                            .getBoundingRectangle()
+                            .toRectangle();
+
+                    AutomationMouse.getInstance().setLocation((int) parent.getMaxX() + 10, (int) parent.getCenterY());
+                    AutomationMouse.getInstance().leftClick();
+                    String val;
+                    if(!(val = this.filter.edit("field_lotsman_order").getValue()).equals(""))
+                        throw new Exception("Фильтр 'Заказ Лоцман' не был очищен. Текущее значение - '" + val + "'");
+                },
+                String.format("Не удалось получить значение поля 'Заказ Лоцман' окна 'Фильтр'(Заказы SAP) для проверки очистки"));
+        log.info("Поле 'Заказ Лоцман' очищено");
+    }
+
+    /**
+     * Вызов окна заказа Лоцман в окне 'Фильтр'
+     * @return Окно заказа Лоцман
+     */
+    public SapLotsmanFilterWindow callLotsmanOrderWindow() {
+        log.info("Вызов окна выбора заказа Лоцман в окне 'Фильтр'");
+        Rectangle fieldRectangle = assertDoesNotThrow(
+                () -> this.filter.edit("field_lotsman_order").getBoundingRectangle().toRectangle(),
+                "Не удалось получить положение поля 'Заказ Лоцман'");
+        AutomationMouse.getInstance().setLocation((int) (fieldRectangle.getMaxX() + 5), (int) fieldRectangle.getCenterY());
+        AutomationMouse.getInstance().leftClick();
+
+        log.info("Инициализация окна 'Заказы Лоцман'");
+        SapLotsmanFilterWindow lotsmanFilterWindow = CheckerDesktopTest.getCurrentApp().window("SAP_FILTER_LOTSMAN_WINDOW", SapLotsmanFilterWindow.class);
+        log.info("Окно инициализировано");
+        return lotsmanFilterWindow;
     }
 }

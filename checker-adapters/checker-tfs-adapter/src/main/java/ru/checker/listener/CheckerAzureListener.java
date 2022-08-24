@@ -1,4 +1,4 @@
-package ru.checker.starter.listener;
+package ru.checker.listener;
 
 import org.monte.media.Format;
 import org.monte.media.FormatKeys;
@@ -16,6 +16,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -32,7 +33,8 @@ import static org.monte.media.VideoFormatKeys.*;
  *
  * @author vd.zinovev
  */
-public class CheckerTFSListener implements ITestListener {
+@SuppressWarnings("unused")
+public class CheckerAzureListener implements ITestListener {
 
     /**
      * Root path.
@@ -55,6 +57,11 @@ public class CheckerTFSListener implements ITestListener {
     private static final String nUnitReportPath = rootPath + "/Reports/Nunit";
 
     /**
+     * Report path.
+     */
+    private static final String ATTACHMENTS = rootPath + "/Reports/Attachment";
+
+    /**
      * NG report path.
      */
     private static final String testNGFiles = rootPath + "/Reports/TestNG";
@@ -66,7 +73,8 @@ public class CheckerTFSListener implements ITestListener {
             videoPath,
             imagePath,
             nUnitReportPath,
-            testNGFiles
+            testNGFiles,
+            ATTACHMENTS
     );
 
     /**
@@ -111,6 +119,7 @@ public class CheckerTFSListener implements ITestListener {
      */
     @Override
     public void onTestSuccess(ITestResult result) {
+        this.formatAttachment(result.id());
         this.stopVideo(result.id(), result.getTestName(), true);
     }
 
@@ -121,6 +130,7 @@ public class CheckerTFSListener implements ITestListener {
      */
     @Override
     public void onTestFailure(ITestResult result) {
+        this.formatAttachment(result.id());
         this.stopVideo(result.id(), result.getTestName(), true);
         this.createScreenshot(result.id(), result.getTestName());
         System.out.println("##vso[task.logissue type=error;] " + result.getThrowable().getMessage());
@@ -134,6 +144,7 @@ public class CheckerTFSListener implements ITestListener {
      */
     @Override
     public void onTestSkipped(ITestResult result) {
+        this.formatAttachment(result.id());
         this.stopVideo(result.id(), result.getTestName(), false);
     }
 
@@ -144,6 +155,7 @@ public class CheckerTFSListener implements ITestListener {
      */
     @Override
     public void onTestFailedButWithinSuccessPercentage(ITestResult result) {
+        this.formatAttachment(result.id());
         this.stopVideo(result.id(), result.getTestName(), false);
     }
 
@@ -154,6 +166,7 @@ public class CheckerTFSListener implements ITestListener {
      */
     @Override
     public void onTestFailedWithTimeout(ITestResult result) {
+        this.formatAttachment(result.id());
         this.stopVideo(result.id(), result.getTestName(), false);
     }
 
@@ -162,10 +175,12 @@ public class CheckerTFSListener implements ITestListener {
         paths.parallelStream().forEach(path -> {
             File file = new File(path);
             File[] files = file.listFiles();
-            Stream.of(files).parallel().forEach(file1 -> {
-                if (!file1.delete())
-                    System.out.println("##vso[task.logissue type=warning;] Не удалось отчистить файл - " + file1.getAbsolutePath());
-            });
+            if(files != null && files.length > 0) {
+                Stream.of(files).parallel().forEach(file1 -> {
+                    if (!file1.delete())
+                        System.out.println("##vso[task.logissue type=warning;] Не удалось отчистить файл - " + file1.getAbsolutePath());
+                });
+            }
         });
     }
 
@@ -185,7 +200,7 @@ public class CheckerTFSListener implements ITestListener {
         String failed = String.valueOf(context.getFailedTests().size());
         String inconclusive = String.valueOf(context.getFailedButWithinSuccessPercentageTests().size());
         String skipped = String.valueOf(context.getSkippedTests().size());
-        String duration = String.valueOf(Math.round(context.getEndDate().getTime() - context.getStartDate().getTime() / 1000));
+        String duration = String.valueOf(Math.round((context.getEndDate().getTime() - context.getStartDate().getTime()) / 1000f));
 
 
         result.setTotal(total);
@@ -235,7 +250,7 @@ public class CheckerTFSListener implements ITestListener {
         try {
             CheckerJunitReportGenerator.generateNUnitReport(result);
         } catch (IOException e) {
-            new RuntimeException("Не удалось сохранить отчет", e);
+            throw new RuntimeException("Не удалось сохранить отчет", e);
         }
     }
 
@@ -285,7 +300,7 @@ public class CheckerTFSListener implements ITestListener {
         File imageFile = new File(imagePath + "/" + testID + ".bmp");
         if (!imageFile.getParentFile().exists()) {
             if (!imageFile.getParentFile().mkdirs()) {
-                System.out.printf("##vso[task.logissue type=warning;] Не удалось создать папку для сохранения изображений.\n");
+                System.out.print("##vso[task.logissue type=warning;] Не удалось создать папку для сохранения изображений.\n");
                 return;
             }
         }
@@ -379,6 +394,7 @@ public class CheckerTFSListener implements ITestListener {
                     this.getFormattedCase(result);
                     NUnitTestCase test = this.getFormattedCase(result);
                     test.setResult(NunitResultStatus.Passed);
+
                     return test;
                 }).collect(Collectors.toList());
     }
@@ -406,15 +422,6 @@ public class CheckerTFSListener implements ITestListener {
                             .collect(Collectors.joining("\n")));
 
                     test.setFailure(failure);
-
-                    if (attachments.containsKey(test.getId())) {
-                        List<NUnitAttachments> attachment = attachments
-                                .get(test.getId())
-                                .parallelStream()
-                                .map(this::getAttachments)
-                                .collect(Collectors.toList());
-                        test.setAttachment(attachment);
-                    }
                     return test;
                 }).collect(Collectors.toList());
     }
@@ -447,6 +454,44 @@ public class CheckerTFSListener implements ITestListener {
         test.setMethodname(resultContext.getMethod().getQualifiedName());
         test.setClassname(resultContext.getTestClass().getName());
 
+        if (attachments.containsKey(test.getId())) {
+            List<NUnitAttachments> attachment = attachments
+                    .get(test.getId())
+                    .parallelStream()
+                    .map(this::getAttachments)
+                    .collect(Collectors.toList());
+            test.setAttachment(attachment);
+        }
+
         return test;
+    }
+
+    private void formatAttachment(String testID) {
+        File attachment = new File(ATTACHMENTS);
+        File[] files = new File(ATTACHMENTS).listFiles();
+        if(files != null && files.length > 0) {
+            File dest = new File(ATTACHMENTS + "/" + testID);
+            if(!dest.exists())
+                if(!dest.mkdirs()) {
+                    System.out.println("##vso[task.logissue type=error;] " +
+                            "Не удалось сохранить дополнительное вложение в папку. " +
+                            "Не удалось создать папку - " + dest.getAbsolutePath());
+                    return;
+                }
+
+            Stream.of(files).filter(File::isFile).forEach(file -> {
+                File destFile = new File(dest.getAbsolutePath() + "/" + file.getName());
+                if(!file.renameTo(destFile)) {
+                    System.out.println("##vso[task.logissue type=error;] " +
+                            "Не удалось сохранить дополнительное вложение в папку. " +
+                            "Не удалось переместить файл в " + destFile.getAbsolutePath());
+                } else {
+                    LinkedList<String> value = (attachments.containsKey(testID))? attachments.get(testID) : new LinkedList<>();
+                    value.add(destFile.getAbsolutePath());
+                    attachments.put(testID, value);
+                }
+            });
+
+        }
     }
 }

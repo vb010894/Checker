@@ -1,4 +1,5 @@
 id: ssm_navigation
 name: Навигация ССМ
+index: 0
 search:
   ClassName: TcxGridSite

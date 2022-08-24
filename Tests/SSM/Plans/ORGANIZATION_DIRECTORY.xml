@@ -1,6 +1,6 @@
 <suite name = "SSM">
     <listeners>
-        <listener class-name = "ru.checker.starter.listener.CheckerTFSListener"/>
+        <listener class-name = "ru.checker.listener.CheckerAzureListener"/>
     </listeners>
     <test name = "ORGANIZATION_DIRECTORY">
         <parameter name = "app" value = "SSM"/>

@@ -3,7 +3,7 @@ package ru.checker.tests.ssm.tests.sap;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
 import ru.checker.tests.ssm.controls.grid.SSMGridData;
-import ru.checker.tests.ssm.temp.forms.SSMSapOrdersForm;
+import ru.checker.tests.ssm.forms.SSMSapOrdersForm;
 
 public class SSM02 implements Runnable {
 

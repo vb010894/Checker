@@ -36,7 +36,7 @@ elements:
       search:
         ClassName: TcxCustomComboBoxInnerEdit
   - element:
-      id: field_lotsman_oreder
+      id: field_lotsman_order
       name: Поле 'Заказ Лоцман'
       label: Заказ Лоцман
       search:
