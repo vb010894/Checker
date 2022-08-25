@@ -19,6 +19,7 @@ import org.junit.jupiter.api.function.ThrowingSupplier;
 import ru.checker.tests.base.enums.CheckerOCRLanguage;
 import ru.checker.tests.base.utils.CheckerOCRUtils;
 import ru.checker.tests.base.utils.CheckerTools;
+import ru.checker.tests.desktop.base.robot.CheckerDesktopMarker;
 import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
 import ru.checker.tests.ssm.annotations.CheckerDefinitionValue;
 
@@ -888,6 +889,24 @@ public class SSMGrid {
         log.info("Окно фильтрации вызвано");
     }
 
+    public void selectTab(String locator) {
+        log.debug("Переключение кладки таблицы. Локатор - '{}'", locator);
+        Rectangle place = this.getRectangle();
+        log.debug("Вычисление положения вкладок. Выставлена высота вкладок - '{}'", this.config.pageHeight);
+        int x = place.x;
+        int y = place.y - this.config.pageHeight;
+        int height = this.config.pageHeight;
+        int width = place.width;
+        Rectangle pagePlace = new Rectangle(x, y, width, height);
+        log.debug("Высота вкладок таблицы вычислена. Расположение - '{}'", pagePlace);
+        log.debug("Нажатие на локатор");
+
+        CheckerOCRUtils.changeScale(5);
+        CheckerOCRUtils.getTextAndMove(pagePlace, locator, CheckerOCRLanguage.RUS, ITessAPI.TessPageIteratorLevel.RIL_WORD);
+        CheckerOCRUtils.changeScale(3);
+        AutomationMouse.getInstance().leftClick();
+        log.debug("Вкладка успешно переключена");
+    }
 
     /**
      * GUI filter condition configurer.
@@ -974,6 +993,8 @@ public class SSMGrid {
         int columnCount = 1;
         @CheckerDefinitionValue("has_selection_bar")
         boolean hasSelectionBar = true;
+        @CheckerDefinitionValue("page_height")
+        int pageHeight = 30;
 
         public Config(Map<String, Object> definition) {
             definition.entrySet().parallelStream().forEach(entry -> Arrays

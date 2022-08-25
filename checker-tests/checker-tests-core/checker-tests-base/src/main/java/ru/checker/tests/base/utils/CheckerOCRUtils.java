@@ -2,6 +2,7 @@ package ru.checker.tests.base.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import net.sourceforge.tess4j.ITessAPI;
 import net.sourceforge.tess4j.Tesseract1;
 import net.sourceforge.tess4j.Word;
@@ -10,7 +11,6 @@ import ru.checker.tests.base.enums.CheckerOCRLanguage;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
@@ -24,8 +24,24 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
  * Checker OCR utils.
  * @author vd.zinovev
  */
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CheckerOCRUtils {
+
+    static int scale = 3;
+
+    /**
+     * Изменяет индекс увеличения картинки для распознавания.
+     *
+     * !!!ВАЖНО: После использования измененного индекса,
+     * требуется вернуть все обратно,
+     * так как многие функции реализованы на стандартном увеличении - 3!!!
+     *
+     * @param targetScale Нужный индекс увеличения
+     */
+    public static void changeScale(int targetScale) {
+        scale = targetScale;
+    }
 
     /**
      * Tesseract config and get.
@@ -132,10 +148,10 @@ public final class CheckerOCRUtils {
                 System.out.println(r.getText());
                 if(pattern.matcher(r.getText()).find()) {
                     Rectangle bounding = r.getBoundingBox();
-                    int x = rectangle.x + (bounding.x / 3);
-                    int y = rectangle.y + (bounding.y / 3);
-                    int width = bounding.width / 3;
-                    int height = bounding.height / 3;
+                    int x = rectangle.x + (bounding.x / scale);
+                    int y = rectangle.y + (bounding.y / scale);
+                    int width = bounding.width / scale;
+                    int height = bounding.height / scale;
                     robot.mouseMove(x + 5, y + 5);
                     out.set(new Rectangle(x, y, width, height));
                 }
@@ -161,10 +177,10 @@ public final class CheckerOCRUtils {
                 System.out.println(r.getText());
                 if(r.getText().contains(text)) {
                     Rectangle bounding = r.getBoundingBox();
-                    int x = rectangle.x + (bounding.x / 3);
-                    int y = rectangle.y + (bounding.y / 3);
-                    int width = bounding.width / 3;
-                    int height = bounding.height / 3;
+                    int x = rectangle.x + (bounding.x / scale);
+                    int y = rectangle.y + (bounding.y / scale);
+                    int width = bounding.width / scale;
+                    int height = bounding.height / scale;
                     robot.mouseMove(x + 5, y + 5);
                     out.set(new Rectangle(x, y, width, height));
                 }
@@ -210,13 +226,13 @@ public final class CheckerOCRUtils {
      * @return Output image
      */
     private static BufferedImage prepareImage(BufferedImage image) {
-        return ImageHelper.convertImageToGrayscale(ImageHelper.getScaledInstance(image, image.getWidth() * 3, image.getHeight() * 3));
+        return ImageHelper.convertImageToGrayscale(ImageHelper.getScaledInstance(image, image.getWidth() * scale, image.getHeight() * scale));
     }
 
     /**
      * Remove some symbols.
      * @param output Raw text
-     * @return Formatted texttymrf
+     * @return Formatted text
      */
     private static String beautifyOutput(String output) {
         return output.replace("\n", "").replace("\r", "");

@@ -1,8 +1,8 @@
 name: SSM
 location: Z:\bin\SSM.exe
 arguments: [ -pp ]
-preStart: true
-stayAlive: false
+preStart: false
+stayAlive: true
 windows:
   - path: SAP/SAP_FILTER_LOTSMAN.yaml
   - path: SAP/SAP_FILTER.yaml

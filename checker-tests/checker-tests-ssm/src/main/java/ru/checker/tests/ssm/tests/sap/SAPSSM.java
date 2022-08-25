@@ -94,7 +94,7 @@ public class SAPSSM extends SSMTest {
     }
 
     /**
-     * SSM.G.01.02.P.06. Работа с фильтрами. Фильтр 'Заказ Лоцман'
+     * SSM.G.01.02.P.02. Назначение мастера на заказ.
      */
     @Test(
             testName = "SSM.G.01.02.P.02",
