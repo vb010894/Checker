@@ -65,7 +65,14 @@ public class SSMSapOrdersForm {
     }
 
     public SSMGrid getProductionReleaseGrid() {
+        log.info("Получение таблицы 'Заказ продукции' формы 'Заказы SAP'");
         return this.form.custom("ssm_01_03", -1, SSMGrid.class);
+    }
+
+
+    public SSMGrid getOrderPRBGrid() {
+        log.info("Получение таблицы 'Задания ПРБ' формы 'Заказы SAP'");
+        return this.form.custom("ssm_01_04", -1, SSMGrid.class);
     }
 
 
