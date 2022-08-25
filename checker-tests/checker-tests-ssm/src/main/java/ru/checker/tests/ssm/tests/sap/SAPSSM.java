@@ -98,8 +98,7 @@ public class SAPSSM extends SSMTest {
      */
     @Test(
             testName = "SSM.G.01.02.P.02",
-            description = "SSM.G.01.02.P.02. Назначение мастера на заказ",
-            groups = {"inWork"})
+            description = "SSM.G.01.02.P.02. Назначение мастера на заказ")
     public void SSMG0102P02() {
         new SSMG0102P02(getRootWindow()).run();
     }
