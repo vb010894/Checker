@@ -7,7 +7,7 @@ import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
 import ru.checker.tests.ssm.controls.grid.SSMGridData;
 import ru.checker.tests.ssm.forms.SSMSapOrdersForm;
-import ru.checker.tests.ssm.windows.SapFilterWindow;
+import ru.checker.tests.ssm.windows.sap.SapFilterWindow;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

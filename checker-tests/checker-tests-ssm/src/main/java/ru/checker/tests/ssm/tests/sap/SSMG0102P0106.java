@@ -6,8 +6,8 @@ import lombok.extern.log4j.Log4j2;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
 import ru.checker.tests.ssm.forms.SSMSapOrdersForm;
-import ru.checker.tests.ssm.windows.SapFilterWindow;
-import ru.checker.tests.ssm.windows.SapLotsmanFilterWindow;
+import ru.checker.tests.ssm.windows.sap.SapFilterWindow;
+import ru.checker.tests.ssm.windows.sap.SapLotsmanFilterWindow;
 
 /**
  * ТС.SSM.01. Заказы SAP. Работа с фильтрами.

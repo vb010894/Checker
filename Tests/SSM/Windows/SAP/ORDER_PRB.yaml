@@ -1,0 +1,67 @@
+id: sap_order_prb_form
+name: Задание ПРБ
+deep: true
+search:
+  ClassName: TfZadPRB
+  Name: ЗАДАНИЕ ПРБ - создание.
+elements:
+  - element:
+      id: prb_masters_grid
+      name: Таблица 'Мастера'
+      index: 0
+      search:
+        ClassName: TcxGridSite
+  - element:
+      id: button_ok
+      name: Кнопка 'Ок'
+      search:
+        ClassName: TcxButton
+        Name: OK
+  - element:
+      id: button_cancel
+      name: Кнопка 'Отмена'
+      search:
+        ClassName: TcxButton
+        Name: Отмена
+  - element:
+      id: prb_master_group
+      name: Панель 'Мастер'
+      search:
+        ClassName: TcxGroupBox
+        Name:           МАСТЕР
+  - element:
+      id: prb_plan_count_field
+      name: Поле 'Планируемое'
+      label: Планируемое
+      search:
+        ClassName: TcxCustomInnerTextEdit
+  - element:
+      id: prb_issued_count_field
+      name: Поле 'Выдано'
+      label: Выдано
+      search:
+        ClassName: TcxCustomInnerTextEdit
+  - element:
+      id: prb_total_count_field
+      name: Поле 'Всего'
+      label: Всего
+      search:
+        ClassName: TcxCustomInnerTextEdit
+  - element:
+      id: prb_comment_field
+      name: Поле 'Примечание'
+      search:
+        ClassName: TcxCustomInnerMemo
+  - element:
+      id: prb_date_from_field
+      name: Поле 'Дата начала'
+      label: Дата начала
+      search:
+        ClassName: TcxCustomDropDownInnerEdit
+  - element:
+      id: prb_date_to_field
+      name: Поле 'Дата оканчания'
+      label: Дата оканчания
+      search:
+        ClassName: TcxCustomDropDownInnerEdit
+
