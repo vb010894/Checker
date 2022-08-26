@@ -19,7 +19,6 @@ import org.junit.jupiter.api.function.ThrowingSupplier;
 import ru.checker.tests.base.enums.CheckerOCRLanguage;
 import ru.checker.tests.base.utils.CheckerOCRUtils;
 import ru.checker.tests.base.utils.CheckerTools;
-import ru.checker.tests.desktop.base.robot.CheckerDesktopMarker;
 import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
 import ru.checker.tests.ssm.annotations.CheckerDefinitionValue;
 
@@ -373,35 +372,95 @@ public class SSMGrid {
      * @param index Current index
      */
     public SSMGridData selectAndAcceptCell(int index) {
+        log.info("Выделение строки таблицы красным цветом");
         this.selectRow(index);
         return assertDoesNotThrow(() -> {
-            log.info("Выделение {} строки", index + 1);
 
+            log.debug("Вычисление координат строки {} таблицы", index);
             AtomicReference<Rectangle> cellRectangle = new AtomicReference<>();
             SSMGridData data = this.getDataFromRow(0, cellRectangle);
             assertNotNull(cellRectangle.get(), "Не удалось получить координаты строки");
+            log.debug("Координаты строки получены");
 
+            log.debug("Выделение {} строки", index + 1);
             AutomationMouse.getInstance().setLocation(cellRectangle.get().x + 20, cellRectangle.get().y);
-
             this.robot.keyPress(KeyEvent.VK_CONTROL);
             AutomationMouse.getInstance().leftClick();
             this.robot.keyRelease(KeyEvent.VK_CONTROL);
+            log.debug("Строка выделена");
 
             log.info("Проверка выделения");
-            boolean found = false;
-            for (int i = cellRectangle.get().x; i < (int) this.control.getBoundingRectangle().toRectangle().getMaxX(); i++) {
-                if (this.robot.getPixelColor(i, (int) cellRectangle.get().getCenterY()).equals(this.config.acceptedRowColor)) {
-                    found = true;
-                    break;
-                }
-            }
-
-            assertTrue(found, "Строка не была выделена");
-            log.info("Строка успешно выделена");
+            assertTrue(this.checkRowColor(cellRectangle.get(), this.config.acceptedRowColor), "Строка не была выделена");
+            log.info("Строка успешно выделена. Считывание данных...");
             this.data = data;
             log.info("Данные считаны");
             return this.data;
-        }, "Не удалось выделить ячейку");
+        }, "Не удалось выделить ячейку с индексом " + index);
+    }
+
+    /**
+     * Выделение ячейки и проверка,
+     * что она выделилась синим цветом.
+     *
+     * Цвет задан в настройках.
+     * @see Config#selectedRowColor
+     *
+     * @param index Индекс строки с 0
+     * @return Данные из строки
+     */
+    public SSMGridData selectRowAndCheckSelection(int index) {
+        log.info("Выделение сроки и чтение данных с номером {}", index + 1);
+        AtomicReference<Rectangle> cellRectangle = new AtomicReference<>();
+        this.getDataFromRow(index, cellRectangle);
+        log.info("Данные получены");
+        log.info("Проверка выделения строки с номером {}", index + 1);
+        assertTrue(
+                this.checkRowColor(cellRectangle.get(), this.config.selectedRowColor),
+                "Строка не выделена цветом - " + this.config.selectedRowColor);
+        log.info("Строка выделена цветом '{}'", this.config.selectedRowColor);
+        return this.data;
+    }
+
+    /**
+     * Выделение ячейки и проверка,
+     * что она выделилась синим цветом.
+     *
+     * Цвет задан в настройках.
+     * @see Config#selectedRowColor
+     *
+     * @param index Индекс строки с 0
+     * @return Данные из строки
+     */
+    public SSMGridData selectRowAndCheckAssigned(int index) {
+        log.info("Выделение сроки и чтение данных с номером {}", index + 1);
+        AtomicReference<Rectangle> cellRectangle = new AtomicReference<>();
+        this.getDataFromRow(index, cellRectangle);
+        log.info("Данные получены");
+        log.info("Проверка выделения строки с номером {}", index + 1);
+        assertTrue(
+                this.checkRowColor(cellRectangle.get(), this.config.assignedRowColor),
+                "Строка не выделена цветом - " + this.config.assignedRowColor);
+        log.info("Строка выделена цветом '{}'", this.config.assignedRowColor);
+        return this.data;
+    }
+
+    /**
+     * Проверка цвета строки таблицы.
+     * @param cellRectangle Положение локатора таблицы
+     * @param color Искомый цвет
+     * @return Результат проверки
+     */
+    public boolean checkRowColor(Rectangle cellRectangle, Color color) {
+        boolean found = false;
+        log.debug("Поиск цвета - '{}'", color.toString());
+        for (int i = cellRectangle.x; i < (int) this.getRectangle().getMaxX(); i++) {
+            if (this.robot.getPixelColor(i, (int) cellRectangle.getCenterY()).equals(color)) {
+                found = true;
+                break;
+            }
+        }
+        log.debug("Цвет {}", (found ? "Найден" : "Не найден"));
+        return found;
     }
 
     /***
@@ -983,6 +1042,8 @@ public class SSMGrid {
         Color filterColor = new Color(181, 181, 181);
         Color clearFilterColor = new Color(244, 244, 244);
         Color enabledFilterColor = new Color(179, 215, 244);
+        Color assignedRowColor = new Color(95, 214, 106);
+        Color selectedRowColor = new Color(129, 175, 233);
 
         @CheckerDefinitionValue("unfocused")
         ArrayList<Object> unFocused = new ArrayList<>();

@@ -3,9 +3,14 @@ package ru.checker.tests.ssm.tests.sap;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.DisplayName;
 import org.testng.annotations.Test;
+import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
+import ru.checker.tests.ssm.controls.grid.SSMGrid;
+import ru.checker.tests.ssm.forms.SSMSapOrdersForm;
 import ru.checker.tests.ssm.test.SSMTest;
-import ru.checker.tests.ssm.windows.SapFilterWindow;
+import ru.checker.tests.ssm.windows.sap.SapFilterWindow;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
@@ -29,6 +34,33 @@ public class SAPSSM extends SSMTest {
         assertDoesNotThrow(() -> Thread.sleep(2000), "Не удалось выполнить ожидание инициализации компонентов окна 'Фильтр'");
         log.info("Компоненты инициализированы.");
         return filter_window;
+    }
+
+    /**
+     * Получение главной формы модуля "Заказы SAP".
+     * @return  главная форма модуля "Заказы SAP"
+     */
+    public static SSMSapOrdersForm getSapOrdersForm(CheckerDesktopWindow root) {
+        SapFilterWindow filter_window = SAPSSM.getFilter();
+
+        log.info("Настройка фильтров окна 'Фильтр' модуля 'Заказы SAP'");
+        filter_window.toggleOpened(true);
+        filter_window.clickOK();
+        log.info("Фильтры настроены");
+
+        log.info("Открытие формы 'Заказы SAP'");
+        SSMSapOrdersForm orders = root.form("mf", SSMSapOrdersForm.class);
+        log.info("Форма 'Заказы SAP' успешно запущена");
+        return orders;
+    }
+
+    public static void  checkPrbOrder(SSMSapOrdersForm orders, Map<String, String> values) {
+        SSMGrid release_grid = orders.getProductionReleaseGrid();
+        release_grid.selectTab("ПРБ");
+        SSMGrid PRBGrid = orders.getOrderPRBGrid();
+        PRBGrid.getAllData();
+        PRBGrid.hasData();
+        values.entrySet().parallelStream().forEach(entry -> PRBGrid.containsData(entry.getKey(), entry.getValue()));
     }
 
     /**
@@ -101,6 +133,16 @@ public class SAPSSM extends SSMTest {
             description = "SSM.G.01.02.P.02. Назначение мастера на заказ")
     public void SSMG0102P02() {
         new SSMG0102P02(getRootWindow()).run();
+    }
+
+    /**
+     * SSM.G.01.02.P.02. Назначение мастера на заказ.
+     */
+    @Test(
+            testName = "SSM.G.01.02.P.04",
+            description = "SSM.G.01.02.P.04. Ручное назначение мастера на операцию")
+    public void SSMG0102P04() {
+        new SSMG0102P04(getRootWindow()).run();
     }
 
 }

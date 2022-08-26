@@ -6,8 +6,8 @@ stayAlive: true
 windows:
   - path: SAP/SAP_FILTER_LOTSMAN.yaml
   - path: SAP/SAP_FILTER.yaml
+  - path: SAP/ORDER_PRB.yaml
+  - path: SAP/ORDER_MASTER_PRB.yaml
   - path: RELEASE_PRODUCT_POPUP.yaml
-  - path: ORDER_MASTER_PRB.yaml
-  - path: ORDER_PRB.yaml
   - path: Root.yaml
   - path: SHOP_DETAILS.yaml

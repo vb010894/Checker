@@ -1,0 +1,29 @@
+id: sap_order_prb_master_form
+name: Задание ПРБ - Мастер
+deep: true
+search:
+  ClassName: TfMaster
+elements:
+  - element:
+      id: prb_master_grid
+      name: Таблица 'Мастера'
+      index: 0
+      search:
+        ClassName: TcxGridSite
+  - element:
+      id: prb_master_choose_button
+      name: Кнопка 'Выбрать'
+      search:
+        ClassName: TcxButton
+        Name: Выбрать
+  - element:
+      id: prb_master_close_button
+      name: Кнопка 'Закрыть'
+      search:
+        ClassName: TcxButton
+        Name: Закрыть
+  - element:
+      id: prb_master_search_edit
+      name: Поле 'Поиск'
+      search:
+        ClassName: TcxCustomInnerTextEdit

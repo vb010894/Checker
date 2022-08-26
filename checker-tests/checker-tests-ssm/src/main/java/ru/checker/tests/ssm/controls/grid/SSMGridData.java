@@ -136,4 +136,19 @@ public class SSMGridData {
         return this.mappedData.get(this.headers.get(index));
     }
 
+    public boolean equals(SSMGridData other) {
+        if(other == null)
+            return false;
+        if(other.getMappedData().size() == this.getMappedData().size())
+            return  true;
+
+
+        return this.getMappedData().entrySet().parallelStream().allMatch(entry -> {
+            if(!other.getMappedData().containsKey(entry.getKey()))
+                return false;
+
+            return other.getColumnData(entry.getKey()).stream().anyMatch(data -> entry.getValue().contains(data));
+        });
+    }
+
 }

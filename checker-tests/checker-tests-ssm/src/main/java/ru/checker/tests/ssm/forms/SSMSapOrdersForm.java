@@ -5,9 +5,12 @@ import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopForm;
+import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
 import ru.checker.tests.ssm.widgets.SSMPage;
 import ru.checker.tests.ssm.widgets.SSMTools;
+import ru.checker.tests.ssm.windows.sap.SapLotsmanFilterWindow;
+import ru.checker.tests.ssm.windows.sap.SapPRBCreationWindow;
 
 @Log4j2
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -29,9 +32,13 @@ public class SSMSapOrdersForm {
         log.info("Кнопка 'Открыть' нажата");
     }
 
-    public void clickAdd() {
-        System.out.println("Нажатие кнопки 'Добавить', ID - 'SSM_05'");
+    public SapPRBCreationWindow clickAdd() {
+        log.info("Нажатие кнопки 'Добавить'");
         this.tools.clickButton("ssm_05");
+        log.info("Инициализация окна 'Задание ПРБ создание'");
+        SapPRBCreationWindow prbWindow = CheckerDesktopTest.getCurrentApp().window("sap_order_prb_form", SapPRBCreationWindow.class);
+        log.info("Окно инициализировано");
+        return prbWindow;
     }
 
     public void selectYear(String year) {

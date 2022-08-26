@@ -6,7 +6,7 @@ import lombok.extern.log4j.Log4j2;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
 import ru.checker.tests.ssm.forms.SSMSapOrdersForm;
-import ru.checker.tests.ssm.windows.SapFilterWindow;
+import ru.checker.tests.ssm.windows.sap.SapFilterWindow;
 
 /**
  * SSM.G.01.02.P.01.05. Работа с фильтрами. Фильтр 'Клиент'

@@ -1,4 +1,4 @@
-package ru.checker.tests.ssm.windows;
+package ru.checker.tests.ssm.windows.sap;
 
 import lombok.AccessLevel;
 import lombok.Getter;
