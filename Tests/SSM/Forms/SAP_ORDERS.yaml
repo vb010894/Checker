@@ -41,3 +41,11 @@ elements:
         unfocused: [ С, Н, Т ]
       search:
         ClassName: TcxGridSite
+  - element:
+      id: sap_lotsman_grid
+      name: Таблица 'Заказы Лоцман'
+      index: 0
+      config:
+        unfocused: [ С, Н, Т ]
+      search:
+        ClassName: TcxGridSite

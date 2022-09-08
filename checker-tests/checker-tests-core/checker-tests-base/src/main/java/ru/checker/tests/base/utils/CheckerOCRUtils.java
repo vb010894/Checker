@@ -3,6 +3,7 @@ package ru.checker.tests.base.utils;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.log4j.Log4j2;
 import net.sourceforge.tess4j.ITessAPI;
 import net.sourceforge.tess4j.Tesseract1;
 import net.sourceforge.tess4j.Word;
@@ -24,8 +25,10 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
  * Checker OCR utils.
  * @author vd.zinovev
  */
+@Log4j2
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@SuppressWarnings("unused")
 public final class CheckerOCRUtils {
 
     static int scale = 3;
@@ -55,6 +58,17 @@ public final class CheckerOCRUtils {
         tesseract1.setDatapath(dataPath.replace("\\", "/"));
         tesseract1.setLanguage(language.getValue());
         return tesseract1;
+    }
+
+    /**
+     * Получает слова из прямоугольника.
+     * @param rectangle Зона для распознавания
+     * @param language Язык надписей
+     * @return Распознанные слова
+     */
+    public static List<Word> getWords(Rectangle rectangle, CheckerOCRLanguage language) {
+        BufferedImage img = prepareImage(getImageFromScreen(rectangle));
+        return getTesseract(language).getWords(img, ITessAPI.TessPageIteratorLevel.RIL_WORD);
     }
 
     /**
@@ -145,7 +159,7 @@ public final class CheckerOCRUtils {
             List<Word> rectangles = getTesseract(language).getWords(img, level);
             AtomicReference<Rectangle> out = new AtomicReference<>(rectangle);
             rectangles.forEach(r -> {
-                System.out.println(r.getText());
+                log.debug("Найдена часть текста - '{}'", r.getText());
                 if(pattern.matcher(r.getText()).find()) {
                     Rectangle bounding = r.getBoundingBox();
                     int x = rectangle.x + (bounding.x / scale);
@@ -174,7 +188,7 @@ public final class CheckerOCRUtils {
             List<Word> rectangles = getTesseract(language).getWords(img, level);
             AtomicReference<Rectangle> out = new AtomicReference<>(rectangle);
             rectangles.forEach(r -> {
-                System.out.println(r.getText());
+                log.debug("Найдена часть текста - '{}'", r.getText());
                 if(r.getText().contains(text)) {
                     Rectangle bounding = r.getBoundingBox();
                     int x = rectangle.x + (bounding.x / scale);

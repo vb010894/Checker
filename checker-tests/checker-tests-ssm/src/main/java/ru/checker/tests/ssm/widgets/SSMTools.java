@@ -2,20 +2,23 @@ package ru.checker.tests.ssm.widgets;
 
 import lombok.extern.log4j.Log4j2;
 import mmarquee.automation.AutomationException;
-import mmarquee.automation.ControlType;
 import mmarquee.automation.UIAutomation;
 import mmarquee.automation.controls.List;
 import mmarquee.automation.controls.ListItem;
 import mmarquee.automation.controls.mouse.AutomationMouse;
 import net.sourceforge.tess4j.ITessAPI;
+import net.sourceforge.tess4j.Word;
+import ru.checker.tests.base.enums.CheckerOCRLanguage;
 import ru.checker.tests.base.utils.CheckerOCRUtils;
 import ru.checker.tests.base.utils.CheckerTools;
-import ru.checker.tests.desktop.base.robot.CheckerDesktopMarker;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWidget;
 import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
 
 import java.awt.*;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -41,6 +44,48 @@ public class SSMTools {
     public SSMTools(CheckerDesktopWidget widget) {
         this.widget = widget;
     }
+
+    public java.util.List<Map.Entry<String, Rectangle>> getTabs(int wordSpace) {
+        Rectangle rectangle = this.widget.getRectangle();
+        int x = rectangle.x;
+        int y = rectangle.y - 30;
+        int width = rectangle.width;
+        int height = 30;
+        Rectangle tabsRectangle = new Rectangle(x, y, width, height);
+        java.util.List<Word> words = CheckerOCRUtils.getWords(tabsRectangle, CheckerOCRLanguage.RUS);
+        return this.concatTabWords(tabsRectangle, words, wordSpace);
+    }
+
+    private java.util.List<Map.Entry<String, Rectangle>> concatTabWords(Rectangle parent, java.util.List<Word> words, int wordSpace) {
+        if (Objects.nonNull(words) && words.size() == 0)
+            return null;
+        if(words.size() == 1)
+            return Collections.singletonList(Map.entry(words.get(0).getText(), words.get(0).getBoundingBox()));
+
+        Word[] wordsArray = words.toArray(new Word[words.size()]);
+        Rectangle last = words.get(0).getBoundingBox();
+        java.util.List<Map.Entry<String, Rectangle>> result = new LinkedList<>();
+        StringBuilder tabString = new StringBuilder(words.get(0).getText());
+
+        for (int i = 1; i < wordsArray.length; i++) {
+            Rectangle target = wordsArray[i].getBoundingBox();
+            if(Math.abs(last.x - target.x) <= wordSpace) {
+                tabString.append(" ").append(wordsArray[i].getText());
+            } else {
+                int x = parent.x + (last.x / 3);
+                int y = parent.y + (last.y / 3);
+                int width = last.width / 3;
+                int height = last.height / 3;
+                result.add(Map.entry(tabString.toString().replaceAll("[|—]", ""), new Rectangle(x, y, width, height)));
+                tabString = new StringBuilder(wordsArray[i].getText());
+            }
+            last = wordsArray[i].getBoundingBox();
+        }
+        result.add(Map.entry(tabString.toString().replaceAll("[|—]", ""), wordsArray[wordsArray.length - 1].getBoundingBox()));
+        return result;
+
+     }
+
 
 
     /**

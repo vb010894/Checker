@@ -4,10 +4,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
-import mmarquee.automation.AutomationException;
-import mmarquee.automation.controls.Button;
 import mmarquee.automation.controls.mouse.AutomationMouse;
-import ru.checker.tests.desktop.base.robot.CheckerDesktopMarker;
+import ru.checker.tests.desktop.utils.CheckerDesktopMarker;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 
 import java.awt.*;
