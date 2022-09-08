@@ -20,6 +20,7 @@ import ru.checker.tests.base.enums.CheckerOCRLanguage;
 import ru.checker.tests.base.utils.CheckerOCRUtils;
 import ru.checker.tests.base.utils.CheckerTools;
 import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
+import ru.checker.tests.desktop.utils.CheckerDesktopManipulator;
 import ru.checker.tests.ssm.annotations.CheckerDefinitionValue;
 
 import java.awt.*;
@@ -692,6 +693,58 @@ public class SSMGrid {
             }
 
         }
+    }
+
+    /**
+     * Перемещение к ячейке по имени колонки и первой строки по умолчанию.
+     * @param columnName Имя колонки
+     */
+    public void moveToCell(String columnName) {
+        this.moveToCell(columnName, 0);
+    }
+
+    /**
+     * Перемещение к ячейке по имени колонки и номеру строки.
+     * @param columnName Имя колонки
+     * @param rowIndex Номер строки
+     */
+    public void moveToCell(String columnName, int rowIndex) {
+        log.debug("Фокус над таблицей");
+        this.control.getElement().setFocus();
+        log.debug("Таблица успешно сфокусирована");
+        assertTrue(
+                this.data.getRowSize() >= rowIndex + 1,
+                String.format("В таблице меньше записей '%d' чем индекс - %d",
+                        this.data.getRowSize(),
+                        rowIndex));
+        log.debug("Заданный индекс строки {} находится в переделах записей", rowIndex);
+
+        assertTrue(
+                this.data.getHeaders().contains(columnName),
+                String.format("В таблице отсутствует колонка '%s'",
+                        columnName));
+        log.debug("Колонка {} в таблице присутствует", columnName);
+
+        log.debug("Переход к первой строчке");
+        CheckerDesktopManipulator.Keyboard.sendKeys("PAGE_UP");
+        log.debug("Перемещение к первой ячейке");
+        CheckerDesktopManipulator.Keyboard.sendKeys("HOME");
+
+        log.debug("Перемещение к нужной строке");
+        for (int i = 0; i < rowIndex; i++) {
+            CheckerDesktopManipulator.Keyboard.sendKeys("DOWN");
+        }
+
+        log.debug("Перемещение к нужной ячейке");
+        for (String header:this.data.getHeaders()) {
+            if(header.equals(columnName))
+                break;
+            if(!this.config.getUnFocused().contains(header)) {
+                CheckerDesktopManipulator.Keyboard.sendKeys("RIGHT");
+            }
+        }
+
+        log.debug("Перемещение к ячейке успешно завершено");
     }
 
     private Rectangle moveToCell(Point rowPoint, SSMGridData data, String targetCell, String columnCondition, CheckerOCRLanguage language, String... unFocused) {

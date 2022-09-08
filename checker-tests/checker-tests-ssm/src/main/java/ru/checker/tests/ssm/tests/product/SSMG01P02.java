@@ -5,7 +5,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 import mmarquee.automation.controls.EditBox;
 import mmarquee.automation.controls.mouse.AutomationMouse;
-import ru.checker.tests.desktop.base.robot.CheckerFieldsUtils;
+import ru.checker.tests.desktop.utils.CheckerFieldsUtils;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
@@ -133,7 +133,7 @@ public class SSMG01P02 implements Runnable {
                 "Не найдена запись в колоне 'Кол-во' равной '1'");
 
         String date_now = new SimpleDateFormat("dd.MM.yyyy HH").format(new Date());
-        assertTrue(accepted_data.getColumnData("Дата подтв.").parallelStream().anyMatch(row -> row.startsWith(date_now)), "Найдены данные не начинающиеся на " + date_now);
+        assertTrue(accepted_data.getColumnData("Дата подтв.").parallelStream().anyMatch(row -> row.trim().contains(date_now.trim())), "Найдены данные не начинающиеся на " + date_now);
         log.info("Данные соответствуют ожидаемым");
 
         log.info("Тест выполнился успешно");

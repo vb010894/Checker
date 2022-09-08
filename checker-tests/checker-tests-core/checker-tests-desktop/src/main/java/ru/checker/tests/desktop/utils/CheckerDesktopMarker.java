@@ -1,4 +1,4 @@
-package ru.checker.tests.desktop.base.robot;
+package ru.checker.tests.desktop.utils;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;

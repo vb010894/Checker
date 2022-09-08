@@ -136,13 +136,23 @@ public class SAPSSM extends SSMTest {
     }
 
     /**
-     * SSM.G.01.02.P.02. Назначение мастера на заказ.
+     * SSM.G.01.02.P.04. Ручное назначение мастера на операцию.
      */
     @Test(
             testName = "SSM.G.01.02.P.04",
             description = "SSM.G.01.02.P.04. Ручное назначение мастера на операцию")
     public void SSMG0102P04() {
         new SSMG0102P04(getRootWindow()).run();
+    }
+
+    /**
+     * SSM.G.01.02.P.05. Поиск заказов SAP в структуре заказа Лоцман.
+     */
+    @Test(
+            testName = "SSM.G.01.02.P.05",
+            description = "SSM.G.01.02.P.05. Поиск заказов SAP в структуре заказа Лоцман")
+    public void SSMG0102P05() {
+        new SSMG0102P05(getRootWindow()).run();
     }
 
 }

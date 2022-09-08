@@ -105,7 +105,6 @@ public class SapPRBCreationWindow extends OkCancelWindow {
         AutomationMouse.getInstance().leftClick();
 
         Robot robot = assertDoesNotThrow((ThrowingSupplier<Robot>) Robot::new, "Не удалось получить доступ к клавиатуре");
-        Toolkit.getProperty("AWT.enter", "Enter");
         int key = KeyStroke.getKeyStroke(value).getKeyCode();
 
         robot.keyPress(KeyEvent.VK_CONTROL);

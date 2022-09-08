@@ -10,9 +10,8 @@ import mmarquee.automation.*;
 import mmarquee.automation.controls.Button;
 import mmarquee.automation.controls.Panel;
 import mmarquee.automation.controls.*;
-import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import ru.checker.tests.base.utils.CheckerTools;
-import ru.checker.tests.desktop.base.robot.CheckerFieldsUtils;
+import ru.checker.tests.desktop.utils.CheckerFieldsUtils;
 import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
 
 import java.awt.*;
