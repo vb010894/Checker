@@ -10,7 +10,7 @@ import mmarquee.automation.controls.mouse.AutomationMouse;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
 import ru.checker.tests.ssm.controls.toogle.SSMToggle;
-import ru.checker.tests.ssm.windows.templates.OkCancelWindow;
+import ru.checker.tests.ssm.windows.core.templates.OkCancelWindow;
 
 import java.awt.*;
 

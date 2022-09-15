@@ -73,7 +73,8 @@ public class SSMGridData {
         String[] rows = this.stringData.split("\n");
         assertNotNull(rows, "Не удалось получить данные из таблицы");
         assertTrue(rows.length > 0, "Не удалось получить данные из таблицы");
-        this.rowSize = rows.length - 1;
+
+        this.rowSize = (headerCount == 0) ? rows.length : rows.length - 1;
         for (int i = 0; i < rows.length; i++) {
             if (headerCount > 0) {
                 if (i == headerCount - 1) {
@@ -81,12 +82,14 @@ public class SSMGridData {
                     continue;
                 }
             } else {
-                String[] data = new String[rows[i].split("\t").length - 1];
-                for (int j = 0; j < rows[i].split("\t").length; j++) {
-                    data[j] = String.valueOf(j);
+                if (headers.size() == 0) {
+                    String[] rowsArray = rows[i].split("\t");
+                    String[] data = new String[rowsArray.length];
+                    for (int j = 0; j < rowsArray.length; j++) {
+                        data[j] = String.valueOf(j);
+                    }
+                    this.addHeader(data);
                 }
-                this.addHeader(data);
-                continue;
             }
             this.addData(rows[i].split("\t"));
         }

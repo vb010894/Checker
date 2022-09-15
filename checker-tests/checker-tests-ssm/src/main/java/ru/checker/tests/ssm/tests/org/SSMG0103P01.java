@@ -3,19 +3,51 @@ package ru.checker.tests.ssm.tests.org;
 import lombok.AccessLevel;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
-import mmarquee.automation.controls.EditBox;
-import ru.checker.tests.desktop.test.entity.CheckerDesktopForm;
+import lombok.extern.log4j.Log4j2;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
-import ru.checker.tests.ssm.widgets.SSMTools;
+import ru.checker.tests.ssm.controls.grid.SSMGrid;
+import ru.checker.tests.ssm.forms.SSMOrgReleaseForm;
+import ru.checker.tests.ssm.windows.core.service.ConfirmWindow;
+import ru.checker.tests.ssm.windows.org.OrganizationShopPopupWindow;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import java.util.Map;
 
+@Log4j2
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class SSMG0103P01 implements Runnable{
+public class SSMG0103P01 implements Runnable {
 
+    /**
+     * Главное окно.
+     */
     CheckerDesktopWindow ROOT_WINDOW;
+
+    /**
+     * ID формы.
+     */
     String FORM_ID;
+
+    /**
+     * Номер цеха.
+     */
+    final int NUMBER = 2;
+
+    /**
+     * Имя цеха.
+     */
+    final String NAME = "Тестовое имя";
+
+    /**
+     * Номер SAP.
+     */
+    final String SAP_NUMBER = "Тестовый номер SAP";
+
+    final int DEVIATION = 3;
+
+    /**
+     * Полное имя.
+     */
+    final String FULL_NAME = "Тестовое полное имя";
 
     public SSMG0103P01(CheckerDesktopWindow root, String formID) {
         this.ROOT_WINDOW = root;
@@ -26,42 +58,47 @@ public class SSMG0103P01 implements Runnable{
     @Override
     public void run() {
 
-        CheckerDesktopForm org_form = this.ROOT_WINDOW.form(this.FORM_ID);
-        SSMTools tools = org_form.widget("ssm_menu", SSMTools.class);
 
-        /*
-        SSMPage pages = org_form.widget("ssm_paging", SSMPage.class);
-        pages.selectTab("Склады");
-        pages.selectTab("Участки");
-        pages.selectTab("Цеха");
-*/
+        SSMOrgReleaseForm org = this.ROOT_WINDOW.form(this.FORM_ID, SSMOrgReleaseForm.class);
+        {
+            log.info("Вызов окна создания цеха");
+            OrganizationShopPopupWindow shop = org.clickAdd();
+            log.info("Окно вызвано");
+            log.info("задание параметров нового цеха");
+            shop.setNumber(this.NUMBER);
+            shop.setName(this.NAME);
+            shop.setFullName(this.FULL_NAME);
+            shop.setSapNumber(this.SAP_NUMBER);
+            shop.setDeviation(this.DEVIATION);
+            shop.clickOK();
+            log.info("Параметры заданы");
+        }
 
-        tools.clickButton("org_01");
+        {
+            log.info("Проверка и поиск созданного цеха с номером '{}' и именем - '{}'", this.NUMBER, this.NAME);
+            SSMGrid shop_grid = org.getOrganizationGrid();
+            shop_grid.filter("number_filter");
+            shop_grid.getDataByRow(0, true);
+            shop_grid.getAllData();
+            Map<String, String> columns = Map.ofEntries(
+                    Map.entry("1", String.valueOf(this.NUMBER)),
+                    Map.entry("2", this.NAME),
+                    Map.entry("3", this.FULL_NAME),
+                    Map.entry("4", this.SAP_NUMBER),
+                    Map.entry("5", String.valueOf(this.DEVIATION))
+            );
 
-        CheckerDesktopWindow shop_details_form = CheckerDesktopTest.getCurrentApp().window("shop_details");
-
-        shop_details_form.edit("edit_number", -1).setValue("11");
-        shop_details_form.edit("edit_name",-1).setValue("22");
-        shop_details_form.edit("edit_full_name",-1).setValue("33");
-        shop_details_form.edit("edit_number_sap",-1).setValue("44");
-
-        EditBox edit_otkl = shop_details_form.edit("edit_otkl", -1);
-        edit_otkl.setValue("55");
-
-/*
-        assertDoesNotThrow(() -> Thread.sleep(1000));
-        assertDoesNotThrow(() -> {
-            Robot robot = new Robot();
-            robot.keyPress(KeyEvent.VK_ENTER);
-            robot.keyRelease(KeyEvent.VK_ENTER);
-        });
-        assertDoesNotThrow(() -> Thread.sleep(1000));
-*/
-
-
-        //List<EditBox> edits = shop_details_form.edits("edit_name");
-
-        shop_details_form.button("button_ok").click();
-
+            shop_grid.columnsDataEqual(columns);
+            log.info("Цех успешно создан и найден в таблице");
+            log.info("Удаление созданного цеха - '{}. {}'", this.NUMBER, this.NAME);
+            org.clickDelete();
+            ConfirmWindow confirm = CheckerDesktopTest.getCurrentApp().window("ssm_core_confirm", ConfirmWindow.class);
+            confirm.clickYes();
+            shop_grid.getDataByRow(0, false);
+            shop_grid.hasNotData();
+            log.info("Цех '{}. {}' успешно удален", this.NUMBER, this.NAME);
+            shop_grid.clearFilter();
+        }
+        log.info("Завершение тестового случая");
     }
 }

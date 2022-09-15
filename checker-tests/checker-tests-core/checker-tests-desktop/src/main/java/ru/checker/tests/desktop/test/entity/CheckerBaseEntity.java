@@ -6,18 +6,21 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
-import mmarquee.automation.*;
+import mmarquee.automation.AutomationException;
+import mmarquee.automation.PropertyID;
 import mmarquee.automation.controls.Button;
 import mmarquee.automation.controls.Panel;
 import mmarquee.automation.controls.*;
+import ru.checker.tests.base.enums.CheckerOCRLanguage;
 import ru.checker.tests.base.utils.CheckerTools;
-import ru.checker.tests.desktop.utils.CheckerFieldsUtils;
 import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
+import ru.checker.tests.desktop.utils.CheckerFieldsUtils;
 
 import java.awt.*;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -133,6 +136,11 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
             this.addChildrenDefinition("elements", this.elements);
     }
 
+    /**
+     * Обновление элемента.
+     * <p>
+     * Принудительно ищет элемент управления.
+     */
     public void refresh() {
         log.debug("Обновление элемента. ID - '{}', имя - '{}'", this.ID, this.getName());
         this.findMySelf();
@@ -147,9 +155,9 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
      */
     public <C> C custom(String ID, Class<C> wrapper) {
         Map<String, Object> definition = this.getElementDefinition(ID);
-        if(definition.containsKey("index")) {
+        if (definition.containsKey("index")) {
             return this.custom(ID, CheckerTools.castDefinition(definition.get("index")), wrapper);
-        } else if(definition.containsKey("label")) {
+        } else if (definition.containsKey("label")) {
             Panel result = this.panels(ID)
                     .parallelStream()
                     .filter(p -> CheckerFieldsUtils.getLabel(p.getElement()).startsWith(CheckerTools.castDefinition(definition.get("label"))))
@@ -192,10 +200,10 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
         if (this.getUsedPanels().containsKey(ID))
             panels = this.getUsedPanels().get(ID);
         else
-            panels = this.convertControl(ID, Panel.class, this.usedPanels);
+            panels = this.convertControls(ID, Panel.class, this.usedPanels);
 
 
-       return panels
+        return panels
                 .parallelStream()
                 .map(
                         panel -> assertDoesNotThrow(() -> wrapper.getConstructor(Panel.class, Map.class).newInstance(panel, this.elements.get(ID)),
@@ -210,7 +218,7 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
      * @return Panel
      */
     public Panel panel(String ID) {
-        return this.panel(ID, 0);
+        return this.convertControl(ID, Panel.class, this.usedPanels);
     }
 
     /**
@@ -221,10 +229,12 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
      * @return Panel
      */
     public Panel panel(String ID, int index) {
-        if (this.getUsedPanels().containsKey(ID))
-            return this.getUsedPanels().get(ID).get(0);
-        else
-            return this.convertControlByIndex(ID, Panel.class, index, this.usedPanels);
+        List<Panel> panels = this.panels(ID);
+        assertTrue(
+                panels.size() >= index,
+                "Количество панелей '" + panels.size()
+                        + "' меньше, чем index '" + index + "'");
+        return panels.get(index);
     }
 
     /**
@@ -234,10 +244,7 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
      * @return Panel
      */
     public List<Panel> panels(String ID) {
-        if (this.getUsedPanels().containsKey(ID))
-            return this.getUsedPanels().get(ID);
-        else
-            return this.convertControl(ID, Panel.class, this.usedPanels);
+        return this.convertControls(ID, Panel.class, this.usedPanels);
     }
 
     /**
@@ -247,21 +254,7 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
      * @return Edit
      */
     public EditBox edit(String ID) {
-        Map<String, Object> definition = this.getElementDefinition(ID);
-        if(definition.containsKey("index")) {
-            return this.edit(ID, CheckerTools.castDefinition(definition.get("index")));
-        } else if(definition.containsKey("label")) {
-            String label = CheckerTools.castDefinition(definition.get("label"));
-            EditBox result = this.edits(ID)
-                    .parallelStream()
-                    .filter(edit -> CheckerFieldsUtils.getLabel(edit.getElement()).trim().startsWith(label))
-                    .findFirst()
-                    .orElseThrow();
-            return result;
-
-        } else {
-            return this.edit(ID, 0);
-        }
+        return this.convertControl(ID, EditBox.class, this.usedEdits);
     }
 
     /**
@@ -272,10 +265,12 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
      * @return Edit
      */
     public EditBox edit(String ID, int index) {
-        if (this.getUsedEdits().containsKey(ID))
-            return this.getUsedEdits().get(ID).get(0);
-        else
-            return this.convertControlByIndex(ID, EditBox.class, index, this.usedEdits);
+        List<EditBox> edits = this.edits(ID);
+        assertTrue(
+                edits.size() >= index,
+                "Количество полей '" + edits.size()
+                        + "' меньше, чем index '" + index + "'");
+        return edits.get(index);
     }
 
     /**
@@ -285,20 +280,17 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
      * @return Edit
      */
     public List<EditBox> edits(String ID) {
-        if (this.getUsedEdits().containsKey(ID))
-            return this.getUsedEdits().get(ID);
-        else
-            return this.convertControl(ID, EditBox.class, this.usedEdits);
+        return this.convertControls(ID, EditBox.class, this.usedEdits);
     }
 
     /**
-     * Get first button
+     * Get button.
      *
      * @param ID Button ID
      * @return button
      */
     public Button button(String ID) {
-        return this.button(ID, 0);
+        return this.convertControl(ID, Button.class, this.usedButtons);
     }
 
     /**
@@ -309,22 +301,12 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
      * @return Button
      */
     public Button button(String ID, int index) {
-        if (this.getUsedButtons().containsKey(ID)) {
-            try {
-                if(this.getUsedButtons().get(ID).get(0).isEnabled()) {
-                    log.debug(this.getUsedButtons().get(ID).get(0).getElement().getControlType() == ControlType.Button.getValue());
-                    log.debug("Кнопка '{}' активна. Продолжение действий из кеша", ID);
-                    return this.getUsedButtons().get(ID).get(0);
-                }
-                else
-                    throw new Exception("Кнопка не активна. Получение нового экземпляра");
-            } catch (Exception e) {
-                log.debug(e.getMessage());
-                return this.convertControlByIndex(ID, Button.class, index, this.usedButtons);
-            }
-        }
-        else
-            return this.convertControlByIndex(ID, Button.class, index, this.usedButtons);
+        List<Button> buttons = this.buttons(ID);
+        assertTrue(
+                buttons.size() >= index,
+                "Количество кнопок '" + buttons.size()
+                        + "' меньше, чем index '" + index + "'");
+        return buttons.get(index);
     }
 
     /**
@@ -334,11 +316,7 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
      * @return Buttons
      */
     public List<Button> buttons(String ID) {
-        if (this.getUsedButtons().containsKey(ID)) {
-            return this.getUsedButtons().get(ID);
-        }
-        else
-            return this.convertControl(ID, Button.class, this.usedButtons);
+        return this.convertControls(ID, Button.class, this.usedButtons);
     }
 
     /**
@@ -367,12 +345,152 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
 
     /**
      * Get element definition.
+     *
      * @param ID Element ID
      * @return Element definition
      */
     public Map<String, Object> getElementDefinition(String ID) {
         assertTrue(this.elements.containsKey(ID), String.format("Элемент с ID '%s' не описан\n %s", ID, String.join(",", this.elements.keySet())));
         return this.elements.get(ID);
+    }
+
+    /**
+     * Конвертирование элемента управления в нужный тип.
+     * @param ID ID элемента
+     * @param target Нужный тип элемента управления
+     * @param cache Кеш элемента управления по типу
+     * @param <C> Тип элемента
+     * @return Сконвертированный элемент
+     */
+    private <C extends AutomationBase> C convertControl(String ID, Class<C> target, Map<String, List<C>> cache) {
+        C result = this.getControlFromCache(ID, cache);
+        if (result != null)
+            return result;
+
+        log.debug("Получение элемента с ID - '{}'...", ID);
+        List<AutomationBase> found = this.getFound(ID);
+        if(found.isEmpty()) {
+            log.debug("Элементов по условиям поиска не найдено");
+            return null;
+        }
+
+        log.debug("Элементы получены в количестве - '{}'", found.size());
+        Map<String, Object> definition = this.getElementDefinition(ID);
+        AutomationBase resultBase;
+
+        if (definition.containsKey("label")) {
+            resultBase = this.filterControlByLabel(found, ID);
+        } else if (definition.containsKey("index")) {
+            resultBase = this.filterControlByIndex(found, CheckerTools.castDefinition(definition.get("index")));
+        } else {
+            log.debug("Не найдено ключей для выборки. Выбор первого элемента");
+            resultBase = found.get(0);
+        }
+        log.debug("Конвертирование элемента в '{}'", target.getSimpleName());
+        result = this.convertElement(resultBase, target);
+        log.debug("Элемент успешно конвертирован");
+        log.debug("Запись в кеш");
+        cache.put(ID, Collections.singletonList(result));
+        log.debug("Элемент с ID '{}' успешно записан в кеш", ID);
+        try {
+            result.getElement().setFocus();
+        } catch (Exception ex) {
+            log.warn("Не удалось установить фокус для элемента управления c ID - {}", ID);
+        }
+
+        return result;
+    }
+
+    /**
+     * Выборка элемента по надписи.
+     *
+     * @param found Найденные элементы управления
+     * @param ID    ID элемента управления
+     * @return Элемент управления
+     */
+    private AutomationBase filterControlByLabel(List<AutomationBase> found, String ID) {
+        Map<String, Object> definition = this.getElementDefinition(ID);
+        String label = CheckerTools.castDefinition(definition.get("label"));
+        CheckerOCRLanguage language = assertDoesNotThrow(() -> (definition.containsKey("labelLag")
+                        ? CheckerOCRLanguage.valueOf(CheckerTools.castDefinition(definition.get("labelLag")))
+                        : CheckerOCRLanguage.RUS),
+                "Не найден язык " + definition.get("labelLag") + " для распознавания надписи элемента");
+
+        log.debug("Выборка элементов по маске надписи '{}'. Язык надписи '{}'", label, language.getValue());
+        AutomationBase required;
+        List<AutomationBase> selected = found
+                .parallelStream()
+                .filter(element -> {
+                    Pattern pattern = Pattern.compile((label.startsWith("^") ? label.trim() : "^" + label.trim()));
+                    return pattern.matcher(CheckerFieldsUtils.getLabel(element.getElement(), language).trim()).lookingAt();
+                }).collect(Collectors.toList());
+        if (selected.isEmpty()) {
+            required = null;
+            fail("Не удалось найти элемент с ID - '" + ID + "' по маске надписи '" + label + "'");
+        } else if (selected.size() == 1) {
+            log.debug("Найден единственный элемент с ID '{}' по маске надписи '{}'", ID, label);
+            required = selected.get(0);
+        } else if (definition.containsKey("index")) {
+            required = this.filterControlByIndex(selected, CheckerTools.castDefinition(definition.get("index")));
+        } else {
+            log.debug("Найдено несколько элементов с ID '{}' по маске надписи '{}'. В описании не задан 'index'. Выбран первый элемент", ID, label);
+            required = selected.get(0);
+        }
+        return required;
+    }
+
+    /**
+     * Конвертирует элемент управления в нужный тип.
+     *
+     * @param base   Базовый элемент управления
+     * @param target Нужный тип элемента
+     * @param <C>    Тип элемента
+     * @return Сконвертированный элемент
+     */
+    private <C extends AutomationBase> C convertElement(AutomationBase base, Class<C> target) {
+        log.debug("Конвертирование в элемент управления('{}')", target.getSimpleName());
+        C converted = assertDoesNotThrow(
+                () -> target.getConstructor(ElementBuilder.class).newInstance(new ElementBuilder().element(base.getElement())),
+                "Не удалось конвертировать элемент в '"
+                        + target.getSimpleName() + "'");
+        log.debug("Элемент управления успешно сконвертированно");
+        return converted;
+    }
+
+    /**
+     * Выборка элемента по индексу.
+     *
+     * @param found Коллекция элементов
+     * @param index Индекс элемента
+     * @return Элемент
+     */
+    private AutomationBase filterControlByIndex(List<AutomationBase> found, int index) {
+        log.debug("Выборка элемента по его индексу");
+        assertTrue(found.size() >= index, "Индекс '" + index + "' превышает количество найденных '" + found.size() + "'");
+        AutomationBase selected = found.get(index);
+        log.debug("Элемент с индексом '{}' найден", index);
+        return selected;
+    }
+
+    /**
+     * Получает элемент из кеша.
+     *
+     * @param ID    ID элемента
+     * @param cache Кеш
+     * @param <C>   Элемент управления
+     * @return Элемент управления
+     */
+    private <C extends AutomationBase> C getControlFromCache(String ID, Map<String, List<C>> cache) {
+        try {
+            if (cache.containsKey(ID) && !cache.get(ID).isEmpty() && cache.get(ID).get(0).isEnabled()) {
+                log.debug("Элемент c ID - {} активен. Извлечение из кеша", ID);
+                return cache.get(ID).get(0);
+            }
+        } catch (Exception ex) {
+            log.debug("Элемент c ID - {} не активен. Повторная попытка поиска", ID);
+        }
+
+        return null;
     }
 
     /**
@@ -384,17 +502,52 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
      * @param <C>    Output control
      * @return Controls
      */
-    private <C extends AutomationBase> List<C> convertControl(String ID, Class<C> target, Map<String, List<C>> output) {
+    private <C extends AutomationBase> List<C> convertControls(String ID, Class<C> target, Map<String, List<C>> output) {
+        if(output.containsKey(ID)) {
+            if(this.checkControlsFromCache(ID, output)) {
+                log.debug("Элементы управления с ID '{}' активны. Извлечение из кеша...", ID);
+                return output.get(ID);
+            } else {
+                log.debug("Один или несколько элементов управления в кеше не активны. Повторный поиск...");
+            }
+        }
+
+        log.debug("Поиск элементов с ID '{}'...", ID);
         List<AutomationBase> found = this.getFound(ID);
-        List<C> result = found.parallelStream().map(f -> assertDoesNotThrow(() ->
-                        target.getConstructor(ElementBuilder.class).newInstance(new ElementBuilder().element(f.getElement()))))
+        log.debug("Элементы с ID '{}' найдены в количестве '{}'", ID, found.size());
+
+        log.debug("Конвертирование элемента управления в '{}'", target.getSimpleName());
+        List<C> result = found
+                .parallelStream()
+                .map(f -> this.convertElement(f, target))
                 .collect(Collectors.toList());
+        log.debug("Элементы успешно сконвертированны");
+        log.debug("Запись в кеш");
         output.put(ID, result);
+        log.debug("Элемент с ID {} успешно записаны в кеш", ID);
         return result;
     }
 
     /**
+     * Получает активность элементов в кеше.
+     * @param ID ID Элемента управления
+     * @param cache Кеш
+     * @param <C> Тип элемента управления
+     * @return Результат проверки
+     */
+    private <C extends AutomationBase> boolean checkControlsFromCache(String ID, Map<String, List<C>> cache) {
+        return cache.get(ID).parallelStream().allMatch(element -> {
+            try {
+                return element.isEnabled();
+            } catch (AutomationException e) {
+                return false;
+            }
+        });
+    }
+
+    /**
      * Get found elements.
+     *
      * @param ID Element ID.
      * @return Found automation controls
      */
@@ -477,14 +630,14 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
         assertTrue(this.references.containsKey(node), "Нет задано отношение нода - папка. Нода - " + node);
         if (this.definition.containsKey(node)) {
             List<Map<String, Object>> nodes = CheckerTools.castDefinition(this.definition.get(node));
-            nodes.stream().forEach(n -> {
+            nodes.forEach(n -> {
                 Map<String, Object> childDefinition;
                 if (n.containsKey("path")) {
                     String app = CheckerDesktopTest.getApplication().getName();
                     String path = String.format("/Tests/%s/%s/%s", app, this.references.get(node), n.get("path"));
-                    childDefinition = CheckerTools.convertYAMLToMap(String.format(path));
+                    childDefinition = CheckerTools.convertYAMLToMap(path);
                 } else {
-                    childDefinition = (Map<String, Object>) n.get(node.substring(0, node.length() - 1));
+                    childDefinition = CheckerTools.castDefinition(n.get(node.substring(0, node.length() - 1)));
                 }
                 assertTrue(
                         childDefinition.containsKey("id"),
@@ -512,7 +665,7 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
         AtomicReference<String> ID = new AtomicReference<>();
         AtomicReference<String> name = new AtomicReference<>();
         List<AutomationBase> found = this.findControl(this.root, definition, ID, name);
-        if(!throwIfNotFound && found.isEmpty()) {
+        if (!throwIfNotFound && found.isEmpty()) {
             log.debug("Компоненты не найдены. Исключения при проверке выключены");
             return false;
         }
@@ -536,7 +689,7 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
                 this.control = CheckerTools.castDefinition(found.get(index));
             }
 
-            if(found.size() > 1)
+            if (found.size() > 1)
                 log.debug("Найдено несколько элементов управления с ID - '{}', именем - '{}'. Выбран первый.", ID.get(), name.get());
             this.control = CheckerTools.castDefinition(found.get(0));
         } else {
@@ -548,45 +701,6 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
         return true;
     }
 
-    /**
-     * Find first control child.
-     *
-     * @param definition Control definition
-     * @param ID         Control ID atomic
-     * @param name       Control name atomic
-     * @return First child
-     */
-    protected AutomationBase findFirstRawChild(Map<String, Object> definition, AtomicReference<String> ID, AtomicReference<String> name) {
-        List<AutomationBase> found = this.findRawChildren(definition, ID, name);
-        return found.get(0);
-    }
-
-    /**
-     * Get RAW children control by index.
-     * <p>
-     * Definition key - 'index'.
-     *
-     * @param definition Control definition
-     * @param ID         Control id atomic
-     * @param name       Control name atomic
-     * @return Control by index
-     */
-    protected AutomationBase findRawChildByIndex(Map<String, Object> definition, AtomicReference<String> ID, AtomicReference<String> name) {
-        List<AutomationBase> found = this.findControl(this.control, definition, ID, name);
-        assertFalse(found.isEmpty(), String.format("Не найден ни один элемент управления с ID - '%s', именем - '%s' по условиям поиска", ID.get(), name.get()));
-        if (this.definition.containsKey("index")) {
-            int index = CheckerTools.castDefinition(this.definition.get("index"));
-            assertTrue(
-                    index <= found.size() - 1,
-                    String.format(
-                            "Индекс компонента управления  с ID - '%s', именем - '%s' больше количества найденных",
-                            ID.get(),
-                            name.get()));
-            return CheckerTools.castDefinition(found.get(index));
-        }
-        System.out.printf("##[warning] Найдено несколько элементов управления с ID - '%s', именем - '%s'. Выбран первый - ''\n", ID.get(), name.get());
-        return CheckerTools.castDefinition(found.get(0));
-    }
 
     /**
      * Get Raw children controls list.
@@ -641,7 +755,7 @@ public abstract class CheckerBaseEntity<T extends AutomationBase, Y extends Auto
                         .filter(control -> this.isSearchingControl(control, search))
                         .collect(Collectors.toList());
             } catch (Exception ex) {
-                log.debug("Повторная попытка найти элемент '{}. {}'. Осталось - {}",currentID, currentName,  limit);
+                log.debug("Повторная попытка найти элемент '{}. {}'. Осталось - {}", currentID, currentName, limit);
             } finally {
                 limit--;
                 assertDoesNotThrow(() -> Thread.sleep(1000), "Не удалось выполнить ожидание элемента");

@@ -6,7 +6,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
-import ru.checker.tests.ssm.windows.templates.OkCancelWindow;
+import ru.checker.tests.ssm.windows.core.templates.OkCancelWindow;
 
 import static org.junit.jupiter.api.Assertions.*;
 

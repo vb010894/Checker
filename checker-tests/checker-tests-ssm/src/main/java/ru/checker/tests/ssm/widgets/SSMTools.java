@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -39,6 +40,7 @@ public class SSMTools {
 
     /**
      * Constructor.
+     *
      * @param widget widget
      */
     public SSMTools(CheckerDesktopWidget widget) {
@@ -59,7 +61,7 @@ public class SSMTools {
     private java.util.List<Map.Entry<String, Rectangle>> concatTabWords(Rectangle parent, java.util.List<Word> words, int wordSpace) {
         if (Objects.nonNull(words) && words.size() == 0)
             return null;
-        if(words.size() == 1)
+        if (words.size() == 1)
             return Collections.singletonList(Map.entry(words.get(0).getText(), words.get(0).getBoundingBox()));
 
         Word[] wordsArray = words.toArray(new Word[words.size()]);
@@ -69,28 +71,30 @@ public class SSMTools {
 
         for (int i = 1; i < wordsArray.length; i++) {
             Rectangle target = wordsArray[i].getBoundingBox();
-            if(Math.abs(last.x - target.x) <= wordSpace) {
-                tabString.append(" ").append(wordsArray[i].getText());
-            } else {
-                int x = parent.x + (last.x / 3);
-                int y = parent.y + (last.y / 3);
-                int width = last.width / 3;
-                int height = last.height / 3;
-                result.add(Map.entry(tabString.toString().replaceAll("[|—]", ""), new Rectangle(x, y, width, height)));
-                tabString = new StringBuilder(wordsArray[i].getText());
+            if(Pattern.compile("[A-Za-zА-Яа-я0-9]").matcher(wordsArray[i].getText()).lookingAt()) {
+                if (Math.abs(last.x - target.x) <= wordSpace) {
+                    tabString.append(" ").append(wordsArray[i].getText());
+                } else {
+                    int x = parent.x + (last.x / 3);
+                    int y = parent.y + (last.y / 3);
+                    int width = last.width / 3;
+                    int height = last.height / 3;
+                    result.add(Map.entry(tabString.toString().replaceAll("[^A-Za-zА-Яа-я0-9., ]", "").trim(), new Rectangle(x, y, width, height)));
+                    tabString = new StringBuilder(wordsArray[i].getText());
+                    last = target;
+                }
             }
-            last = wordsArray[i].getBoundingBox();
         }
-        result.add(Map.entry(tabString.toString().replaceAll("[|—]", ""), wordsArray[wordsArray.length - 1].getBoundingBox()));
+        result.add(Map.entry(tabString.toString().replaceAll("[^A-Za-zА-Яа-я., ]", "").trim(), wordsArray[wordsArray.length - 1].getBoundingBox()));
         return result;
 
-     }
-
+    }
 
 
     /**
      * Select value from ssm combobox.
-     * @param ID Combobox item ID
+     *
+     * @param ID    Combobox item ID
      * @param value Required value
      */
     public void selectCombobox(String ID, String value) {
@@ -111,7 +115,7 @@ public class SSMTools {
                         } catch (AutomationException e) {
                             return "*Без имени*";
                         }
-                    }).collect(Collectors.joining("\n","Элемент - '", "'")));
+                    }).collect(Collectors.joining("\n", "Элемент - '", "'")));
 
 
             ListItem item = list.getItem(value);
@@ -126,6 +130,7 @@ public class SSMTools {
 
     /**
      * Click menu button.
+     *
      * @param ID Button ID
      */
     public void clickButton(String ID) {
@@ -141,7 +146,8 @@ public class SSMTools {
 
     /**
      * Change menu toggle's state
-     * @param ID Toggle ID
+     *
+     * @param ID   Toggle ID
      * @param isOn State
      */
     public void toggle(String ID, boolean isOn) {
@@ -174,6 +180,7 @@ public class SSMTools {
 
     /**
      * Move to menu element
+     *
      * @param ID Element ID
      * @return Element rectangle
      */

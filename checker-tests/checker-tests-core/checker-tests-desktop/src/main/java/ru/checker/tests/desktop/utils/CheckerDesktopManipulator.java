@@ -111,6 +111,54 @@ public final class CheckerDesktopManipulator {
         }
 
         /**
+         * Зажимает комбинацию клавиш.
+         * В маске клавиши следует разделять символом '|'.
+         * Для отпускания клавиши следует использовать
+         * @see CheckerDesktopManipulator.Keyboard#releaseKeys(String).
+         *
+         * @param mask Маска клавиш
+         */
+        @SneakyThrows
+        public static void pressKeys(String mask) {
+            log.debug("Зажатие кнопок - '{}'", mask);
+
+            Robot r = new Robot();
+            Arrays.asList(mask.split("\\|")).forEach(key -> {
+                int keys = KeyStroke.getKeyStroke(key.trim()).getKeyCode();
+                r.keyPress(keys);
+            });
+
+
+            log.debug("Комбинация клавиш успешно выполнена");
+
+        }
+
+        /**
+         * Зажимает комбинацию клавиш.
+         * В маске клавиши следует разделять символом '|'.
+         * Для зажатия клавиши следует использовать
+         * @see CheckerDesktopManipulator.Keyboard#pressKeys(String).
+         *
+         * @param mask Маска клавиш
+         */
+        @SneakyThrows
+        public static void releaseKeys(String mask) {
+            log.debug("Отпускание кнопок - '{}'", mask);
+
+            Robot r = new Robot();
+
+            Arrays.asList(mask.split("\\|")).forEach(key -> {
+                int keys = KeyStroke.getKeyStroke(key.trim()).getKeyCode();
+                r.keyRelease(keys);
+            });
+
+
+            log.debug("Кнопки отпущены");
+
+        }
+
+
+        /**
          * Посылает комбинацию клавиш.
          * В маске клавиши следует разделять символом '|'.
          *
@@ -132,6 +180,33 @@ public final class CheckerDesktopManipulator {
 
             log.debug("Комбинация клавиш успешно выполнена");
 
+        }
+
+        /**
+         * Посылает комбинацию клавиш.
+         * В маске клавиши следует разделять символом '|'.
+         *
+         * @param mask Маска клавиш
+         */
+        @SneakyThrows
+        public static void sendKeys(Element element, String mask, int modifier) {
+            element.setFocus();
+            Robot r = new Robot();
+            sendKeys(mask, modifier);
+        }
+
+        /**
+         * Посылает комбинацию клавиш.
+         * В маске клавиши следует разделять символом '|'.
+         *
+         * @param mask Маска клавиш
+         */
+        @SneakyThrows
+        public static void sendKeys(String mask, int modifier) {
+            Robot r = new Robot();
+            r.keyPress(modifier);
+            sendKeys(mask);
+            r.keyRelease(modifier);
         }
     }
 
@@ -271,7 +346,7 @@ public final class CheckerDesktopManipulator {
                     Toolkit.getDefaultToolkit().getScreenSize().width,
                     Toolkit.getDefaultToolkit().getScreenSize().height);
 
-            BufferedImage screen =  this.robot.createScreenCapture(rectangle);
+            BufferedImage screen = this.robot.createScreenCapture(rectangle);
             log.debug("Скриншот получен. Размер - {}x{}. ", rectangle.width, rectangle.height);
             return screen;
         }

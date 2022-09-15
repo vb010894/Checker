@@ -113,6 +113,7 @@ public class CheckerDesktopApplication extends CheckerApplication {
         assertTrue(this.windowDefinitions.containsKey(ID), "Не найдено описание окна приложения с ID - " + ID);
         CheckerDesktopWindow window = new CheckerDesktopWindow(application, this.windowDefinitions.get(ID));
         window.findMySelf();
+        window.getControl().focus();
         return assertDoesNotThrow(
                 () -> target.getConstructor(CheckerDesktopWindow.class).newInstance(window),
                 "Не удалось конвертировать окно в обертку - " + target.getSimpleName());

@@ -1,4 +1,4 @@
-id: shop_details
+id: org_shop_details
 name: Цех
 deep: true
 search:
@@ -17,32 +17,33 @@ elements:
         ClassName: TcxButton
         Name: OK
   - element:
-      id: edit_number
+      id: org_shop_edit_number
       name: Поле 'Номер'
-      index: 1
+      label: Номер
       search:
         ClassName: TcxCustomInnerTextEdit
   - element:
-      id: edit_name
+      id: org_shop_edit_name
       name: Поле 'Наименование'
-      index: 4
+      label: Наименование
       search:
         ClassName: TcxCustomInnerTextEdit
   - element:
-      id: edit_full_name
+      id: org_shop_edit_full_name
       name: Поле 'Полное наименование'
-      index: 3
+      label: Полное наименование
       search:
         ClassName: TcxCustomInnerTextEdit
   - element:
-      id: edit_number_sap
+      id: org_shop_edit_number_sap
       name: Поле 'Номер SAP'
-      index: 2
+      labelLang: RUS+ENG
+      label: ^Номер SAP|Номер 5АР
       search:
         ClassName: TcxCustomInnerTextEdit
   - element:
-      id: edit_otkl
+      id: org_shop_edit_deviation
       name: Поле 'Отклонение'
-      index: 0
+      label: Отклонение
       search:
         ClassName: TcxCustomInnerTextEdit

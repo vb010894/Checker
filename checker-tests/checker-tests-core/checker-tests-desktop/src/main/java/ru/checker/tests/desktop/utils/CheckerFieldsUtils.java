@@ -1,15 +1,16 @@
 package ru.checker.tests.desktop.utils;
 
+import com.sun.jna.Pointer;
+import com.sun.jna.platform.win32.WinDef;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import mmarquee.automation.AutomationException;
-import mmarquee.automation.Element;
-import mmarquee.automation.UIAutomation;
+import mmarquee.automation.*;
 import mmarquee.automation.controls.AutomationBase;
-import mmarquee.automation.controls.EditBox;
 import mmarquee.automation.controls.ElementBuilder;
 import mmarquee.automation.controls.Panel;
+import mmarquee.automation.controls.mouse.AutomationMouse;
+import ru.checker.tests.base.enums.CheckerOCRLanguage;
 import ru.checker.tests.base.utils.CheckerOCRUtils;
 
 import java.awt.*;
@@ -57,13 +58,21 @@ public final class CheckerFieldsUtils {
         }).findFirst().orElseThrow();
     }
 
-    private static List<Rectangle> getXNeighbor(AutomationBase parent, Rectangle element, int elementX) {
+    private static List<Rectangle> getXNeighbor(AutomationBase parent, Element element) {
         List<Rectangle> result = new LinkedList<>();
+
         try {
+            Object handle = element.getPropertyValue(PropertyID.NativeWindowHandle.getValue());
             parent.getChildren(true).parallelStream().filter(child -> {
                 try {
                     Rectangle childRect = child.getBoundingRectangle().toRectangle();
-                    return childRect.contains(child.getBoundingRectangle().toRectangle().x, element.y) && childRect.x < elementX && !child.getElement().getBoundingRectangle().toRectangle().equals(element);
+                    return childRect
+                            .contains(
+                                    child.getBoundingRectangle().toRectangle().x, element.getBoundingRectangle().toRectangle().y)
+                            & !child.getBoundingRectangle().toRectangle().equals(element.getBoundingRectangle().toRectangle())
+                            & Math.abs(child.getBoundingRectangle().toRectangle().x - element.getBoundingRectangle().toRectangle().x) > 10
+                            & child.getBoundingRectangle().toRectangle().x < element.getBoundingRectangle().toRectangle().x
+                            & child.getElement().getControlType() != ControlType.Pane.getValue();
                 } catch (AutomationException e) {
                     return false;
                 }
@@ -74,6 +83,7 @@ public final class CheckerFieldsUtils {
                     log.warn("Не удалось получить местоположения соседнего элемента");
                 }
             });
+
             return result;
         } catch (AutomationException e) {
            return new LinkedList<>();
@@ -82,6 +92,7 @@ public final class CheckerFieldsUtils {
 
     private static Rectangle getLabelRectangle(Element element) throws AutomationException {
         Rectangle el_rect = element.getBoundingRectangle().toRectangle();
+        Element current = element;
         Rectangle rectangle = el_rect;
         Element parent = null;
         while (Math.abs(rectangle.height - el_rect.height) < 10) {
@@ -92,7 +103,7 @@ public final class CheckerFieldsUtils {
 
         if(parent != null) {
             Panel parentPanel = new Panel(new ElementBuilder().element(parent));
-            List<Rectangle> neighbors = getXNeighbor(parentPanel, element.getBoundingRectangle().toRectangle(), el_rect.x);
+            List<Rectangle> neighbors = getXNeighbor(parentPanel, current);
             Rectangle target;
             if(neighbors.isEmpty()) {
                 Rectangle parentRect = parent.getBoundingRectangle().toRectangle();
@@ -106,16 +117,22 @@ public final class CheckerFieldsUtils {
     }
 
     public static String getLabel(Element element) {
+        return getLabel(element, CheckerOCRLanguage.RUS);
+    }
+
+    public static String getLabel(Element element, CheckerOCRLanguage language) {
         String result;
         try {
             Rectangle rectangle = getLabelRectangle(element);
             if(rectangle == null)
                 result = "";
             else
-                result = CheckerOCRUtils.getTextFromRectangle(rectangle);
+                result = CheckerOCRUtils.getTextFromRectangle(rectangle, language);
         } catch (AutomationException e) {
             result = "";
         }
+
+        result = result.replaceAll("[^A-Za-zА-Яа-я0-9 !,?.:]", "").trim();
         log.info("Найдена надпись поля - " + result);
         return result;
     }
