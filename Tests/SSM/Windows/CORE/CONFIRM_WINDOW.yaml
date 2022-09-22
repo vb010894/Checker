@@ -1,0 +1,18 @@
+id: ssm_core_confirm
+name: Окно подтверждения действия
+deep: true
+search:
+  ClassName: "#32770"
+elements:
+  - element:
+      id: ssm_core_confirm_yes
+      name: Кнопка "Да"
+      search:
+        ClassName: Button
+        Name: Да
+  - element:
+      id: ssm_core_confirm_no
+      name: Кнопка "Нет"
+      search:
+        ClassName: Button
+        Name: Нет

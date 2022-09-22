@@ -13,16 +13,21 @@ import mmarquee.automation.Element;
 import mmarquee.automation.UIAutomation;
 import mmarquee.automation.controls.ElementBuilder;
 import mmarquee.automation.controls.Window;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LogEvent;
 import org.junit.jupiter.api.Assertions;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Parameters;
+import ru.checker.tests.base.logger.CheckerLogAppender;
+import ru.checker.tests.base.test.CheckerConstants;
 import ru.checker.tests.base.utils.CheckerTools;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
 import ru.checker.tests.ssm.widgets.SSMNavigation;
 import ru.checker.tests.ssm.widgets.SSMTools;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -47,6 +52,8 @@ public class SSMTest extends CheckerDesktopTest {
     @BeforeMethod
     public void before(String id) {
         log.info("Инициализация тестового случая");
+        CheckerLogAppender.clearStatistic();
+        CheckerConstants.clearConstants();
         this.rootWindow = getCurrentApp().window("ssm_main");
         this.rootWindow.maximize();
         this.navigation = this.rootWindow.widget("ssm_navigation", SSMNavigation.class);
@@ -106,6 +113,7 @@ public class SSMTest extends CheckerDesktopTest {
     @AfterMethod
     public void after() {
         log.info("Завершение тестового случая");
+        Map<String, List<LogEvent>> test = CheckerLogAppender.getLogging();
         this.closePopUps();
         this.closeForm();
         log.info("Тестовый случай завершен");

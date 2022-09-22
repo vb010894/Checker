@@ -16,17 +16,19 @@ elements:
       search:
         ClassName: TcxGridSite
   - element:
-        id: ssm_01_04
-        name: Таблица 'Задания ПРБ'
-        index: 0
-        search:
-          ClassName: TcxGridSite
+      id: ssm_01_04
+      name: Таблица 'Задания ПРБ'
+      index: 0
+      search:
+        ClassName: TcxGridSite
   - element:
       id: ssm_01_03
       name: Таблица 'Выпуск продукции по заказу'
       index: 0
       search:
         ClassName: TcxGridSite
+      config:
+        header_word_space: 110
   - element:
       id: ssm_01_02
       name: Таблица 'Мастера'
@@ -37,6 +39,70 @@ elements:
       id: ssm_01_01
       name: Таблица 'Производственные заказы'
       index: 3
+      filters:
+        - filter:
+            id: close_filter
+            $comment: Фильтр колонки 'С' равным 'Закрыт'
+            condition1: EQUAL
+            value1: Закрыт
+            column: С
+            columnCondition: "^{1}[СсCc]$"
+        - filter:
+            id: not_close_filter
+            $comment: Фильтр колонки 'С' не равным 'Закрыт'
+            condition1: NOT_EQUAL
+            value1: Закрыт
+            column: С
+            columnCondition: "^{1}[СсCc]$"
+        - filter:
+            id: not_open_filter
+            $comment: Фильтр колонки 'С' не равным 'Открыт'
+            condition1: NOT_EQUAL
+            value1: Открыт
+            column: С
+            columnCondition: "^{1}[СсCc]$"
+        - filter:
+            id: year_filter
+            $comment: Фильтр колонки 'ДеБлок' меньше чем значение
+            condition1: LESS_THEN
+            column: ДеБлок
+        - filter:
+            id: shop_filter
+            $comment: Фильтр колонки 'Цех' не равным значению
+            condition1: NOT_EQUAL
+            column: Цех
+        - filter:
+            id: period_filter
+            $comment: Фильтр колонки 'ДеБлок' со значениями не входящие в диапозон
+            condition1: LESS_THEN
+            separator: AND
+            condition2: MORE_THEN
+            column: ДеБлок
+        - filter:
+            id: lotsman_order
+            $comment: Фильтр с заказом Лоцман
+            condition1: NOT_EQUAL
+            value1: 5-148-2022/0
+            column: Заказ
+        - filter:
+            id: SSMG0102P0104_H_filter
+            $comment: Фильтр заказ Подтвержден/Не подтвержден
+            condition1: EQUAL
+            value1: "0"
+            column: Н
+            columnCondition: "\\d[HнН]|[HнН]"
+        - filter:
+            id: SSMG0102P0104_SAP_order_filter
+            $comment: Фильтр заказ SAP
+            condition1: EQUAL
+            value1: "${SSMG0102P0104_SAP_order}"
+            column: Заказ SAP
+        - filter:
+            id: order_count_more_filter
+            $comment: Фильтр количество заказов больше 0
+            condition1: MORE_THEN
+            value1: 0
+            column: Кол-во
       config:
         unfocused: [ С, Н, Т ]
       search:

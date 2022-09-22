@@ -1,0 +1,54 @@
+id: ssm_core_filter
+name: Окно фильтрации
+deep: true
+search:
+  Name: Настройка фильтра
+elements:
+  - element:
+      id: ssm_core_filter_first_condition
+      name: Первое условие фильтра таблицы
+      index: 1
+      search:
+        ClassName: TcxCustomComboBoxInnerEdit
+  - element:
+      id: ssm_core_filter_second_condition
+      name: Второе условие фильта таблицы
+      index: 0
+      search:
+        ClassName: TcxCustomComboBoxInnerEdit
+  - element:
+      id: ssm_core_filter_first_value
+      name: Первое значение фильтра таблицы
+      index: 1
+      search:
+        ClassName: TcxCustomInnerTextEdit
+  - element:
+      id: ssm_core_filter_second_value
+      name: Второе значение фильта таблицы
+      index: 0
+      search:
+        ClassName: TcxCustomInnerTextEdit
+  - element:
+      id: ssm_core_filter_or_radio
+      name: Переключатель 'ИЛИ'
+      search:
+        ClassName: TcxRadioButton
+        Name: ИЛИ
+  - element:
+      id: ssm_core_filter_and_radio
+      name: Переключатель 'И'
+      search:
+        ClassName: TcxRadioButton
+        Name: И
+  - element:
+      id: button_cancel
+      name: Кнопка 'Отмена'
+      search:
+        ClassName: TcxButton
+        Name: Отмена
+  - element:
+      id: button_ok
+      name:  Кнопка 'ОК'
+      search:
+        ClassName: TcxButton
+        Name: OK

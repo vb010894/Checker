@@ -2,10 +2,10 @@ package ru.checker.tests.ssm.controls.grid;
 
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
+import junit.framework.AssertionFailedError;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
-import mmarquee.automation.AutomationException;
 import mmarquee.automation.ControlType;
 import mmarquee.automation.Element;
 import mmarquee.automation.UIAutomation;
@@ -17,21 +17,27 @@ import mmarquee.automation.controls.mouse.AutomationMouse;
 import net.sourceforge.tess4j.ITessAPI;
 import org.junit.jupiter.api.function.ThrowingSupplier;
 import ru.checker.tests.base.enums.CheckerOCRLanguage;
+import ru.checker.tests.base.test.CheckerConstants;
+import ru.checker.tests.base.test.CheckerTestCase;
 import ru.checker.tests.base.utils.CheckerOCRUtils;
 import ru.checker.tests.base.utils.CheckerTools;
+import ru.checker.tests.desktop.test.entity.CheckerDesktopWidget;
 import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
 import ru.checker.tests.desktop.utils.CheckerDesktopManipulator;
+import ru.checker.tests.desktop.utils.CheckerDesktopMarker;
 import ru.checker.tests.ssm.annotations.CheckerDefinitionValue;
+import ru.checker.tests.ssm.widgets.SSMTools;
+import ru.checker.tests.ssm.windows.core.service.GridFilterWindow;
 
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.lang.reflect.Field;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
@@ -46,13 +52,44 @@ import static org.junit.jupiter.api.Assertions.*;
 @SuppressWarnings({"ConstantConditions", "unused"})
 public class SSMGrid {
 
+    /**
+     * Элемент управления.
+     */
     final Panel control;
+
+    /**
+     * Робот.
+     */
     final Robot robot;
+
+    /**
+     * Описание элемента.
+     */
     final Map<String, Object> DEFINITION;
 
+    /**
+     * ID таблицы.
+     */
+    String ID;
+
+    /**
+     * Имя таблицы.
+     */
+    String name;
+
+    /**
+     * Данные таблицы.
+     */
     SSMGridData data;
+
+    /**
+     * Местоположение заголовков таблицы.
+     */
     Rectangle headerRectangle;
 
+    /**
+     * Конфигурация таблицы.
+     */
     @Getter
     @Setter
     Config config;
@@ -64,20 +101,40 @@ public class SSMGrid {
         this.robot = assertDoesNotThrow((ThrowingSupplier<Robot>) Robot::new, "Не удалось получить доступ к клавиатуре");
     }
 
+    /**
+     * ID таблицы.
+     *
+     * @return ID
+     */
     public String getID() {
-        return CheckerTools.castDefinition(this.DEFINITION.get("ID"));
+        if (this.ID == null) {
+            assertTrue(this.DEFINITION.containsKey("id"), "Для таблицы не задан ID");
+            this.ID = CheckerTools.castDefinition(this.DEFINITION.get("id"));
+        }
+        return this.ID;
     }
 
+    /**
+     * Имя таблицы.
+     *
+     * @return Имя
+     */
     public String getName() {
-        return this.DEFINITION.containsKey("name")
-                ? CheckerTools.castDefinition(this.DEFINITION.get("name"))
-                : "*Нет Имени*";
+        if (this.name == null) {
+            this.name = this.DEFINITION.containsKey("name")
+                    ? CheckerTools.castDefinition(this.DEFINITION.get("name"))
+                    : "*Нет Имени*";
+        }
+        return this.name;
     }
 
     /**
      * Get table rectangle.
+     * <p>
+     * Получение местоположения таблицы.
      *
      * @return Rectangle
+     * Местоположение
      */
     public Rectangle getRectangle() {
         return assertDoesNotThrow(
@@ -85,278 +142,310 @@ public class SSMGrid {
                 "Не удалось получить расположение таблицы");
     }
 
+    /**
+     * Фокус над таблицей.
+     */
     private void focus() {
-        log.debug("Фокус над таблицей");
+        AtomicBoolean focused = new AtomicBoolean(false);
         assertDoesNotThrow(() -> {
             int limit = 60000;
             while (limit >= 0) {
                 try {
-                    Rectangle controlRect = this.control.getBoundingRectangle().toRectangle();
-                    AutomationMouse.getInstance().setLocation(controlRect.x + 5, (int) controlRect.getCenterY());
-                    AutomationMouse.getInstance().leftClick();
+                    log.debug("Фокус над таблицей");
+                    this.control.getElement().setFocus();
 
-                    this.robot.keyPress(KeyEvent.VK_PAGE_UP);
-                    this.robot.keyRelease(KeyEvent.VK_PAGE_UP);
+                    log.debug("Переход на 1 строку 1 ячейку");
+                    CheckerDesktopManipulator.Keyboard.sendKeys("PAGE_UP");
+                    CheckerDesktopManipulator.Keyboard.sendKeys("HOME");
+                    focused.set(true);
                     break;
                 } catch (Exception ex) {
                     Thread.sleep(1000);
                     limit -= 1000;
                 }
             }
-        });
-        log.debug("Таблица сфокусирована");
+        }, "Не удалось сфокусироваться над таблицей '" + this.getID() + ". " + this.getName() + "'");
+        assertTrue(focused.get(), "Таблица '" + this.getID() + ". " + this.getName() + "' не была сфокусирована");
+        log.debug("Таблица '{}. {}' сфокусирована", this.getID(), this.getName());
     }
 
+    /**
+     * Получает данные видимой страницы таблицы
+     * с отключенной проверкой данных.
+     *
+     * @return Дынные страницы таблицы
+     */
     public SSMGridData getFirstPageData() {
-        log.info("Чтение данных таблицы из первой страницы");
-        CheckerTools.clearClipboard();
-        this.data = new SSMGridData("");
-        String stringData = "";
-        this.focus();
-        int limit = 10000;
-        while (stringData.equals("") & limit >= 0) {
-
-            this.robot.keyPress(KeyEvent.VK_CONTROL);
-            this.robot.keyPress(KeyEvent.VK_A);
-            this.robot.keyRelease(KeyEvent.VK_CONTROL);
-            this.robot.keyRelease(KeyEvent.VK_A);
-
-            this.robot.keyPress(KeyEvent.VK_SHIFT);
-            this.robot.keyPress(KeyEvent.VK_PAGE_DOWN);
-            this.robot.keyRelease(KeyEvent.VK_SHIFT);
-            this.robot.keyRelease(KeyEvent.VK_PAGE_DOWN);
-
-            this.robot.keyPress(KeyEvent.VK_CONTROL);
-            this.robot.keyPress(KeyEvent.VK_C);
-            this.robot.keyRelease(KeyEvent.VK_CONTROL);
-            this.robot.keyRelease(KeyEvent.VK_C);
-
-            stringData = assertDoesNotThrow(() -> Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor).toString(), "Не удалось получить данные из буфера");
-            if (stringData.equals("")) {
-                assertDoesNotThrow(() -> Thread.sleep(1000), "Не удалось выдержать паузу");
-                limit -= 1000;
-            } else {
-                break;
-            }
-        }
-        log.info("Данные таблицы успешно прочитаны");
-
-        log.debug("Конвертация данных");
-        this.data = new SSMGridData(stringData);
-        this.data.convert();
-        log.debug("Данные успешно конвертированы.\nКоличество колонок - {}\nКоличество строк - {}", this.data.getHeaderSize(), this.data.getRowSize());
-
-        return this.data;
+        return this.getFirstPageData(false);
     }
 
-    public SSMGridData getAllData() {
-        log.info("Чтение данных таблицы");
-        CheckerTools.clearClipboard();
+    /**
+     * Получает данные видимой страницы таблицы.
+     * <p>
+     * Взаимодействие происходит при помощи комбинации SHIFT + PAGE_DOWN.
+     *
+     * @param needDataCheck Нужна ли проверка наличия данных
+     * @return Данные страницы из таблицы.
+     */
+    public SSMGridData getFirstPageData(boolean needDataCheck) {
+        log.debug("Чтение данных таблицы '{}. {}' из первой страницы", this.getID(), this.getName());
+
+        log.debug("Очистка данных таблицы '{}. {}'", this.getID(), this.getName());
         this.data = new SSMGridData("");
-        String stringData = "";
         this.focus();
-        int limit = 10000;
-        while (stringData.equals("") & limit >= 0) {
-            this.robot.keyPress(KeyEvent.VK_CONTROL);
-            this.robot.keyPress(KeyEvent.VK_A);
-            this.robot.keyRelease(KeyEvent.VK_CONTROL);
-            this.robot.keyRelease(KeyEvent.VK_A);
 
-            this.robot.keyPress(KeyEvent.VK_CONTROL);
-            this.robot.keyPress(KeyEvent.VK_C);
-            this.robot.keyRelease(KeyEvent.VK_CONTROL);
-            this.robot.keyRelease(KeyEvent.VK_C);
-
-            CheckerDesktopTest.getCurrentApp().waitApp();
-
-            stringData = assertDoesNotThrow(() -> {
-                Thread.sleep(1000);
-                return Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor).toString();
-            }, "Не удалось получить данные из буфера");
-            if (stringData.equals("")) {
-                assertDoesNotThrow(() -> Thread.sleep(1000), "Не удалось выдержать паузу");
-                limit -= 1000;
-            } else {
-                break;
-            }
-        }
-        log.info("Данные таблицы успешно прочитаны");
-
-        WinDef.HWND handle = User32.INSTANCE.FindWindow(null, "Ssm");
-        if (handle != null) {
-            assertDoesNotThrow(() -> {
-                Element windowRaw = UIAutomation.getInstance().getElementFromHandle(handle);
-                Window rejectWindow = new Window(new ElementBuilder().element(windowRaw));
-                rejectWindow.close();
-            }, "Не удалось закрыть окно отказа в доступе");
-        }
-
-        log.debug("Конвертация данных");
-        this.data = new SSMGridData(stringData);
-        this.data.convert();
-        log.debug("Данные успешно конвертированы.\nКоличество колонок - {}\nКоличество строк - {}", this.data.getHeaderSize(), this.data.getRowSize());
+        Runnable run = () -> {
+            CheckerDesktopManipulator.Keyboard.pressKeys("SHIFT");
+            CheckerDesktopManipulator.Keyboard.sendKeys("END | PAGE_DOWN");
+            CheckerDesktopManipulator.Keyboard.releaseKeys("SHIFT");
+        };
 
         return this.data;
     }
 
     /**
-     * Check all values equals required in column
+     * Получает все записи таблицы
+     * с выключенной проверкой на наличие данных.
      *
-     * @param columnName Column name
-     * @param value      Searching value
-     * @return Check result
+     * @return Данные
      */
-    public boolean columnExistValue(String columnName, String value) {
-        log.info("Проверка колонки '{}' на наличие значения '{}'", columnName, value);
-        boolean result = this.data.getColumnData(columnName).parallelStream().allMatch(value::equalsIgnoreCase);
-        log.info("Колонка '{}' содержит {} все значения равные '{}'", columnName, (result) ? "" : "не", value);
-        return result;
+    public SSMGridData getAllData() {
+        return this.getAllData(false);
+    }
+
+    /**
+     * Получает все записи таблицы.
+     * Используется комбинация CTRL + A.
+     * При большом объеме данных
+     * возможно появление окна с отказом доступа к буферу обмена,
+     * В данном случае данные вернуться с пустым значением,
+     * !!!но не исключает зависание программы!!!
+     *
+     * @param needCheckData Нужна ли проверка на наличие данных
+     * @return Данные
+     */
+    public SSMGridData getAllData(boolean needCheckData) {
+        log.info("Чтение всех данных таблицы '{}. {}'", this.getID(), this.getData());
+        CheckerTools.clearClipboard();
+        this.data = new SSMGridData("");
+        String stringData = "";
+        this.focus();
+        Runnable run = () -> CheckerDesktopManipulator.Keyboard.sendKeys("CONTROL | A");
+        this.readData(run, needCheckData);
+
+        return this.data;
     }
 
     /**
      * Check grid has data.
+     * Проверяет есть ли данные в таблице.
+     * <p>
+     * Проверка осуществляется с помощью метода:
+     *
+     * @see SSMGrid#hasDataResult()
+     * <p>
+     * При ошибке бросает исключение:
+     * @see AssertionFailedError
      */
     public void hasData() {
+        assertTrue(
+                this.hasDataResult(),
+                String.format("Не найдено записей в таблице '%s.%s'", this.getID(), this.getName()));
+    }
+
+    /**
+     * Check grid has data.
+     * Проверяет есть ли данные в таблице.
+     * <p>
+     * !!! Не обходимо считать данные в буфер таблицы перед проверкой!!!
+     *
+     * @return Результат проверки
+     */
+    public boolean hasDataResult() {
         log.info("Проверка наличия данных в таблице '{}.{}'", this.getID(), this.getName());
         log.debug("Обнаружено\nКолонок - '{}'\nСтрок - {}", this.data.getHeaderSize(), this.data.getRowSize());
-        assertNotEquals(
-                this.data.getRowSize(),
-                0,
-                String.format("Не найдено записей в таблице '%s.%s'", this.getID(), this.getName()));
-        log.info("В таблице '{}.{}' имеет записи", this.getID(), this.getName());
+        boolean result = this.data.getRowSize() > 0;
+        log.info("В таблице '{}.{}' {} записи", this.getID(), this.getName(), (result ? "имеет" : "не имеет"));
+        return result;
     }
 
     /**
      * Check grid hasn't data.
+     * Проверяет отсутствие данных.
+     * <p>
+     * Проверка проходит с помощью метода:
+     *
+     * @see SSMGrid#hasDataResult()
+     * <p>
+     * При ошибке бросает исключение:
+     * @see AssertionFailedError
      */
     public void hasNotData() {
         log.info("Проверка отсутствия данных в таблице '{}.{}'", this.getID(), this.getName());
-        assertEquals(this.data.getRowSize(), 0, String.format("Найдены записи в таблице '%s.%s'", this.getID(), this.getName()));
+        assertFalse(this.hasDataResult(), String.format("Найдены записи в таблице '%s.%s'", this.getID(), this.getName()));
         log.info("В таблице '{}.{}' отсутствуют данные", this.getID(), this.getName());
     }
 
     /**
-     * Check grid contains data.
+     * Проверка содержит ли значение колонка таблицы.
      *
-     * @param column Grid column
-     * @param value searching value
+     * @param column Колонка таблицы
+     * @param value  Искомое значение
+     *               <p>
+     *               При ошибке бросает исключение:
+     * @see AssertionFailedError
      */
     public void containsData(String column, String value) {
+        assertTrue(this.containsDataResult(column, value), String.format(
+                "Найдены записи в таблице '%s.%s', не удовлетворяющие условию: 'Колонка '%s' содержит '%s''",
+                this.getID(),
+                this.getName(),
+                column,
+                value));
+    }
+
+    /**
+     * Check grid contains data.
+     * Метод проверяет содержит ли колонка таблицы данные.
+     *
+     * @param column Grid column
+     *               Колонка таблицы
+     * @param value  Searching value
+     *               Искомое значение
+     * @return Результат проверки
+     */
+    public boolean containsDataResult(String column, String value) {
         log.info(
                 "Проверка данных в таблице '{}.{}' по условию: 'Колонка '{}' содержит '{}''",
                 this.getID(),
                 this.getName(),
                 column,
                 value);
-        assertTrue(this.data.getColumnData(column).parallelStream().anyMatch(row -> row.contains(value)), String.format(
-                "Найдены записи в таблице '%s.%s', не удовлетворяющие условию: 'Колонка '%s' содержит '%s''",
-                this.getID(),
-                this.getName(),
-                column,
-                value));
+        boolean result = this.data.getColumnData(column).parallelStream().anyMatch(row -> row.contains(value));
         log.info(
-                "В таблице '{}.{}' присутствуют данные, удовлетворяющие условию: 'Колонка '{}' содержит '{}''",
+                "В таблице '{}.{}' {} данные, удовлетворяющие условию: 'Колонка '{}' содержит '{}''",
                 this.getID(),
                 this.getName(),
+                (result ? "присутствуют" : "отсутствуют"),
                 column,
                 value);
+        return result;
     }
 
     /**
      * Check grid doesn't contains data.
      *
      * @param column Grid column
-     * @param value searching value
+     * @param value  searching value
+     *               <p>
+     *               При ошибке бросает исключение:
+     * @see AssertionFailedError
      */
     public void doesntContainsData(String column, String value) {
-        log.info(
-                "Проверка данных в таблице '{}.{}' по условию: 'Колонка '{}' не содержит '{}''",
-                this.getID(),
-                this.getName(),
-                column,
-                value);
-        assertFalse(this.data.getColumnData(column).parallelStream().anyMatch(row -> row.contains(value)), String.format(
+        assertFalse(this.containsDataResult(column, value), String.format(
                 "Найдены записи в таблице '%s.%s', не удовлетворяющие условию: 'Колонка '%s' не содержит '%s''",
                 this.getID(),
                 this.getName(),
                 column,
                 value));
-        log.info(
-                "В таблице '{}.{}' присутствуют данные, удовлетворяющие условию: 'Колонка '{}' не содержит '{}''",
-                this.getID(),
-                this.getName(),
-                column,
-                value);
+    }
+
+    /**
+     * Проверяет равенства колонок в таблице.
+     * @param columns Словарь "Колонка-Значение"
+     */
+    public void columnsDataEqual(Map<String, String> columns) {
+        AtomicReference<Map.Entry<String, String>> error = new AtomicReference<>();
+        assertTrue(
+                columns.entrySet().parallelStream().allMatch(entry -> {
+                    boolean result;
+                    if(!(result = this.containsDataResult(entry.getKey(), entry.getValue()))) {
+                        error.set(entry);
+                    }
+
+                    return result;
+                }),
+                "Найдены записи не удовлетворяющие условию равенства");
     }
 
     /**
      * Check grid column data equals value.
+     * Проверка всех значений колонки таблицы равных значению.
      *
      * @param column Grid column
-     * @param value searching value
+     *               Имя колонки таблицы
+     * @param value  searching value
+     *               Искомое значение
+     *               <p>
+     *               При ошибке бросает исключение:
+     * @see AssertionFailedError
      */
     public void columnDataEquals(String column, String value) {
+        assertTrue(this.columnDataEqualsResult(column, value), String.format(
+                "Найдены записи в таблице '%s.%s', не удовлетворяющие условию: 'Данные колонки  '%s' равны '%s''",
+                this.getID(),
+                this.getName(),
+                column,
+                value));
+    }
+
+    /**
+     * Проверяет значения колонки равны значению.
+     * !!! Перед проверкой следует считать данные в буфер таблицы !!!
+     *
+     * @param column Имя колонки таблицы
+     * @param value  Искомое значение
+     * @return Результат проверки
+     */
+    public boolean columnDataEqualsResult(String column, String value) {
         log.info(
                 "Проверка данных в таблице '{}.{}' по условию: 'Данные колонки '{}' равны '{}''",
                 this.getID(),
                 this.getName(),
                 column,
                 value);
-        assertTrue(this.data.getColumnData(column).parallelStream().allMatch(row -> row.contains(value)), String.format(
-                "Найдены записи в таблице '%s.%s', не удовлетворяющие условию: 'Данные колонки  '%s' равны '%s''",
-                this.getID(),
-                this.getName(),
-                column,
-                value));
+        boolean result = this.data.getColumnData(column).parallelStream().allMatch(row -> row.equals(value));
         log.info(
-                "В таблице '{}.{}' присутствуют данные, удовлетворяющие условию: 'Данные колонки '{}' равны '{}''",
+                "В таблице '{}.{}' {} данные, удовлетворяющие условию: 'Данные колонки '{}' равны '{}''",
                 this.getID(),
                 this.getName(),
+                (result ? "присутствуют" : "отсутствуют"),
                 column,
                 value);
+
+        return result;
     }
 
     /**
      * Check grid column data equals value.
      *
      * @param column Grid column
-     * @param value searching value
+     * @param value  searching value
+     *
+     * <p>При ошибке бросает исключение:
+     * @see AssertionFailedError
      */
     public void columnDataNotEquals(String column, String value) {
-        log.info(
-                "Проверка данных в таблице '{}.{}' по условию: 'Данные колонки '{}' не равны '{}''",
-                this.getID(),
-                this.getName(),
-                column,
-                value);
-        assertFalse(this.data.getColumnData(column).parallelStream().allMatch(row -> row.contains(value)), String.format(
+        assertFalse(this.columnDataEqualsResult(column, value), String.format(
                 "Найдены записи в таблице '%s.%s', не удовлетворяющие условию: 'Данные колонки  '%s' не равны '%s''",
                 this.getID(),
                 this.getName(),
                 column,
                 value));
-        log.info(
-                "В таблице '{}.{}' присутствуют данные, удовлетворяющие условию: 'Данные колонки '{}' не равны '{}''",
-                this.getID(),
-                this.getName(),
-                column,
-                value);
     }
 
     /**
-     * Select row by index
+     * Select row by index.
+     *
+     * Выбор строки по индексу.
      *
      * @param index Current index
+     *              Индекс строки
      */
     public void selectRow(int index) {
         assertDoesNotThrow(() -> {
             this.focus();
             log.info("Выбор {} строки в таблице", index + 1);
-            this.robot.keyPress(KeyEvent.VK_PAGE_UP);
-            this.robot.keyRelease(KeyEvent.VK_PAGE_UP);
-
-            this.robot.keyPress(KeyEvent.VK_HOME);
-            this.robot.keyRelease(KeyEvent.VK_HOME);
 
             for (int i = 0; i < index; i++) {
                 this.robot.keyPress(KeyEvent.VK_DOWN);
@@ -374,7 +463,6 @@ public class SSMGrid {
      */
     public SSMGridData selectAndAcceptCell(int index) {
         log.info("Выделение строки таблицы красным цветом");
-        this.selectRow(index);
         return assertDoesNotThrow(() -> {
 
             log.debug("Вычисление координат строки {} таблицы", index);
@@ -402,12 +490,12 @@ public class SSMGrid {
     /**
      * Выделение ячейки и проверка,
      * что она выделилась синим цветом.
-     *
+     * <p>
      * Цвет задан в настройках.
-     * @see Config#selectedRowColor
      *
      * @param index Индекс строки с 0
      * @return Данные из строки
+     * @see Config#selectedRowColor
      */
     public SSMGridData selectRowAndCheckSelection(int index) {
         log.info("Выделение сроки и чтение данных с номером {}", index + 1);
@@ -425,12 +513,12 @@ public class SSMGrid {
     /**
      * Выделение ячейки и проверка,
      * что она выделилась синим цветом.
-     *
+     * <p>
      * Цвет задан в настройках.
-     * @see Config#selectedRowColor
      *
      * @param index Индекс строки с 0
      * @return Данные из строки
+     * @see Config#selectedRowColor
      */
     public SSMGridData selectRowAndCheckAssigned(int index) {
         log.info("Выделение сроки и чтение данных с номером {}", index + 1);
@@ -447,8 +535,9 @@ public class SSMGrid {
 
     /**
      * Проверка цвета строки таблицы.
+     *
      * @param cellRectangle Положение локатора таблицы
-     * @param color Искомый цвет
+     * @param color         Искомый цвет
      * @return Результат проверки
      */
     public boolean checkRowColor(Rectangle cellRectangle, Color color) {
@@ -496,6 +585,12 @@ public class SSMGrid {
      * @return Mapped grid data
      */
     private SSMGridData readData(Runnable preActions, boolean checkContainsData) {
+        log.debug(
+                "Проверка на наличие данных таблицы '{}. {}' {}",
+                this.getID(),
+                this.getName(),
+                (checkContainsData ? "Включена" : "Выключена"));
+        CheckerTools.clearClipboard();
         String stringData = "";
         int limit = 60000;
 
@@ -534,11 +629,28 @@ public class SSMGrid {
                     "Не удалось выполнить ожидание при считывании данных в таблице");
             limit -= 1000;
         }
+
+        WinDef.HWND handle = User32.INSTANCE.FindWindow(null, "Ssm");
+        if (handle != null) {
+            assertDoesNotThrow(() -> {
+                Element windowRaw = UIAutomation.getInstance().getElementFromHandle(handle);
+                Window rejectWindow = new Window(new ElementBuilder().element(windowRaw));
+                rejectWindow.close();
+            }, "Не удалось закрыть окно отказа в доступе");
+        }
+
         if (checkContainsData)
             assertNotEquals(stringData, "", "Не удалось считать данные из таблицы");
 
+        log.debug("Таблица '{}. {}' успешно прочитана", this.getID(), this.getName());
         SSMGridData data = new SSMGridData(stringData);
-        data.convert();
+        data.convert(this.config.headerCount);
+        log.debug("Конвертирование данных таблицы '{}. {}'", this.getID(), this.getName());
+        log.debug("Данные успешно конвертированы.\nКоличество колонок - {}\nКоличество строк - {}", data.getHeaderSize(), data.getRowSize());
+        log.debug("Сохранение данных в буфере таблицы '{}. {}'", this.getID(), this.getName());
+        this.data = data;
+        log.debug("Данные сохранены");
+        this.focus();
         return data;
     }
 
@@ -601,6 +713,303 @@ public class SSMGrid {
     }
 
     /**
+     * Получает данные по индексу строки.
+     * Проверка данных по умолчанию выключена.
+     * @param index Индекс строки
+     */
+    public void getDataByRow(int index) {
+        this.getDataByRow(index, false);
+    }
+
+    /**
+     * Получает данные по индексу строки.
+     * @param index Индекс строки
+     * @param needCheck Нужна ли проверка данных
+     */
+    public SSMGridData getDataByRow(int index, boolean needCheck) {
+        this.focus();
+        this.selectRow(0);
+        Runnable run;
+        if(Objects.isNull((run = this.getSelectRowActionWithSelectionBar())))
+            run  = this.getSelectionRowByKeyboard();
+
+        this.data = this.readData(run, needCheck);
+        CheckerDesktopManipulator.Keyboard.sendKeys("HOME");
+        return this.data;
+    }
+
+    /**
+     * Выделение строки с помощью клавиатуры.
+     *
+     * Выделение происходит с помощью комбинации SHIFT + END.
+     *
+     * @return Действие для выделения строки
+     */
+    private Runnable getSelectionRowByKeyboard() {
+        return  () -> CheckerDesktopManipulator.Keyboard.sendKeys("END", KeyEvent.VK_SHIFT);
+    }
+
+    /**
+     * Выделение строки с помощью служебного столбца для выделения.
+     *
+     * Работает только в случае,
+     * если таблица имеет сервисный столбец для выделения.
+     * @see Config#hasSelectionBar - есть ли служебная колонка для выделения.
+     *
+     * @return Действие для выделения строки
+     */
+    private Runnable getSelectRowActionWithSelectionBar() {
+        if(!this.config.hasSelectionBar)
+            return null;
+        int rowY;
+        if((rowY = this.getRowYCoordinateByCellLocator()) == -1)
+            rowY = this.getRowYCoordinateBySelectedRowColor();
+
+        if(rowY == -1)
+            return null;
+
+        int x = this.getRectangle().x + 3;
+        int y = rowY;
+
+        return  () -> CheckerDesktopManipulator.Mouse.click(x, y);
+    }
+
+    /**
+     * Поучает Y координату строки по цвету выделенной ячейки.
+     *
+     * Работает только в случае,
+     * если таблица имеет сервисный столбец для выделения.
+     * @see Config#hasSelectionBar - есть ли служебная колонка для выделения.
+     *
+     * Если все ячейки строки не фокусируемые или не удается сформировать координату,
+     * то метод вернет "-1".
+     *
+     * @return Y координата строки таблицы
+     */
+    private int getRowYCoordinateBySelectedRowColor() {
+        log.debug("Вычисление координаты Y строки по цвету выделенной ячейки");
+        Rectangle rect = this.getRectangle();
+        int result = -1;
+        for (int i = rect.y; i < rect.height; i++) {
+            if(this.robot.getPixelColor((int) rect.getCenterX(), i).equals(this.config.selectedRowColor)) {
+                result = i + 3;
+                log.debug("Координаты Y строки получена - '{}'", result);
+                break;
+            }
+        }
+        if(result == -1)
+            log.debug("Не удалось вычислить координату Y строки таблицы");
+        return result;
+    }
+
+    /**
+     * Поучает Y координату строки по ячейки-локаторе.
+     *
+     * Работает только в случае,
+     * если таблица имеет сервисный столбец для выделения.
+     * @see Config#hasSelectionBar - есть ли служебная колонка для выделения.
+     *
+     * Если все ячейки строки не фокусируемые или не удается сформировать координату,
+     * то метод вернет "-1".
+     *
+     * @return Y координата строки таблицы
+     */
+    private int getRowYCoordinateByCellLocator() {
+        log.debug("Попытка вычисления Y координаты строки через ячейку-локатор");
+        int result = -1;
+        try {
+            CheckerDesktopManipulator.Keyboard.sendKeys("SPACE");
+            Thread.sleep(500);
+            Element cell = UIAutomation.getInstance().getFocusedElement();
+            if (cell.getControlType() == ControlType.Edit.getValue() && cell.getClassName().equals("TcxCustomInnerTextEdit")) {
+                result = (int) cell.getBoundingRectangle().toRectangle().getCenterY();
+                log.debug("Y координата найдена - '{}'", result);
+            }
+        } catch (Exception ex) {
+            log.debug("Не удалось вычислить Y координату строки через ячейку-локатор");
+        }
+
+        return result;
+    }
+
+    /**
+     * Фильтрует таблицу с помощью интерфейса по ID фильтра.
+     * Для нахождения конфигурации фильтра следует указать в описании таблицы
+     * список фильтров('filters'), указать 'id'
+     * и задать поля указанные в конфигураторе.
+     * @see ConditionConfigurer - конфигуратор фильтра.
+     *
+     * @param filterID ID фильтра
+     */
+    public void filter(String filterID) {
+        ConditionConfigurer config = ConditionConfigurer.getConfig(this.DEFINITION, filterID);
+        this.filter(config);
+
+    }
+
+    /**
+     * Фильтрует таблицу с помощью интерфейса через конфигуратор.
+     * @see ConditionConfigurer - конфигуратор фильтра.
+     *
+     * @param config Конфигуратор
+     */
+    public void filter(ConditionConfigurer config) {
+        this.focus();
+        this.getDataByRow(0, true);
+        String cellName = (this.config.headerCount == 0) ? config.columnIndexReference : config.column;
+        this.moveToCell(cellName);
+        if(this.config.hasHeader && this.config.headerCount == 0) {
+            this.filterByUnreadColumns(config);
+        } else if(this.config.unFocused.contains(config.column)) {
+            this.filterByUnreadColumns(config);
+        } else {
+            this.filterByEnterCell(config);
+        }
+    }
+
+    /**
+     * Фильтрует таблицу с помощью ячейки-локатора.
+     * Ячейка-локатор появляется только тогда,
+     * когда есть возможность установить фокус на данную ячейку.
+     *
+     * @deprecated Следует пользоваться новым методом 'filter'.
+     *
+     * @param configurer Конфигуратор фильтра
+     */
+    @Deprecated
+    private void filterByEnterCell(ConditionConfigurer configurer) {
+        try {
+            EditBox cell = this.enterToCell();
+            Rectangle cellRectangle = cell.getBoundingRectangle().toRectangle();
+            this.findAndClickFilterButton(cellRectangle);
+            this.callFilterWindow();
+            GridFilterWindow filter = CheckerDesktopTest.getCurrentApp().window("ssm_core_filter", GridFilterWindow.class);
+            filter.setFilterByConfigurer(configurer);
+            filter.clickOK();
+        } catch (Exception ex) {
+            this.filterByUnreadColumns(configurer);
+        }
+    }
+
+    public EditBox enterToCell() {
+        CheckerDesktopManipulator.Keyboard.sendKeys("SPACE");
+        assertDoesNotThrow(() -> Thread.sleep(1000), String.format("Не удалось дождаться входа в ячейку таблицы '%s. %s'", this.getID(), this.getName()));
+        Element raw = assertDoesNotThrow(() -> UIAutomation.getInstance().getFocusedElement(), "Не удалось получить элемент управления под фокусом");
+        assertDoesNotThrow(() -> {
+            if(raw.getControlType() != ControlType.Edit.getValue() && !raw.getClassName().equalsIgnoreCase("TcxCustomInnerTextEdit"))
+                throw new Exception(String.format("Элемент управления под фокусом не является ячейкой таблицы '%s. %s'", this.getID(), this.getName()));
+        });
+        return new EditBox(new ElementBuilder().element(raw));
+    }
+
+    private void filterByUnreadColumns(ConditionConfigurer config) {
+        Map.Entry<String, Rectangle> header = this.getHeadersByOCR(config);
+        this.findFilterButtonFromHeaderRectangle(header.getValue(), header.getKey());
+        this.callFilterWindow();
+        GridFilterWindow filter = CheckerDesktopTest.getCurrentApp().window("ssm_core_filter", GridFilterWindow.class);
+        filter.setFilterByConfigurer(config);
+        filter.clickOK();
+    }
+
+    /**
+     * Проверяет являться ли колонка искомой.
+     * @param header Заголовок
+     * @param config Конфигуратор условий.
+     * @return Заголовок
+     */
+    private boolean getSearchingColumn(Map.Entry<String, Rectangle> header, ConditionConfigurer config) {
+        Pattern pattern;
+        if(Objects.nonNull(config.columnCondition)) {
+            pattern = Pattern.compile(config.columnCondition);
+        } else {
+            pattern = Pattern.compile("^" + config.column);
+        }
+
+        return pattern.matcher(header.getKey()).lookingAt();
+    }
+
+    /**
+     * Ищет кнопку фильтра на колонке.
+     * @param headerRectangle Положение колонки
+     * @param columnName Имя колонки
+     */
+    private void findFilterButtonFromHeaderRectangle(Rectangle headerRectangle, String columnName) {
+        int y = (int) headerRectangle.getCenterY() - 5;
+        boolean found = false;
+        for (int i = (int) headerRectangle.getMaxX(); i > headerRectangle.x; i--) {
+            AutomationMouse.getInstance().setLocation(i, y);
+            if(this.robot.getPixelColor(i + 3, y).equals(this.config.filterColor)) {
+                AutomationMouse.getInstance().leftClick();
+                found = true;
+                break;
+            }
+        }
+        assertTrue(found, String.format("Не удалось найти кнопку фильтра колонки '%s' таблицы '$%s. %s'", columnName, this.getID(), this.getName()));
+    }
+
+    /**
+     * Считывание колонок методом OCR.
+     *
+     * Срабатывает в случае, когда в настройках указано:
+     * @see Config#headerCount - количество заголовков при считывании в буфер = '0'.
+     * @see Config#hasHeader - имеются ли заголовки = 'true'
+     *
+     * Механизм:
+     * 1) От начала таблицы + 2px ищет цвет равный цвету,
+     * указанного в настройках.
+     * @see Config#headerColor - Цвет колонок
+     * 2) Считывает пиксели пока не найдет цвет указанный в настройках.
+     * @see Config#headerSplitColor - Цвет разделения заголовков.
+     * При нахождении цвета формирует местоположение заголовка и считывает.
+     *
+     * @return Заголовки и их положение
+     */
+    private Map.Entry<String, Rectangle> getHeadersByOCR(ConditionConfigurer config) {
+        log.debug("Вычисление положения строки заголовков таблицы '{}. {}'", this.getID(), this.getName());
+        int rectangleY = -1;
+        Rectangle tableRect = this.getRectangle();
+        for (int i = tableRect.y; i < tableRect.height; i++) {
+            if(this.robot.getPixelColor(tableRect.x + 2, i).equals(this.config.tableHeaderColor)) {
+                rectangleY = i;
+                break;
+            }
+        }
+        assertNotEquals(rectangleY, -1, String.format(
+                "Не найден цвет-локатор строки с заголовками талицы '%s. %s'",
+                this.getID(),
+                this.getName()));
+        log.debug("Положение строки заголовков вычислено. Y - '{}'", rectangleY);
+        log.debug("Считывание колонок таблицы '{}. {}'", this.getID(), this.getName());
+        Map.Entry<String, Rectangle> header = null;
+        int rectX = tableRect.x + 2;
+        for (int i = rectX; i < tableRect.width; i++) {
+            if(this.robot.getPixelColor(i, rectangleY).equals(this.config.headerSplitColor)) {
+                int width = i - rectX;
+                Rectangle headerRectangle = new Rectangle(rectX, rectangleY, width - 1, 22);
+                CheckerOCRUtils.changeScale(4);
+                String text = CheckerOCRUtils.getTextFromRectangle(headerRectangle);
+                CheckerOCRUtils.changeScale(3);
+                log.debug("Поучен текст колонки - '{}'", text);
+                String headerName = text
+                        .replaceAll("[^A-Za-zА-Яа-я0-9,\\u00a9 ]", "")
+                        .replace("\u00a9", "С")
+                        .trim();
+                if(this.getSearchingColumn(Map.entry(headerName, headerRectangle), config)) {
+                    header = Map.entry(headerName, headerRectangle);
+                    break;
+                } else {
+                    log.debug("Найдена колонка - '{}'", headerName);
+                    i += 1;
+                    rectX = i;
+                }
+            }
+        }
+        assertNotNull(header, String.format("Не удалось найти заголовок '%s' таблицы '%s. %s'", config.column, this.getID(), this.getName()));
+        log.debug("Заголовок найден - '{}'", header.getKey());
+
+        return header;
+    }
+    /**
      * Clear GUI filter.
      */
     public void clearFilter() {
@@ -629,8 +1038,24 @@ public class SSMGrid {
     /**
      * Filter table by GUI.
      *
-     * @param config    Condition configurer
+     * @deprecated Следует пользоваться новым методом 'filter'.
      */
+    @Deprecated
+    public void filterByGUI(String configID) {
+        String[] columns = new String[this.config.unFocused.size()];
+        AtomicInteger index = new AtomicInteger(0);
+        this.config.unFocused.forEach(member -> columns[index.getAndIncrement()] = member.toString());
+        this.filterByGUI(ConditionConfigurer.getConfig(this.DEFINITION, configID), CheckerOCRLanguage.RUS, (columns));
+    }
+
+    /**
+     * Filter table by GUI.
+     *
+     * @deprecated Следует пользоваться новым методом 'filter'.
+     *
+     * @param config Condition configurer
+     */
+    @Deprecated
     public void filterByGUI(ConditionConfigurer config) {
         String[] columns = new String[this.config.unFocused.size()];
         AtomicInteger index = new AtomicInteger(0);
@@ -640,22 +1065,26 @@ public class SSMGrid {
 
     /**
      * Filter table by GUI.
+     * @deprecated Следует пользоваться новым методом 'filter'.
      *
      * @param config    Condition configurer
      * @param unFocused Unfocused columns
      */
+    @Deprecated
     public void filterByGUI(ConditionConfigurer config, String... unFocused) {
         this.filterByGUI(config, CheckerOCRLanguage.RUS, unFocused);
     }
 
     /**
      * Filter table by GUI.
+     * @deprecated Следует пользоваться новым методом 'filter'.
      *
      * @param config    Condition configurer
      * @param unFocused Unfocused columns
      */
+    @Deprecated
     public void filterByGUI(ConditionConfigurer config, CheckerOCRLanguage language, String... unFocused) {
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i <= this.config.filterCallingTryCont; i++) {
             try {
                 log.info("Производится фильтрация через интерфейс");
                 if (unFocused == null)
@@ -676,16 +1105,14 @@ public class SSMGrid {
                 this.findAndClickFilterButton(cellRectangle);
                 this.callFilterWindow();
 
-                Element focused = assertDoesNotThrow(() -> {
-                    Thread.sleep(8000);
-                    return UIAutomation.getInstance().getFocusedElement();
-                }, "Не удалось найти ячейку-локатор строки");
-                this.fillFilterDialog(focused, config);
+                GridFilterWindow filter = CheckerDesktopTest.getCurrentApp().window("ssm_core_filter", GridFilterWindow.class);
+                filter.setFilterByConfigurer(config);
+                filter.clickOK();
                 log.info("Фильтрация выполнена");
                 break;
             } catch (Exception | Error ex) {
                 log.warn("Повторная попытка фильтрации. Так как была прервана по ошибке");
-                if(i != 3) {
+                if (i != this.config.filterCallingTryCont) {
                     assertDoesNotThrow(() -> Thread.sleep(1000));
                 } else {
                     fail(ex);
@@ -697,6 +1124,7 @@ public class SSMGrid {
 
     /**
      * Перемещение к ячейке по имени колонки и первой строки по умолчанию.
+     *
      * @param columnName Имя колонки
      */
     public void moveToCell(String columnName) {
@@ -705,8 +1133,9 @@ public class SSMGrid {
 
     /**
      * Перемещение к ячейке по имени колонки и номеру строки.
+     *
      * @param columnName Имя колонки
-     * @param rowIndex Номер строки
+     * @param rowIndex   Номер строки
      */
     public void moveToCell(String columnName, int rowIndex) {
         log.debug("Фокус над таблицей");
@@ -736,10 +1165,10 @@ public class SSMGrid {
         }
 
         log.debug("Перемещение к нужной ячейке");
-        for (String header:this.data.getHeaders()) {
-            if(header.equals(columnName))
+        for (String header : this.data.getHeaders()) {
+            if (header.equals(columnName))
                 break;
-            if(!this.config.getUnFocused().contains(header)) {
+            if (!this.config.getUnFocused().contains(header)) {
                 CheckerDesktopManipulator.Keyboard.sendKeys("RIGHT");
             }
         }
@@ -747,6 +1176,16 @@ public class SSMGrid {
         log.debug("Перемещение к ячейке успешно завершено");
     }
 
+    /**
+     * Перемещается к ячейке.
+     * @param rowPoint Точка-локатор строки
+     * @param data Данные
+     * @param targetCell Нужная ячейка
+     * @param columnCondition Паттерн колони
+     * @param language Язык распознавания
+     * @param unFocused Не фокусируемые ячейки
+     * @return Положение ячейки
+     */
     private Rectangle moveToCell(Point rowPoint, SSMGridData data, String targetCell, String columnCondition, CheckerOCRLanguage language, String... unFocused) {
         List<String> unFocusedList = Arrays.asList(unFocused);
         AtomicReference<Rectangle> out = new AtomicReference<>();
@@ -758,7 +1197,7 @@ public class SSMGrid {
         this.robot.keyPress(KeyEvent.VK_ESCAPE);
         this.robot.keyRelease(KeyEvent.VK_ESCAPE);
 
-        for (String header: data.getHeaders()) {
+        for (String header : data.getHeaders()) {
             if (!unFocusedList.contains(header)) {
                 if (header.equals(targetCell)) {
                     this.robot.keyPress(KeyEvent.VK_SPACE);
@@ -807,153 +1246,6 @@ public class SSMGrid {
         return out.get();
     }
 
-    /**
-     * Fill filter dialog window.
-     *
-     * @param focused Focused element after filter button was pressed
-     */
-    private void fillFilterDialog(Element focused, ConditionConfigurer config) {
-        // поиск родительского окна фильтра
-        Element focusedEl = focused;
-        AtomicReference<Element> temp = new AtomicReference<>(focusedEl);
-        int controlType = 0;
-        while (controlType != ControlType.Window.getValue()) {
-            temp.set(assertDoesNotThrow(() -> UIAutomation.getInstance().getControlViewWalker().getParentElement(temp.get())));
-            int ct = assertDoesNotThrow(() -> temp.get().getControlType());
-            if (ct == ControlType.Window.getValue()) {
-                focusedEl = temp.get();
-                break;
-            }
-        }
-
-        Window dialog = new Window(new ElementBuilder().element(focusedEl));
-        assertDoesNotThrow(() -> assertEquals("Настройка фильтра", dialog.getName(), "Под фокусом находится окно не являющейся окном фильтрации"));
-        List<EditBox> edits = assertDoesNotThrow(
-                () -> dialog.getChildren(true).parallelStream().filter(control -> {
-                            try {
-                                return control.getElement().getControlType() == ControlType.Edit.getValue();
-                            } catch (AutomationException e) {
-                                return false;
-                            }
-                        })
-                        .map(element -> new EditBox(new ElementBuilder().element(element.getElement())))
-                        .collect(Collectors.toList()),
-                "Не удалось заполнить окно фильтрации");
-        this.fillFilterConditionFiled(dialog, edits, config);
-        this.fillFilterValueFiled(edits, config);
-        assertDoesNotThrow(() -> dialog.getButton("OK").click(), "Не удалось нажать кнопку 'ОК' в окне фильтра");
-    }
-
-    /**
-     * Fill filter dialog value fields.
-     *
-     * @param edits      Dialog edits
-     * @param configurer Condition configurer
-     */
-    private void fillFilterValueFiled(List<EditBox> edits, ConditionConfigurer configurer) {
-        List<EditBox> conditionFields = edits.parallelStream().filter(control -> {
-            try {
-                return control.getClassName().equals("TcxCustomInnerTextEdit");
-            } catch (AutomationException e) {
-                return false;
-            }
-        }).collect(Collectors.toList());
-
-        assertFalse(conditionFields.isEmpty(), "Не удалось найти поля-значения фильтра");
-
-        AtomicInteger minY = new AtomicInteger((int) this.getRectangle().getMaxY());
-        AtomicReference<EditBox> higherEdit = new AtomicReference<>();
-        conditionFields.forEach(field -> {
-            int y = assertDoesNotThrow(() -> field.getBoundingRectangle().top, "Не удалось получить высоту поля-значения фильтра");
-            if (y < minY.get()) {
-                higherEdit.set(field);
-                minY.set(y);
-            }
-        });
-
-        EditBox firstConditionField = higherEdit.get();
-        assertNotNull(configurer.value1, "В конфигурации фильтрации обязательно должна быть заполнена переменная 'value1'");
-        assertDoesNotThrow(() -> {
-            Thread.sleep(1000);
-            firstConditionField.setValue(configurer.value1);
-        }, "Не удалось вставить значение в первое условие фильтрации");
-
-        if (configurer.separator != null && configurer.separator != Separator.NONE) {
-            AtomicInteger maxY = new AtomicInteger(0);
-            AtomicReference<EditBox> lowerEdit = new AtomicReference<>();
-            conditionFields.forEach(field -> {
-                int y = assertDoesNotThrow(() -> field.getBoundingRectangle().top, "Не удалось получить высоту поля-значения фильтра");
-                if (y > maxY.get()) {
-                    lowerEdit.set(field);
-                    maxY.set(y);
-                }
-            });
-
-            EditBox secondField = lowerEdit.get();
-            assertNotNull(configurer.value2, "В конфигурации фильтрации должна быть заполнена переменная 'value2'");
-            assertDoesNotThrow(() -> {
-                Thread.sleep(1000);
-                secondField.setValue(configurer.value2);
-            }, "Не удалось вставить значение в первое условие фильтрации");
-        }
-    }
-
-    /**
-     * Fill condition fields.
-     *
-     * @param dialog     Filter dialog
-     * @param edits      Filter edits
-     * @param configurer Conditions configurer
-     */
-    private void fillFilterConditionFiled(Window dialog, List<EditBox> edits, ConditionConfigurer configurer) {
-        List<EditBox> conditionFields = edits.parallelStream().filter(control -> {
-            try {
-                return control.getClassName().equals("TcxCustomComboBoxInnerEdit");
-            } catch (AutomationException e) {
-                return false;
-            }
-        }).collect(Collectors.toList());
-
-        assertFalse(conditionFields.isEmpty(), "Не удалось найти поля-условия фильтра");
-
-        AtomicInteger minY = new AtomicInteger((int) this.getRectangle().getMaxY());
-        AtomicReference<EditBox> higherEdit = new AtomicReference<>();
-        conditionFields.forEach(field -> {
-            int y = assertDoesNotThrow(() -> field.getBoundingRectangle().top, "Не удалось получить высоту поля-условия фильтра");
-            if (y < minY.get()) {
-                higherEdit.set(field);
-                minY.set(y);
-            }
-        });
-
-        EditBox firstConditionField = higherEdit.get();
-        assertNotNull(configurer.condition1.value, "В конфигурации фильтрации обязательно должна быть заполнена переменная 'condition1'");
-        assertDoesNotThrow(() -> {
-            Thread.sleep(1000);
-            firstConditionField.setValue(configurer.condition1.value);
-            Thread.sleep(1000);
-        }, "Не удалось вставить значение в первое условие фильтрации");
-
-        if (configurer.separator != null && configurer.separator != Separator.NONE) {
-            AtomicInteger maxY = new AtomicInteger(0);
-            AtomicReference<EditBox> lowerEdit = new AtomicReference<>();
-            conditionFields.forEach(field -> {
-                int y = assertDoesNotThrow(() -> field.getBoundingRectangle().top, "Не удалось получить высоту поля-условия фильтра");
-                if (y > maxY.get()) {
-                    lowerEdit.set(field);
-                    maxY.set(y);
-                }
-            });
-
-            EditBox secondField = lowerEdit.get();
-            assertDoesNotThrow(() -> dialog.getButton(configurer.separator.value).click(), "Не удалось переключить соединение условий - " + configurer.separator.getValue());
-            assertNotNull(configurer.condition2.value, "В конфигурации фильтрации должна быть заполнена переменная 'condition2'");
-            assertDoesNotThrow(() -> {
-                Thread.sleep(1000);
-                secondField.setValue(configurer.condition2.value);
-            }, "Не удалось вставить значение в первое условие фильтрации");
-        }
-    }
 
     /**
      * Find and click filter button on column header.
@@ -962,7 +1254,17 @@ public class SSMGrid {
      * and the mouse selection button is color-coded
      * in the variable 'filterColor'.
      *
+     * Находит и нажимает кнопку фильтра в названии колонки.
+     * Механизм:
+     * 1) Метод получает положение ячейки - локатора.
+     * 2) Двигает мышкой вверх, считывает цвет пикселя и сравнивает с индикатором пока, не появится фильтр
+     * 3) Цвет - индикатор задан в конфигурациях таблицы.
+     * @see Config#filterColor
+     *
+     * 3) Если находит цвет схожий с индикатором отступает 3px вверх и нажимает левой кнпкой мыши.
+     *
      * @param cellRectangle Cell-locator rectangle
+     *                      Ячейка - локатор таблицы
      */
     private void findAndClickFilterButton(Rectangle cellRectangle) {
         log.info("Поиск фильтра в таблице");
@@ -987,6 +1289,10 @@ public class SSMGrid {
 
     /**
      * Calling filter window.
+     * Вызывает око фильтрации.
+     * После нажатия на кнопку фильтра в колонке таблицы
+     * выводится лист выбора значения.
+     * В этом листе метод выбирает запись "Выбор...".
      */
     private void callFilterWindow() {
         log.info("Фильтр найден. Поиск окна фильтрации");
@@ -994,30 +1300,60 @@ public class SSMGrid {
                         UIAutomation.getInstance().getFocusedElement(),
                 "Не удалось найти список фильтрации таблицы");
         Rectangle searchRectangle = assertDoesNotThrow(() -> searchList.getBoundingRectangle().toRectangle(), "Не удалось найти положения листа фильтрации");
+        CheckerOCRUtils.changeScale(4);
         CheckerOCRUtils.getTextAndMove(
-                new Rectangle(searchRectangle.x - 5, searchRectangle.y, searchRectangle.width + 5, searchRectangle.height),
-                        "Выб", ITessAPI.TessPageIteratorLevel.RIL_WORD);
+                new Rectangle(searchRectangle.x - 2, searchRectangle.y, searchRectangle.width, searchRectangle.height),
+                "Выб", ITessAPI.TessPageIteratorLevel.RIL_WORD);
+        CheckerOCRUtils.changeScale(3);
         AutomationMouse.getInstance().leftClick();
         log.info("Окно фильтрации вызвано");
     }
 
-    public void selectTab(String locator) {
-        log.debug("Переключение кладки таблицы. Локатор - '{}'", locator);
+    /**
+     * Выбирает вкладку над таблицей.
+     * @param name Имя вкладки
+     */
+    public void selectTab(String name) {
+        log.debug("Переключение кладки таблицы. Локатор - '{}'", name);
         Rectangle place = this.getRectangle();
-        log.debug("Вычисление положения вкладок. Выставлена высота вкладок - '{}'", this.config.pageHeight);
-        int x = place.x;
-        int y = place.y - this.config.pageHeight;
-        int height = this.config.pageHeight;
-        int width = place.width;
-        Rectangle pagePlace = new Rectangle(x, y, width, height);
-        log.debug("Высота вкладок таблицы вычислена. Расположение - '{}'", pagePlace);
-        log.debug("Нажатие на локатор");
+        CheckerDesktopWidget w = new CheckerDesktopWidget(this.control, this.control, this.DEFINITION);
+        SSMTools pages = new SSMTools(w);
 
-        CheckerOCRUtils.changeScale(5);
-        CheckerOCRUtils.getTextAndMove(pagePlace, locator, CheckerOCRLanguage.RUS, ITessAPI.TessPageIteratorLevel.RIL_WORD);
-        CheckerOCRUtils.changeScale(3);
-        AutomationMouse.getInstance().leftClick();
-        log.debug("Вкладка успешно переключена");
+        log.debug("Поиск вкладки '{}' таблицы '{}. {}'",
+                name,
+                this.getID(),
+                this.getName());
+        List<Map.Entry<String, Rectangle>> tabs = pages.getTabs(this.config.pageWordSpace);
+        Map.Entry<String, Rectangle> tab = tabs
+                .parallelStream()
+                .filter(tabEntry -> tabEntry.getKey().equalsIgnoreCase(name))
+                .findFirst()
+                .orElseThrow(
+                        () -> {
+                            throw new AssertionFailedError(String.format(
+                                    "Не удалось найти вкладку '%s' таблицы '%s. %s'",
+                                    name,
+                                    this.getID(),
+                                    this.getName()));
+                        });
+        log.debug("Нажатие на вкладку {}' таблицы '{}. {}'",
+                name,
+                this.getID(),
+                this.getName());
+        CheckerDesktopManipulator.Mouse.click((int) tab.getValue().getCenterX(), (int) tab.getValue().getCenterY());
+        log.debug("Вкладка {} таблицы '{}. {}' успешно переключена",
+                name,
+                this.getID(),
+                this.getName());
+    }
+
+    /**
+     * Получает конфигурацию фильтра.
+     * @param filterID ID Фильтра
+     * @return Конфигурация фильтра
+     */
+    public ConditionConfigurer getFilterConfig(String filterID) {
+        return ConditionConfigurer.getConfig(this.DEFINITION, filterID);
     }
 
     /**
@@ -1032,15 +1368,93 @@ public class SSMGrid {
     public static class ConditionConfigurer {
         String column;
         String columnCondition;
+        String columnIndexReference;
         String value1;
         String value2;
         Condition condition1;
         Condition condition2;
         Separator separator;
+
+        /**
+         * Получает описание конфигуратора фильтра из конфигурации таблицы.
+         *
+         * @param DEFINITION Описание таблицы
+         * @param FILTER_ID  ID фильтра
+         * @return Конфигуратор фильтра
+         */
+        public static ConditionConfigurer getConfig(Map<String, Object> DEFINITION, String FILTER_ID) {
+            Map<String, Object> getFilterDefinition = getFilterByID(DEFINITION, FILTER_ID);
+            return assertDoesNotThrow(() -> {
+                ConditionConfigurer config = new ConditionConfigurer.ConditionConfigurerBuilder().build();
+                Arrays.stream(config.getClass().getDeclaredFields())
+                        .parallel()
+                        .forEach(field -> fillField(CheckerTools.castDefinition(getFilterDefinition.get("filter")), field, config));
+                return config;
+            }, "Не удалось конвертировать описание в конфигурацию фильтра");
+        }
+
+        /**
+         * Заполняет поле из описания фильтра.
+         *
+         * @param DEFINITION Описание фильтра
+         * @param field      Поле
+         * @param config     Конфигуратор
+         */
+        private static void fillField(Map<String, Object> DEFINITION, Field field, ConditionConfigurer config) {
+            String name = field.isAnnotationPresent(CheckerDefinitionValue.class)
+                    ? field.getAnnotation(CheckerDefinitionValue.class).value()
+                    : field.getName();
+
+            if (DEFINITION.containsKey(name)) {
+                field.setAccessible(true);
+                Object value;
+                if(field.getType().isEnum()) {
+                    if(field.getType().equals(SSMGrid.Condition.class))
+                        value = assertDoesNotThrow(() -> SSMGrid.Condition.valueOf(DEFINITION.get(name).toString()),"В перечисленных значениях условий '" + DEFINITION.get(name) + "' не найдено");
+                    else
+                        value = assertDoesNotThrow(() -> SSMGrid.Separator.valueOf(DEFINITION.get(name).toString()),"В перечисленных значениях условий '" + DEFINITION.get(name) + "' не найдено");
+                } else {
+                    value = String.valueOf(DEFINITION.get(name));
+                    if(value instanceof String) {
+                        if(value.toString().startsWith("${")) {
+                            value = CheckerConstants.getConstant(value.toString().trim().replaceAll("[${}]", ""));
+                        }
+                    }
+                }
+                Object finalValue = value;
+                assertDoesNotThrow(() -> field.set(config, finalValue), "Не удалось получить доступ к полю конфигуратора фильтра");
+                field.setAccessible(false);
+            }
+        }
+
+        /**
+         * Получает конфигурацию фильтров из описания таблицы.
+         *
+         * @param DEFINITION Описание таблицы.
+         * @param FILTER_ID  ID фильтра
+         * @return Описание конфигурации
+         */
+        private static Map<String, Object> getFilterByID(Map<String, Object> DEFINITION, String FILTER_ID) {
+            assertTrue(DEFINITION.containsKey("filters"), "Описание таблицы не содержит описание фильтров (ключ 'filters')");
+            List<Map<String, Object>> filters = CheckerTools.castDefinition(DEFINITION.get("filters"));
+            assertNotEquals(filters.size(), 0, "Не удалось найти фильтр с ID - '" + FILTER_ID + "'. Список фильтров пуст");
+            return filters
+                    .parallelStream()
+                    .filter(def -> {
+                        assertTrue(def.containsKey("filter"),"Не найден ключ 'filter' описаниях фильтра");
+                        Map<String, Object> temp = CheckerTools.castDefinition(def.get("filter"));
+                        return temp.getOrDefault("id", "").toString().equals(FILTER_ID);
+                    })
+                    .findFirst()
+                    .orElseThrow(() -> {
+                        throw new AssertionFailedError("Не найден фильтр с ID - " + FILTER_ID);
+                    });
+        }
     }
 
     /**
      * GUI condition separator.
+     * Перечисление связки фильтров.
      *
      * @author vd.zinovev
      */
@@ -1059,6 +1473,7 @@ public class SSMGrid {
 
     /**
      * GUI condition.
+     * Условия фильтрации.
      *
      * @author vd.zinovev
      */
@@ -1086,30 +1501,128 @@ public class SSMGrid {
         }
     }
 
+    /**
+     * Конфигурация таблицы.
+     *
+     * Для изменения в описании таблицы необходимо задать ключ 'config'
+     * и задать нужные поля обозначенные в аннотации.
+     * @see CheckerDefinitionValue
+     *
+     * @author vd.zinovev
+     */
     @FieldDefaults(level = AccessLevel.PRIVATE)
     @Data
     @NoArgsConstructor
     public static class Config {
+
+        /**
+         * Цвет заголовков.
+         */
         Color headerColor = new Color(244, 244, 244);
+
+        /**
+         * Цвет назначенной строки.
+         */
         Color acceptedRowColor = new Color(255, 85, 85);
+
+        /**
+         *
+         */
         Color filterColor = new Color(181, 181, 181);
+
+        /**
+         * Цвет отчищенного фильтра.
+         */
         Color clearFilterColor = new Color(244, 244, 244);
+
+        /**
+         * Цвет фильтра при наведенной мыши.
+         */
         Color enabledFilterColor = new Color(179, 215, 244);
+
+        /**
+         * Цвет назначенной строки.
+         */
         Color assignedRowColor = new Color(95, 214, 106);
+
+        /**
+         * Цвет выбранной строки.
+         */
         Color selectedRowColor = new Color(129, 175, 233);
 
+        /**
+         * Цвет строки с заголовками.
+         */
+        Color tableHeaderColor = new Color(224, 224, 224);
+
+        /**
+         * Цвет разделения заголовков.
+         */
+        Color headerSplitColor = new Color(0, 0, 0);
+
+        /**
+         * Не фокусируемые колонки.
+         * В конфигурации указывается в качестве массива.
+         */
         @CheckerDefinitionValue("unfocused")
         ArrayList<Object> unFocused = new ArrayList<>();
 
+        /**
+         * Есть ли скролл снизу.
+         * Нужно для правильной отчистки фильтра.
+         */
         @CheckerDefinitionValue("has_scroll_bar")
         boolean hasBottomScroll = true;
+
+        /**
+         * Служебная колонка.
+         */
         @CheckerDefinitionValue("column_count")
         int columnCount = 1;
+
+        /**
+         * Есть ли служебная колонка для выделения строк.
+         */
         @CheckerDefinitionValue("has_selection_bar")
         boolean hasSelectionBar = true;
+
+        /**
+         * Высота вкладок таблицы.
+         */
         @CheckerDefinitionValue("page_height")
         int pageHeight = 30;
 
+        /**
+         * Количество строк заголовков таблицы.
+         */
+        @CheckerDefinitionValue("header_count")
+        int headerCount = 1;
+
+        /**
+         * Ширина пробела между словами вкладок.
+         */
+        @CheckerDefinitionValue("header_word_space")
+        int pageWordSpace = 140;
+
+        /**
+         * Максимальная задержка чтения данных.
+         */
+        @CheckerDefinitionValue("max_wait_delay")
+        int maxWaitDelay = 60;
+
+        /**
+         * Максимальная задержка чтения данных.
+         */
+        @CheckerDefinitionValue("filter_calling_try_cont")
+        int filterCallingTryCont = 3;
+
+        @CheckerDefinitionValue("has_header")
+        boolean hasHeader = true;
+
+        /**
+         * Конструктор конфигурации таблицы.
+         * @param definition Описание таблицы
+         */
         public Config(Map<String, Object> definition) {
             definition.entrySet().parallelStream().forEach(entry -> Arrays
                     .stream(this.getClass().getDeclaredFields()).parallel()

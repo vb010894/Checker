@@ -25,28 +25,6 @@ public class SSMG0102P0104 implements Runnable {
     final CheckerDesktopWindow root;
 
     /**
-     * Фильтр 'C' со значением не равным 'Открыт'.
-     */
-    final SSMGrid.ConditionConfigurer open_filter = SSMGrid
-            .ConditionConfigurer
-            .builder()
-            .condition1(SSMGrid.Condition.NOT_EQUAL)
-            .value1("Открыт")
-            .columnCondition("[CСсс]")
-            .column("С").build();
-
-    /**
-     * Фильтр 'C' со значением не равным 'Закрыт'.
-     */
-    final SSMGrid.ConditionConfigurer closed_filter = SSMGrid
-            .ConditionConfigurer
-            .builder()
-            .condition1(SSMGrid.Condition.NOT_EQUAL)
-            .value1("Закрыт")
-            .columnCondition("[CСсс]")
-            .column("С").build();
-
-    /**
      * Конструктор.
      * @param root Родительский элемент
      */
@@ -61,6 +39,7 @@ public class SSMG0102P0104 implements Runnable {
     public void run() {
         SapFilterWindow filter_window = SAPSSM.getFilter();
 
+        log.info("Шаг 1");
         log.info("Настройка фильтров");
         filter_window.toggleOpened(true);
         filter_window.selectShop("");
@@ -68,12 +47,13 @@ public class SSMG0102P0104 implements Runnable {
         filter_window.clickOK();
         log.info("Фильтры настроены");
 
+        log.info("Шаг 2");
         log.info("Открытие формы 'Заказы SAP'");
         SSMSapOrdersForm orders = this.root.form("mf", SSMSapOrdersForm.class);
         log.info("Форма 'Заказы SAP' успешно запущена");
         SSMGrid orders_grid = orders.getSapOrderGrid();
         log.info("Фильтрация колонки 'C' не равной 'Открыт'");
-        orders_grid.filterByGUI(open_filter);
+        orders_grid.filter("not_open_filter");
         log.info("Проверка данных");
         SSMGridData data = orders_grid.getDataFromRow(0);
         assertEquals(data.getRowSize(), 0, "Найдены записи не соответствующие условию: не равно 'Открыт'");
@@ -90,7 +70,7 @@ public class SSMG0102P0104 implements Runnable {
         filter_window.clickOK();
         log.info("Фильтры настроены");
 
-        orders_grid.filterByGUI(closed_filter);
+        orders_grid.filter("not_close_filter");
         log.info("Проверка данных");
         data = orders_grid.getDataFromRow(0);
         assertEquals(data.getRowSize(), 0, "Найдены записи не соответствующие условию: не равно 'Закрыт'");

@@ -4,6 +4,41 @@ search:
   ClassName: TdxRibbonGroupsDockControl
 elements:
   - element:
+      id: org_refresh
+      name: Кнопка 'Обновить'
+      buttonName: Обновить
+      search:
+        ClassName: TdxRibbonGroupBarControl
+        Name: ОПЕРАЦИИ
+  - element:
+      id: org_delete
+      name: Кнопка 'Удалить'
+      buttonName: Удалить
+      search:
+        ClassName: TdxRibbonGroupBarControl
+        Name: ОПЕРАЦИИ
+  - element:
+      id: org_block
+      name: Кнопка 'Блокировать'
+      buttonName: Блокировать
+      search:
+        ClassName: TdxRibbonGroupBarControl
+        Name: ОПЕРАЦИИ
+  - element:
+      id: org_edit
+      name: Кнопка 'Изменить'
+      buttonName: Изменить
+      search:
+        ClassName: TdxRibbonGroupBarControl
+        Name: ОПЕРАЦИИ
+  - element:
+      id: org_add
+      name: Кнопка 'Добавить'
+      buttonName: Добавить
+      search:
+        ClassName: TdxRibbonGroupBarControl
+        Name: ОПЕРАЦИИ
+  - element:
       id: sap_filter
       name: Кнопка 'Открыть'
       buttonName: Открыть

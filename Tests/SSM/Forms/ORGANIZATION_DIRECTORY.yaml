@@ -9,7 +9,20 @@ widgets:
   - path: SSM_TOOLS.yaml
 elements:
   - element:
-      id: data_table
+      id: org_data_table
       name: Таблица
+      config:
+        header_count: 0
+        unfocused: [ 0 ]
+        has_scroll_bar: false
+        max_wait_delay: 20
+      filters:
+        - filter:
+            id: number_filter
+            condition1: EQUAL
+            value1: 2
+            column: Номер
+            columnIndexReference: 1
+            columnCondition: "{1}[Нн]омер"
       search:
         ClassName: TcxGridSite

@@ -6,11 +6,7 @@
         <parameter name = "app" value = "SSM"/>
         <parameter name = "form.id" value = "organization_directory"/>
         <classes>
-            <class name = "ru.checker.tests.ssm.tests.org.SSMOrganizationDirectoryTest">
-                <methods>
-                    <include name = "SSMG0103P01"/>
-                </methods>
-            </class>
+            <class name = "ru.checker.tests.ssm.tests.org.SSMOrganizationDirectoryTest"/>
         </classes>
     </test>
 </suite>

@@ -1,4 +1,4 @@
-package ru.checker.tests.ssm.windows.templates;
+package ru.checker.tests.ssm.windows.core.templates;
 
 import lombok.AccessLevel;
 import lombok.Getter;

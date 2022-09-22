@@ -29,20 +29,6 @@ public class SSMG0102P0103 implements Runnable {
     CheckerDesktopWindow root;
 
     /**
-     * Фильтр колонки 'ДеБлок' со значениями в диапазоне от 01.01.{Текущий год} и 31.12.{Текущий год}.
-     */
-    SSMGrid.ConditionConfigurer year_filter = SSMGrid
-            .ConditionConfigurer
-            .builder()
-            .condition1(SSMGrid.Condition.LESS_THEN)
-            .value1("01.01." + new SimpleDateFormat("yyyy").format(new Date()))
-            .separator(SSMGrid.Separator.AND)
-            .condition2(SSMGrid.Condition.MORE_THEN)
-            .value2("31.12." + new SimpleDateFormat("yyyy").format(new Date()))
-            .column("ДеБлок")
-            .build();
-
-    /**
      * Конструктор.
      * @param root Родительский элемент
      */
@@ -74,7 +60,10 @@ public class SSMG0102P0103 implements Runnable {
         log.info("Форма 'Заказы SAP' успешно запущена");
         SSMGrid orders_grid = orders.getSapOrderGrid();
         log.info("Фильтрация колонки 'ДеБлок' по условию меньше 01.01.2021 года или больше 31.12.2021");
-        orders_grid.filterByGUI(year_filter);
+        SSMGrid.ConditionConfigurer config = orders_grid.getFilterConfig("period_filter");
+        config.setValue1("01.01." + new SimpleDateFormat("yyyy").format(new Date()));
+        config.setValue2("31.12." + new SimpleDateFormat("yyyy").format(new Date()));
+        orders_grid.filter(config);
         log.info("Проверка данных");
         SSMGridData data = orders_grid.getDataFromRow(0);
         assertEquals(data.getRowSize(), 0, "Найдены записи не соответствующие условию меньше 01.01.2021 года или больше 31.12.2021");

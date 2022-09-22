@@ -10,7 +10,7 @@ import org.junit.jupiter.api.function.ThrowingSupplier;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
-import ru.checker.tests.ssm.windows.templates.OkCancelWindow;
+import ru.checker.tests.ssm.windows.core.templates.OkCancelWindow;
 
 import javax.swing.*;
 import java.awt.*;

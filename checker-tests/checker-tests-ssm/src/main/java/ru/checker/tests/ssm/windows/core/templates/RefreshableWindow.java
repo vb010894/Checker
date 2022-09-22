@@ -1,4 +1,4 @@
-package ru.checker.tests.ssm.windows.templates;
+package ru.checker.tests.ssm.windows.core.templates;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -6,28 +6,21 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 
-import java.awt.*;
-
 /**
  * Шаблон обновляемого окна.
  * @author vd.zinovev
  */
 @Log4j2
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public abstract class RefreshableWindow {
+public abstract class RefreshableWindow extends GetSetWindow {
 
-    /**
-     * Текущее окно.
-     */
-    @Getter
-    CheckerDesktopWindow window;
 
     /**
      * Конструктор шаблона.
      * @param window Текущее окно
      */
     public RefreshableWindow(CheckerDesktopWindow window) {
-        this.window = window;
+        super(window);
     }
 
     /**
