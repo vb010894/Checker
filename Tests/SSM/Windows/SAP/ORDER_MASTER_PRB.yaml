@@ -8,6 +8,8 @@ elements:
       id: prb_master_grid
       name: Таблица 'Мастера'
       index: 0
+      config:
+        has_selection_bar: false
       search:
         ClassName: TcxGridSite
   - element:

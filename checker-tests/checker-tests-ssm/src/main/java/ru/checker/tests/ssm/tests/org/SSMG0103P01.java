@@ -77,6 +77,7 @@ public class SSMG0103P01 implements Runnable {
         {
             log.info("Проверка и поиск созданного цеха с номером '{}' и именем - '{}'", this.NUMBER, this.NAME);
             SSMGrid shop_grid = org.getOrganizationGrid();
+            shop_grid.getDataByRow(0, true);
             shop_grid.filter("number_filter");
             shop_grid.getDataByRow(0, true);
             shop_grid.getAllData();

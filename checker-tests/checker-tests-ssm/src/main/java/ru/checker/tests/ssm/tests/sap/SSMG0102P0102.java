@@ -72,13 +72,11 @@ public class SSMG0102P0102 implements Runnable {
             log.info("Форма 'Заказы SAP' успешно запущена");
             SSMGrid orders_grid = orders.getSapOrderGrid();
             log.info("Проверка таблицы 'Прозводственные заказы SAP'");
-            orders_grid.filterByGUI(shop_filter.value1(shop).build());
-            SSMGridData data = orders_grid.getDataFromRow(0);
-            assertEquals(
-                    data.getRowSize(),
-                    0,
-                    "В таблице 'Прозводственные заказы SAP' найдены записи" +
-                            " со значением отличающейся от '" + shop + "'");
+            SSMGrid.ConditionConfigurer filter = orders_grid.getFilterConfig("shop_filter");
+            filter.setValue1(shop);
+            orders_grid.filter(filter);
+            orders_grid.getDataByRow(0);
+            orders_grid.hasNotData();
             orders_grid.clearFilter();
             orders.callFilter();
             filter_window.refresh();

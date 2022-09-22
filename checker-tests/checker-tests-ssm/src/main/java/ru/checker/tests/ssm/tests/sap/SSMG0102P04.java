@@ -3,6 +3,7 @@ package ru.checker.tests.ssm.tests.sap;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
+import ru.checker.tests.base.test.CheckerConstants;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
 import ru.checker.tests.ssm.controls.grid.SSMGridData;
@@ -84,15 +85,16 @@ public class SSMG0102P04 implements Runnable{
             log.info("Шаг 1");
             orders = SAPSSM.getSapOrdersForm(this.root);
             orders_grid = orders.getSapOrderGrid();
-            orders_grid.filterByGUI(H_filter);
+            orders_grid.filter("SSMG0102P0104_H_filter");
             orders_grid.getDataFromRow(0);
             orders_grid.hasData();
 
-            orders_grid.filterByGUI(count_filter);
+            orders_grid.filter("order_count_more_filter");
             orders_grid.hasData();
             String sap_orders = orders_grid.getDataFromRow(0).getColumnData("Заказ SAP").get(0);
 
-            orders_grid.filterByGUI(order_sap_filter.value1(sap_orders).build());
+            CheckerConstants.saveConstant("SSMG0102P0104_SAP_order", sap_orders);
+            orders_grid.filter("SSMG0102P0104_SAP_order_filter");
             orders_grid.hasData();
         }
 
@@ -125,10 +127,8 @@ public class SSMG0102P04 implements Runnable{
         {
             log.info("Шаг 6");
             SSMGrid prb_master = choose_master.getMasterGrid();
-            prb_master.getDataFromRow(0);
-            prb_master.hasData();
             log.info("Получение информации о мастере в окне 'Выбор Мастеров'");
-            SSMGridData prb_master_data = prb_master.selectRowAndCheckSelection(0);
+            SSMGridData prb_master_data = prb_master.getDataByRow(0, true);
             master_tab = prb_master_data.getColumnData("Таб.").get(0);
             master_fio = prb_master_data.getColumnData("Фамилия И.О.").get(0);
             log.info("Информация о мастере в окне 'Выбор Мастеров' получена. Таб. номер - '{}', ФИО - '{}'", master_tab, master_fio);

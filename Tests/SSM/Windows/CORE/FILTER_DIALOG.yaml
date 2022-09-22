@@ -2,7 +2,7 @@ id: ssm_core_filter
 name: Окно фильтрации
 deep: true
 search:
-  ClassName: TcxFilterDialog
+  Name: Настройка фильтра
 elements:
   - element:
       id: ssm_core_filter_first_condition

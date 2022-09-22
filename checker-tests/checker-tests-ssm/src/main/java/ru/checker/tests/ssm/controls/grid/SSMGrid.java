@@ -17,11 +17,14 @@ import mmarquee.automation.controls.mouse.AutomationMouse;
 import net.sourceforge.tess4j.ITessAPI;
 import org.junit.jupiter.api.function.ThrowingSupplier;
 import ru.checker.tests.base.enums.CheckerOCRLanguage;
+import ru.checker.tests.base.test.CheckerConstants;
+import ru.checker.tests.base.test.CheckerTestCase;
 import ru.checker.tests.base.utils.CheckerOCRUtils;
 import ru.checker.tests.base.utils.CheckerTools;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWidget;
 import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
 import ru.checker.tests.desktop.utils.CheckerDesktopManipulator;
+import ru.checker.tests.desktop.utils.CheckerDesktopMarker;
 import ru.checker.tests.ssm.annotations.CheckerDefinitionValue;
 import ru.checker.tests.ssm.widgets.SSMTools;
 import ru.checker.tests.ssm.windows.core.service.GridFilterWindow;
@@ -723,17 +726,121 @@ public class SSMGrid {
      * @param index Индекс строки
      * @param needCheck Нужна ли проверка данных
      */
-    public void getDataByRow(int index, boolean needCheck) {
+    public SSMGridData getDataByRow(int index, boolean needCheck) {
         this.focus();
         this.selectRow(0);
-        Runnable run = () -> {
-            CheckerDesktopManipulator.Keyboard.sendKeys("END", KeyEvent.VK_SHIFT);
-        };
+        Runnable run;
+        if(Objects.isNull((run = this.getSelectRowActionWithSelectionBar())))
+            run  = this.getSelectionRowByKeyboard();
 
         this.data = this.readData(run, needCheck);
         CheckerDesktopManipulator.Keyboard.sendKeys("HOME");
+        return this.data;
     }
 
+    /**
+     * Выделение строки с помощью клавиатуры.
+     *
+     * Выделение происходит с помощью комбинации SHIFT + END.
+     *
+     * @return Действие для выделения строки
+     */
+    private Runnable getSelectionRowByKeyboard() {
+        return  () -> CheckerDesktopManipulator.Keyboard.sendKeys("END", KeyEvent.VK_SHIFT);
+    }
+
+    /**
+     * Выделение строки с помощью служебного столбца для выделения.
+     *
+     * Работает только в случае,
+     * если таблица имеет сервисный столбец для выделения.
+     * @see Config#hasSelectionBar - есть ли служебная колонка для выделения.
+     *
+     * @return Действие для выделения строки
+     */
+    private Runnable getSelectRowActionWithSelectionBar() {
+        if(!this.config.hasSelectionBar)
+            return null;
+        int rowY;
+        if((rowY = this.getRowYCoordinateByCellLocator()) == -1)
+            rowY = this.getRowYCoordinateBySelectedRowColor();
+
+        if(rowY == -1)
+            return null;
+
+        int x = this.getRectangle().x + 3;
+        int y = rowY;
+
+        return  () -> CheckerDesktopManipulator.Mouse.click(x, y);
+    }
+
+    /**
+     * Поучает Y координату строки по цвету выделенной ячейки.
+     *
+     * Работает только в случае,
+     * если таблица имеет сервисный столбец для выделения.
+     * @see Config#hasSelectionBar - есть ли служебная колонка для выделения.
+     *
+     * Если все ячейки строки не фокусируемые или не удается сформировать координату,
+     * то метод вернет "-1".
+     *
+     * @return Y координата строки таблицы
+     */
+    private int getRowYCoordinateBySelectedRowColor() {
+        log.debug("Вычисление координаты Y строки по цвету выделенной ячейки");
+        Rectangle rect = this.getRectangle();
+        int result = -1;
+        for (int i = rect.y; i < rect.height; i++) {
+            if(this.robot.getPixelColor((int) rect.getCenterX(), i).equals(this.config.selectedRowColor)) {
+                result = i + 3;
+                log.debug("Координаты Y строки получена - '{}'", result);
+                break;
+            }
+        }
+        if(result == -1)
+            log.debug("Не удалось вычислить координату Y строки таблицы");
+        return result;
+    }
+
+    /**
+     * Поучает Y координату строки по ячейки-локаторе.
+     *
+     * Работает только в случае,
+     * если таблица имеет сервисный столбец для выделения.
+     * @see Config#hasSelectionBar - есть ли служебная колонка для выделения.
+     *
+     * Если все ячейки строки не фокусируемые или не удается сформировать координату,
+     * то метод вернет "-1".
+     *
+     * @return Y координата строки таблицы
+     */
+    private int getRowYCoordinateByCellLocator() {
+        log.debug("Попытка вычисления Y координаты строки через ячейку-локатор");
+        int result = -1;
+        try {
+            CheckerDesktopManipulator.Keyboard.sendKeys("SPACE");
+            Thread.sleep(500);
+            Element cell = UIAutomation.getInstance().getFocusedElement();
+            if (cell.getControlType() == ControlType.Edit.getValue() && cell.getClassName().equals("TcxCustomInnerTextEdit")) {
+                result = (int) cell.getBoundingRectangle().toRectangle().getCenterY();
+                log.debug("Y координата найдена - '{}'", result);
+            }
+        } catch (Exception ex) {
+            log.debug("Не удалось вычислить Y координату строки через ячейку-локатор");
+        }
+
+        return result;
+    }
+
+    /**
+     * Фильтрует таблицу с помощью интерфейса по ID фильтра.
+     * Для нахождения конфигурации фильтра следует указать в описании таблицы
+     * список фильтров('filters'), указать 'id'
+     * и задать поля указанные в конфигураторе.
+     * @see ConditionConfigurer - конфигуратор фильтра.
+     *
+     * @param filterID ID фильтра
+     */
     public void filter(String filterID) {
         ConditionConfigurer config = ConditionConfigurer.getConfig(this.DEFINITION, filterID);
         this.filter(config);
@@ -741,10 +848,13 @@ public class SSMGrid {
     }
 
     /**
+     * Фильтрует таблицу с помощью интерфейса через конфигуратор.
+     * @see ConditionConfigurer - конфигуратор фильтра.
      *
-     * @param config
+     * @param config Конфигуратор
      */
     public void filter(ConditionConfigurer config) {
+        this.focus();
         this.getDataByRow(0, true);
         String cellName = (this.config.headerCount == 0) ? config.columnIndexReference : config.column;
         this.moveToCell(cellName);
@@ -757,12 +867,21 @@ public class SSMGrid {
         }
     }
 
+    /**
+     * Фильтрует таблицу с помощью ячейки-локатора.
+     * Ячейка-локатор появляется только тогда,
+     * когда есть возможность установить фокус на данную ячейку.
+     *
+     * @deprecated Следует пользоваться новым методом 'filter'.
+     *
+     * @param configurer Конфигуратор фильтра
+     */
+    @Deprecated
     private void filterByEnterCell(ConditionConfigurer configurer) {
         try {
             EditBox cell = this.enterToCell();
             Rectangle cellRectangle = cell.getBoundingRectangle().toRectangle();
-            Rectangle headerRectangle = new Rectangle(cellRectangle.x, cellRectangle.y - 20, cellRectangle.width, 20);
-            this.findAndClickFilterButton(headerRectangle);
+            this.findAndClickFilterButton(cellRectangle);
             this.callFilterWindow();
             GridFilterWindow filter = CheckerDesktopTest.getCurrentApp().window("ssm_core_filter", GridFilterWindow.class);
             filter.setFilterByConfigurer(configurer);
@@ -815,7 +934,7 @@ public class SSMGrid {
      * @param columnName Имя колонки
      */
     private void findFilterButtonFromHeaderRectangle(Rectangle headerRectangle, String columnName) {
-        int y = (int) headerRectangle.getCenterY();
+        int y = (int) headerRectangle.getCenterY() - 5;
         boolean found = false;
         for (int i = (int) headerRectangle.getMaxX(); i > headerRectangle.x; i--) {
             AutomationMouse.getInstance().setLocation(i, y);
@@ -866,13 +985,21 @@ public class SSMGrid {
         for (int i = rectX; i < tableRect.width; i++) {
             if(this.robot.getPixelColor(i, rectangleY).equals(this.config.headerSplitColor)) {
                 int width = i - rectX;
-                Rectangle headerRectangle = new Rectangle(rectX, rectangleY, width - 1, 20);
-                String headerName = CheckerOCRUtils.getTextFromRectangle(headerRectangle).replaceAll("[^A-Za-zА-Яа-я0-9, ]", "").trim();
+                Rectangle headerRectangle = new Rectangle(rectX, rectangleY, width - 1, 22);
+                CheckerOCRUtils.changeScale(4);
+                String text = CheckerOCRUtils.getTextFromRectangle(headerRectangle);
+                CheckerOCRUtils.changeScale(3);
+                log.debug("Поучен текст колонки - '{}'", text);
+                String headerName = text
+                        .replaceAll("[^A-Za-zА-Яа-я0-9,\\u00a9 ]", "")
+                        .replace("\u00a9", "С")
+                        .trim();
                 if(this.getSearchingColumn(Map.entry(headerName, headerRectangle), config)) {
                     header = Map.entry(headerName, headerRectangle);
                     break;
                 } else {
-                    i += 2;
+                    log.debug("Найдена колонка - '{}'", headerName);
+                    i += 1;
                     rectX = i;
                 }
             }
@@ -910,7 +1037,10 @@ public class SSMGrid {
 
     /**
      * Filter table by GUI.
+     *
+     * @deprecated Следует пользоваться новым методом 'filter'.
      */
+    @Deprecated
     public void filterByGUI(String configID) {
         String[] columns = new String[this.config.unFocused.size()];
         AtomicInteger index = new AtomicInteger(0);
@@ -921,8 +1051,11 @@ public class SSMGrid {
     /**
      * Filter table by GUI.
      *
+     * @deprecated Следует пользоваться новым методом 'filter'.
+     *
      * @param config Condition configurer
      */
+    @Deprecated
     public void filterByGUI(ConditionConfigurer config) {
         String[] columns = new String[this.config.unFocused.size()];
         AtomicInteger index = new AtomicInteger(0);
@@ -932,20 +1065,24 @@ public class SSMGrid {
 
     /**
      * Filter table by GUI.
+     * @deprecated Следует пользоваться новым методом 'filter'.
      *
      * @param config    Condition configurer
      * @param unFocused Unfocused columns
      */
+    @Deprecated
     public void filterByGUI(ConditionConfigurer config, String... unFocused) {
         this.filterByGUI(config, CheckerOCRLanguage.RUS, unFocused);
     }
 
     /**
      * Filter table by GUI.
+     * @deprecated Следует пользоваться новым методом 'filter'.
      *
      * @param config    Condition configurer
      * @param unFocused Unfocused columns
      */
+    @Deprecated
     public void filterByGUI(ConditionConfigurer config, CheckerOCRLanguage language, String... unFocused) {
         for (int i = 0; i <= this.config.filterCallingTryCont; i++) {
             try {
@@ -1163,9 +1300,11 @@ public class SSMGrid {
                         UIAutomation.getInstance().getFocusedElement(),
                 "Не удалось найти список фильтрации таблицы");
         Rectangle searchRectangle = assertDoesNotThrow(() -> searchList.getBoundingRectangle().toRectangle(), "Не удалось найти положения листа фильтрации");
+        CheckerOCRUtils.changeScale(4);
         CheckerOCRUtils.getTextAndMove(
-                new Rectangle(searchRectangle.x - 5, searchRectangle.y, searchRectangle.width + 5, searchRectangle.height),
+                new Rectangle(searchRectangle.x - 2, searchRectangle.y, searchRectangle.width, searchRectangle.height),
                 "Выб", ITessAPI.TessPageIteratorLevel.RIL_WORD);
+        CheckerOCRUtils.changeScale(3);
         AutomationMouse.getInstance().leftClick();
         log.info("Окно фильтрации вызвано");
     }
@@ -1206,6 +1345,15 @@ public class SSMGrid {
                 name,
                 this.getID(),
                 this.getName());
+    }
+
+    /**
+     * Получает конфигурацию фильтра.
+     * @param filterID ID Фильтра
+     * @return Конфигурация фильтра
+     */
+    public ConditionConfigurer getFilterConfig(String filterID) {
+        return ConditionConfigurer.getConfig(this.DEFINITION, filterID);
     }
 
     /**
@@ -1267,8 +1415,14 @@ public class SSMGrid {
                         value = assertDoesNotThrow(() -> SSMGrid.Separator.valueOf(DEFINITION.get(name).toString()),"В перечисленных значениях условий '" + DEFINITION.get(name) + "' не найдено");
                 } else {
                     value = String.valueOf(DEFINITION.get(name));
+                    if(value instanceof String) {
+                        if(value.toString().startsWith("${")) {
+                            value = CheckerConstants.getConstant(value.toString().trim().replaceAll("[${}]", ""));
+                        }
+                    }
                 }
-                assertDoesNotThrow(() -> field.set(config, value), "Не удалось получить доступ к полю конфигуратора фильтра");
+                Object finalValue = value;
+                assertDoesNotThrow(() -> field.set(config, finalValue), "Не удалось получить доступ к полю конфигуратора фильтра");
                 field.setAccessible(false);
             }
         }

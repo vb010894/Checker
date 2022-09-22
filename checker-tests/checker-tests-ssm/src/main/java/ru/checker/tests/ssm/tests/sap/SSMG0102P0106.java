@@ -41,17 +41,6 @@ public class SSMG0102P0106 implements Runnable {
         this.root = root;
     }
 
-
-    /**
-     * Фильтр 'C' со значением 'Открыт'.
-     */
-    final SSMGrid.ConditionConfigurer order_filter = SSMGrid
-            .ConditionConfigurer
-            .builder()
-            .condition1(SSMGrid.Condition.NOT_EQUAL)
-            .value1(lotsman_order)
-            .column("Заказ").build();
-
     /**
      * Запуск.
      */
@@ -90,7 +79,7 @@ public class SSMG0102P0106 implements Runnable {
         log.info("Форма 'Заказы SAP' успешно запущена");
         SSMGrid orders_grid = orders.getSapOrderGrid();
         log.info("Фильтрация колонки 'Заказ' по условию: 'Колонка 'Заказ' не равна '{}'", lotsman_order);
-        orders_grid.filterByGUI(order_filter);
+        orders_grid.filter("lotsman_order");
         orders_grid.getDataFromRow(0);
         orders_grid.hasNotData();
         orders_grid.clearFilter();

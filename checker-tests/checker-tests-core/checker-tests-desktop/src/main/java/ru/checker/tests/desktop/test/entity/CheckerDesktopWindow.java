@@ -12,12 +12,12 @@ import mmarquee.automation.UIAutomation;
 import mmarquee.automation.controls.Application;
 import mmarquee.automation.controls.ElementBuilder;
 import mmarquee.automation.controls.Window;
-import mmarquee.automation.controls.mouse.AutomationMouse;
 import ru.checker.tests.base.utils.CheckerTools;
 
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -106,7 +106,7 @@ public class CheckerDesktopWindow extends CheckerBaseEntity<Window, Application>
             this.usedForms.put(ID, form);
             log.debug("****. End");
             if(needToThrow & !isFound)
-                fail(String.format("Не удалось найти форму. ID - '%s', имя - '%s'", ID));
+                fail(String.format("Не удалось найти форму. ID - '%s'", ID));
         }
 
         return isFound ? form : null;
@@ -180,7 +180,10 @@ public class CheckerDesktopWindow extends CheckerBaseEntity<Window, Application>
             handle = assertDoesNotThrow(() -> {
                 log.debug("Поиск окна...");
                 Thread.sleep(1000);
-                return User32.INSTANCE.FindWindow(className, name);
+
+                return User32.INSTANCE.FindWindow(
+                        (Objects.nonNull(className)) ? className.trim() : null,
+                        Objects.nonNull(name) ? name.trim(): null);
             }, "Не удалось дождаться окно");
             if (handle == null) {
                 log.debug("Не удалось получить handle окна");

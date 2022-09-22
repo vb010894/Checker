@@ -52,9 +52,9 @@ public class GridFilterWindow extends OkCancelWindow {
         assertNotNull(configurer.getValue1(), "Не задано перове поле-значение фильтра колонки таблицы");
         this.setFirstCondition(configurer.getCondition1(), configurer.getValue1());
         if(Objects.nonNull(configurer.getSeparator()) && !configurer.getSeparator().equals(SSMGrid.Separator.NONE)) {
-            assertNotNull(configurer.getCondition1(), "Не задано второе поле-условие фильтра колонки таблицы");
-            assertNotNull(configurer.getValue1(), "Не задано второе поле-значение фильтра колонки таблицы");
-            this.setFirstCondition(configurer.getCondition1(), configurer.getValue1());
+            assertNotNull(configurer.getCondition2(), "Не задано второе поле-условие фильтра колонки таблицы");
+            assertNotNull(configurer.getValue2(), "Не задано второе поле-значение фильтра колонки таблицы");
+            this.setSecondCondition(configurer.getCondition2(), configurer.getValue2());
         }
     }
 

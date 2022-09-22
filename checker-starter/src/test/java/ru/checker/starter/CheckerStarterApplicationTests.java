@@ -15,7 +15,7 @@ class CheckerStarterApplicationTests {
     @SneakyThrows
     @Test
     void contextLoads() {
-        var handle = User32.INSTANCE.FindWindow("TcxFilterDialog", null);
+        var handle = User32.INSTANCE.FindWindow(null, "Настройка фильтра");
         Element w = UIAutomation.getInstance().getElementFromHandle(handle);
         new CheckerDesktopMarker(w.getBoundingRectangle().toRectangle()).draw();
         System.out.println(ControlType.fromValue(w.getControlType()).toString());

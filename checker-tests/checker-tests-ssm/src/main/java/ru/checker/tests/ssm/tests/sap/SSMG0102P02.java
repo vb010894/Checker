@@ -3,6 +3,7 @@ package ru.checker.tests.ssm.tests.sap;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
+import ru.checker.tests.base.test.CheckerConstants;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
 import ru.checker.tests.ssm.controls.grid.SSMGridData;
@@ -23,26 +24,6 @@ public class SSMG0102P02 implements Runnable{
      * Главное окно ССМ.
      */
     CheckerDesktopWindow root;
-
-    /**
-     * Фильтр колонки 'ДеБлок' со значениями в диапазоне от 01.01.{Текущий год} и 31.12.{Текущий год}.
-     */
-    SSMGrid.ConditionConfigurer H_filter = SSMGrid
-            .ConditionConfigurer
-            .builder()
-            .condition1(SSMGrid.Condition.EQUAL)
-            .value1("0")
-            .column("Н")
-            .columnCondition("\\d[HнН]|[HнН]").build();
-
-    /**
-     * Фильтр колонки 'ДеБлок' со значениями в диапазоне от 01.01.{Текущий год} и 31.12.{Текущий год}.
-     */
-    SSMGrid.ConditionConfigurer.ConditionConfigurerBuilder order_sap_filter = SSMGrid
-            .ConditionConfigurer
-            .builder()
-            .condition1(SSMGrid.Condition.EQUAL)
-            .column("Заказ SAP");
 
     /**
      * Конструктор.
@@ -72,11 +53,12 @@ public class SSMG0102P02 implements Runnable{
             orders = SAPSSM.getSapOrdersForm(this.root);
             log.info("Форма 'Заказы SAP' успешно запущена");
             orders_grid = orders.getSapOrderGrid();
-            orders_grid.filterByGUI(H_filter);
+            orders_grid.filter("SSMG0102P0104_H_filter");
             SSMGridData data = orders_grid.getDataFromRow(0);
             orders_grid.hasData();
             String order_sap_number = data.getColumnData("Заказ SAP").get(0);
-            orders_grid.filterByGUI(order_sap_filter.value1(order_sap_number).build());
+            CheckerConstants.saveConstant("SSMG0102P0104_SAP_order", order_sap_number);
+            orders_grid.filter("SSMG0102P0104_SAP_order_filter");
             orders_grid.getDataFromRow(0);
             orders_grid.hasData();
         }
