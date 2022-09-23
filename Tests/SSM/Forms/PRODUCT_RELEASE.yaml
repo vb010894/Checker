@@ -12,15 +12,53 @@ elements:
       id: filtered_table
       name: Таблица 'Задания ОТК'
       index: 1
+      filters:
+        - filter:
+            id: open_not_2_filter
+            $comment: Фильтр "С" со значением не равным 2
+            column: С
+            columnCondition: ^[СсCc]$
+            condition1: NOT_EQUAL
+            value1: 2
+        - filter:
+            id: open_2_filter
+            $comment: Фильтр "С" со значением не равным 2
+            column: С
+            columnCondition: ^[СсCc]$
+            condition1: EQUAL
+            value1: 2
+        - filter:
+            id: dostupno_more_0_filter
+            $comment: Фильтр "Дступно" со значением большим 0
+            column: Доступно
+            condition1: MORE_THEN
+            value1: 1
       config:
-        unfocused: [C]
+        unfocused: [С]
       search:
         ClassName: TcxGridSite
   - element:
         id: operation_table
         name: Таблица 'Подтвержденые операции'
+        index: 0
+        filters:
+          - filter:
+              id: accepted_test_number_filter
+              column: Номер
+              condition1: CONTAINS
+              value1: Тест
+          - filter:
+              id: years_more_now_filter
+              column: Дата подтв.
+              condition1: MORE_OR_EQUAL_SHORT
+              value1: "${dateNow}"
+          - filter:
+              id: release_count_equal_1_filter
+              column: Кол-во
+              condition1: EQUAL
+              value1: 1
         config:
           unfocused: [ СН ]
-        index: 0
+          has_scroll_bar: false
         search:
           ClassName: TcxGridSite

@@ -2,7 +2,7 @@ package ru.checker.tests.ssm.tests.product;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import ru.checker.tests.base.enums.CheckerOCRLanguage;
+import lombok.extern.log4j.Log4j2;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
 import ru.checker.tests.ssm.controls.grid.SSMGridData;
@@ -11,59 +11,90 @@ import ru.checker.tests.ssm.forms.templates.FilteredFormTemplate;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.fail;
 
+/**
+ * С.SSM.G.01.01.P.01. Выпуск продукции SAP. Работа с фильтрами.
+ *
+ * @author vd.zinovev
+ */
+@Log4j2
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SSMG01P01 implements Runnable {
 
+    /**
+     * Главное окно.
+     */
     CheckerDesktopWindow ROOT_WINDOW;
+
+    /**
+     * ID формы.
+     */
     String FORM_ID;
 
+    /**
+     * Конструктор.
+     * @param root Главная форма
+     * @param formID ID тестируемой формы.
+     */
     public SSMG01P01(CheckerDesktopWindow root, String formID) {
         this.ROOT_WINDOW = root;
         this.FORM_ID = formID;
     }
 
-    SSMGrid.ConditionConfigurer.ConditionConfigurerBuilder openCloseConfig = SSMGrid.ConditionConfigurer
-            .builder()
-            .column("С")
-            .columnCondition("C|С")
-            .condition1(SSMGrid.Condition.NOT_EQUAL);
-
+    /**
+     * Сценарий.
+     */
     @Override
     public void run() {
-        SSMProductReleaseForm template = this.ROOT_WINDOW.form(FORM_ID, SSMProductReleaseForm.class);
-        //template.selectYear(String.valueOf(Calendar.getInstance().get(Calendar.YEAR)));
-        template.toggleOpened(false);
-        SSMGrid grid = template.getFilteredGrid();
-        SSMGridData data = grid.getAllData();
-        assertEquals(data.getRowSize(), 0, "В таблице найдены записи, проверка переключателя 'Открытые' провалена");
+        SSMProductReleaseForm template;
+        SSMGrid grid;
 
-        template.toggleClosed(true);
-        grid.filterByGUI(openCloseConfig.value1("2").build(), CheckerOCRLanguage.ENG, "С");
-        data = grid.getAllData();
-        assertEquals(data.getRowSize(), 0, "В таблице найдены записи, проверка переключателя 'Закрытые' провалена");
-        grid.clearFilter();
+        {
+            log.info("Шаг 1");
+            template = this.ROOT_WINDOW.form(FORM_ID, SSMProductReleaseForm.class);
+            template.toggleOpened(false);
+            grid = template.getFilteredGrid();
+            grid.getDataByRow(0, true);
+        }
 
-        template.toggleClosed(false);
-        grid.getAllData();
+        {
+            log.info("Шаг 2");
+            template.toggleClosed(true);
+            grid.filter("open_not_2_filter");
+            grid.getDataByRow(0);
+            grid.hasNotData();
+            grid.clearFilter();
+        }
 
-        template.toggleOpened(true);
-        data = grid.getAllData();
-        data.getColumnData("С")
-                .parallelStream()
-                .filter(record -> !record.equals("Открыт"))
-                .findFirst().
-                ifPresent(s -> fail("Найдена запись отличная от 'Открыт'. Значение - " + s));
+        {
+            log.info("Шаг 3");
+            template.toggleClosed(false);
+            template.toggleOpened(true);
 
+            grid.filter("open_2_filter");
+            grid.getDataByRow(0);
+            grid.hasNotData();
+            grid.clearFilter();
+        }
 
-        List.of("КМЦ", "РМЦ-1", "ФЛЦ", "ЦИ", "ЦРМО-1").forEach(shop -> this.checkShop(template, grid, shop));
+        {
+            log.info("Шаг 4");
+            List.of("КМЦ", "РМЦ-1", "ФЛЦ", "ЦИ", "ЦРМО-1").forEach(shop -> this.checkShop(template, grid, shop));
+        }
 
     }
 
+    /**
+     * Проверяет фильтр цехов.
+     * @param template Форма
+     * @param grid Таблица
+     * @param shop Цех
+     */
     private void checkShop(FilteredFormTemplate template, SSMGrid grid, String shop) {
         template.selectShop(shop);
         SSMGridData data = grid.getAllData();
+        grid.hasData();
         data.getColumnData("Цех")
                 .parallelStream()
                 .filter(record -> !record.equals(shop))

@@ -1,0 +1,36 @@
+id: task_control
+name: Управление заданиями
+search:
+  ClassName: TMainForm
+  Name: Управление заданиями33
+navigation: TASK_MANAGEMENT
+widgets:
+  - path: SSM_PAGING.yaml
+  - path: SSM_TOOLS.yaml
+elements:
+  - element:
+      id: task_control_tasks_table
+      name: Таблица
+      index: 3
+      config:
+        unfocused: [ С ]
+        max_wait_delay: 20
+      search:
+        ClassName: TcxGridSite
+  - element:
+      id: task_control_prb_table
+      name: Таблица
+      index: 2
+      config:
+        unfocused: [ С ]
+        max_wait_delay: 20
+      search:
+        ClassName: TcxGridSite
+  - element:
+      id: task_control_personal_table
+      name: Таблица
+      index: 2
+      config:
+        has_selection_bar: false
+      search:
+        ClassName: TcxGridSite

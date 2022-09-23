@@ -1,0 +1,67 @@
+id: TASK_FILTER_WINDOW
+name: Форма фильтрации 'Управления заданиями'
+deep: true
+search:
+  ClassName: TfFilter
+  Name: ФИЛЬТР
+elements:
+  - element:
+      id: field_shop
+      name: Комбобокс 'Цех'
+      label: Цех
+      search:
+        ClassName: TcxCustomComboBoxInnerEdit
+  - element:
+        id: field_year_from
+        name: Комбобокс 'Год c'
+        label: Год с
+        search:
+          ClassName: TcxCustomComboBoxInnerEdit
+  - element:
+      id: field_year_to
+      name: Комбобокс 'Год по'
+      label: Год по
+      search:
+        ClassName: TcxCustomComboBoxInnerEdit
+  - element:
+      id: toggle_inwork
+      name: Переключатель 'В работе'
+      label: В работе
+      search:
+        ClassName: TdxToggleSwitch
+  - element:
+      id: toggle_new
+      name: Переключатель 'Новые'
+      label: Новые
+      search:
+        ClassName: TdxToggleSwitch
+  - element:
+      id: toggle_closed
+      name: Переключатель 'Закрытые'
+      label: Закрытые
+      search:
+        ClassName: TdxToggleSwitch
+  - element:
+      id: toggle_master
+      name: Переключатель 'Мастер'
+      label: Мастер
+      search:
+        ClassName: TdxToggleSwitch
+  - element:
+      id: field_lotsman_order
+      name: Поле 'Заказ Лоцман'
+      label: Заказ Лоцман
+      search:
+        ClassName: TcxCustomInnerTextEdit
+  - element:
+      id: button_cancel
+      name: Кнопка 'Отмена'
+      search:
+        ClassName: TcxButton
+        Name: Отмена
+  - element:
+      id: button_ok
+      name:  Кнопка 'ОК'
+      search:
+        ClassName: TcxButton
+        Name: OK
