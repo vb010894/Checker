@@ -1486,6 +1486,8 @@ public class SSMGrid {
         LESS_THEN("меньше чем"),
         LESS_OR_EQUAL("меньше чем или равно"),
         MORE_OR_EQUAL("больше чем или равно"),
+        LESS_OR_EQUAL_SHORT("меньше или равно"),
+        MORE_OR_EQUAL_SHORT("больше или равно"),
         LIKE("похоже"),
         NOT_LIKE("не похоже"),
         CONTAINS("содержит"),

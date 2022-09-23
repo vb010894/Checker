@@ -46,6 +46,20 @@ elements:
         ClassName: TdxRibbonGroupBarControl
         Name: ФИЛЬТР
   - element:
+      id: tools_filter_refresh
+      name: Кнопка 'Обновить'
+      buttonName: Обновить
+      search:
+        ClassName: TdxRibbonGroupBarControl
+        Name: ФИЛЬТР
+  - element:
+      id: tools_filter_auto_refresh
+      name: Кнопка 'Автообновление'
+      buttonName: Автообновление
+      search:
+        ClassName: TdxRibbonGroupBarControl
+        Name: ФИЛЬТР
+  - element:
       id: product_release
       name: Кнопка 'Выпуск продукции'
       buttonName: Выпуск

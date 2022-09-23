@@ -1,4 +1,4 @@
-package ru.checker.tests.ssm.tests.sap;
+package ru.checker.tests.ssm.tests.sap.cases;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -7,6 +7,7 @@ import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.desktop.utils.CheckerDesktopManipulator;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
 import ru.checker.tests.ssm.forms.SSMSapOrdersForm;
+import ru.checker.tests.ssm.tests.sap.SAPSSM;
 
 import java.util.Locale;
 

@@ -8,6 +8,7 @@ import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
 import ru.checker.tests.ssm.forms.SSMSapOrdersForm;
 import ru.checker.tests.ssm.test.SSMTest;
+import ru.checker.tests.ssm.tests.sap.cases.*;
 import ru.checker.tests.ssm.windows.sap.SapFilterWindow;
 
 import java.util.Map;

@@ -1,12 +1,12 @@
-package ru.checker.tests.ssm.tests.sap;
+package ru.checker.tests.ssm.tests.sap.cases;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
-import ru.checker.tests.ssm.controls.grid.SSMGridData;
 import ru.checker.tests.ssm.forms.SSMSapOrdersForm;
+import ru.checker.tests.ssm.tests.sap.SAPSSM;
 import ru.checker.tests.ssm.windows.sap.SapFilterWindow;
 
 import java.util.List;
