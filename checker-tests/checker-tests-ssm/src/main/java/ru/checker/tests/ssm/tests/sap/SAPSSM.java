@@ -121,7 +121,8 @@ public class SAPSSM extends SSMTest {
      */
     @Test(
             testName = "SSM.G.01.02.P.01.06",
-            description = "SSM.G.01.02.P.01.06. Работа с фильтрами. Фильтр 'Заказ Лоцман'")
+            description = "SSM.G.01.02.P.01.06. Работа с фильтрами. Фильтр 'Заказ Лоцман'",
+            groups = {"broken"})
     public void SSMG0102P0106() {
         new SSMG0102P0106(getRootWindow()).run();
     }

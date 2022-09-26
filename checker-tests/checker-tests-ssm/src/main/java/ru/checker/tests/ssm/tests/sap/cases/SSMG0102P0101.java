@@ -5,15 +5,12 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
-import ru.checker.tests.ssm.controls.grid.SSMGridData;
 import ru.checker.tests.ssm.forms.SSMSapOrdersForm;
 import ru.checker.tests.ssm.tests.sap.SAPSSM;
 import ru.checker.tests.ssm.windows.sap.SapFilterWindow;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * SSM.G.01.02.P.01. Работа с фильтрами. Настройки по умолчанию
@@ -36,27 +33,6 @@ public class SSMG0102P0101 implements Runnable {
         this.root = root;
     }
 
-    /**
-     * Фильтр 'C' со значением 'Закрыт'.
-     */
-    final SSMGrid.ConditionConfigurer open_close_filter = SSMGrid
-            .ConditionConfigurer
-            .builder()
-            .condition1(SSMGrid.Condition.EQUAL)
-            .value1("Закрыт")
-            .columnCondition("[CСсс]")
-            .column("С").build();
-
-    /**
-     * Фильтр 'ДеБлок' со значением меньшим текущего года.
-     */
-    final SSMGrid.ConditionConfigurer year_filter = SSMGrid
-            .ConditionConfigurer
-            .builder()
-            .condition1(SSMGrid.Condition.LESS_THEN)
-            .value1("a")
-            .column("ДеБлок")
-            .build();
 
     /**
      * Запуск.
