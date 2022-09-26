@@ -41,7 +41,7 @@ public class SSMG0102P0105 implements Runnable {
         filter_window.toggleOpened(true);
         filter_window.selectYear("2021");
         filter_window.setClient("");
-        filter_window.setClient("ККЦ");
+        filter_window.setClient("ЛПЦ-2");
         filter_window.clickOK();
         log.info("Фильтры настроены");
 

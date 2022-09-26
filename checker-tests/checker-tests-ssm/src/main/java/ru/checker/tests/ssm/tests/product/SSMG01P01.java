@@ -80,7 +80,7 @@ public class SSMG01P01 implements Runnable {
 
         {
             log.info("Шаг 4");
-            List.of("КМЦ", "РМЦ-1", "ФЛЦ", "ЦИ", "ЦРМО-1").forEach(shop -> this.checkShop(template, grid, shop));
+            List.of("КМЦ", "РМЦ-1", "ФЛЦ", "КПЦ", "ЦРМО-1").forEach(shop -> this.checkShop(template, grid, shop));
         }
 
     }
@@ -92,6 +92,7 @@ public class SSMG01P01 implements Runnable {
      * @param shop Цех
      */
     private void checkShop(FilteredFormTemplate template, SSMGrid grid, String shop) {
+        log.info("Проверка цеха '{}'", shop);
         template.selectShop(shop);
         SSMGridData data = grid.getAllData();
         grid.hasData();
@@ -100,6 +101,7 @@ public class SSMG01P01 implements Runnable {
                 .filter(record -> !record.equals(shop))
                 .findFirst().
                 ifPresent(s -> fail("Найдена запись отличная от 'Открыт'. Значение - " + s));
+        log.info("Цех '{}' проверен. Данные таблицы соответствует", shop);
     }
 
 }
