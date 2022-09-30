@@ -1,0 +1,18 @@
+<suite name = "SSM">
+    <listeners>
+        <listener class-name = "ru.checker.listener.CheckerAzureListener"/>
+    </listeners>
+    <test name = "SAP">
+        <groups>
+            <run>
+                <exclude name="broken"/>
+                <exclude name="inWork"/>
+            </run>
+        </groups>
+        <parameter name = "app" value = "SSM"/>
+        <parameter name = "form.id" value = "task_control"/>
+        <classes>
+            <class name = "ru.checker.tests.ssm.tests.task.SSMTaskModule"/>
+        </classes>
+    </test>
+</suite>

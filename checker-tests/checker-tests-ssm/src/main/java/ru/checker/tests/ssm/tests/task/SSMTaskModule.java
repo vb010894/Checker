@@ -5,6 +5,7 @@ import org.testng.annotations.Test;
 import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
 import ru.checker.tests.ssm.test.SSMTest;
 import ru.checker.tests.ssm.tests.task.cases.SSMG0104P0101;
+import ru.checker.tests.ssm.tests.task.cases.SSMG0104P0102;
 import ru.checker.tests.ssm.windows.task.TaskFilter;
 
 /**
@@ -31,6 +32,15 @@ public class SSMTaskModule extends SSMTest {
             description = "SSM.G.01.04.P.01. Работа с фильтрами. Даты")
     public void SSMG0104P0101() {
         new SSMG0104P0101(getRootWindow()).run();
+
+    }
+
+    @Test(
+            testName = "SSM.G.01.04.P.01.02",
+            description = "SSM.G.01.04.P.02. Работа с фильтрами. Цех",
+            groups = "broken")
+    public void SSMG0104P0102() {
+        new SSMG0104P0102(getRootWindow()).run();
 
     }
 

@@ -11,7 +11,23 @@ elements:
   - element:
       id: task_control_tasks_table
       name: Таблица
-      index: 3
+      filters:
+        - filter:
+            id: date_start_diapason
+            $comment: Фильтр выборки диапазона за 2021 год
+            column: Дата начала
+            condition1: LESS_THEN
+            value1: 01.01.2021 00:00:00
+            separator: AND
+            condition2: MORE_THEN
+            value2: 31.12.2021 23:59:59
+        - filter:
+            id: shop_filter
+            $comment: Фильтр по цеху по переменной 'shop'
+            column: Цех
+            condition1: NOT_EQUAL
+            value1: "${shop}"
+      index: 1
       config:
         unfocused: [ С ]
         max_wait_delay: 20
@@ -29,7 +45,7 @@ elements:
   - element:
       id: task_control_personal_table
       name: Таблица
-      index: 2
+      index: 3
       config:
         has_selection_bar: false
       search:
