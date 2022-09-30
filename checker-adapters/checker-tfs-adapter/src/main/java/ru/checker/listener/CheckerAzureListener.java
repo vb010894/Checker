@@ -364,7 +364,7 @@ public class CheckerAzureListener implements ITestListener {
      * @return Skipped tests
      */
     private List<NUnitTestCase> getSkipped(ITestContext context) {
-        return context
+        List<NUnitTestCase> res = context
                 .getSkippedTests()
                 .getAllResults()
                 .parallelStream()
@@ -377,7 +377,37 @@ public class CheckerAzureListener implements ITestListener {
                     test.setResult(NunitResultStatus.Skipped);
                     return test;
                 }).collect(Collectors.toList());
+
+        res.addAll(context.getExcludedMethods().parallelStream().map(result -> {
+            NUnitTestCase test = new NUnitTestCase();
+            test.setId(result.getId());
+            test.setName(result.getDescription());
+            test.setDuration(String.valueOf(0));
+            test.setFullname(result.getQualifiedName());
+            test.setAsserts("0");
+            test.setMethodname(result.getQualifiedName());
+            test.setClassname(result.getMethodName());
+
+            NUnitReason reason = new NUnitReason();
+            reason.setMessage("Тест выключен");
+            test.setReason(reason);
+            test.setResult(NunitResultStatus.Skipped);
+
+            if (attachments.containsKey(test.getId())) {
+                List<NUnitAttachments> attachment = attachments
+                        .get(test.getId())
+                        .parallelStream()
+                        .map(this::getAttachments)
+                        .collect(Collectors.toList());
+                test.setAttachment(attachment);
+            }
+
+            return test;
+        }).collect(Collectors.toList()));
+        return res;
     }
+
+
 
     /**
      * Get test cases with 'Passed' status.

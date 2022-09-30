@@ -124,7 +124,7 @@ public class SSMTools {
             AutomationMouse.getInstance().leftClick();
             CheckerDesktopTest.getCurrentApp().waitApp();
             Thread.sleep(1000);
-        }, "Не удалось выбрать элемент списка комбобокса. ID - " + ID);
+        }, "Не удалось выбрать элемент '" + value + "' списка комбобокса. ID - " + ID);
         log.info("Значение выбрано успешно");
     }
 
