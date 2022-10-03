@@ -1,6 +1,10 @@
 package ru.checker.starter;
 
+import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.User32;
+import com.sun.jna.platform.win32.WinDef;
+import com.sun.jna.platform.win32.WinUser;
+import com.sun.jna.ptr.IntByReference;
 import lombok.SneakyThrows;
 import mmarquee.automation.ControlType;
 import mmarquee.automation.Element;
@@ -15,10 +19,7 @@ class CheckerStarterApplicationTests {
     @SneakyThrows
     @Test
     void contextLoads() {
-        var handle = User32.INSTANCE.FindWindow(null, "Настройка фильтра");
-        Element w = UIAutomation.getInstance().getElementFromHandle(handle);
-        new CheckerDesktopMarker(w.getBoundingRectangle().toRectangle()).draw();
-        System.out.println(ControlType.fromValue(w.getControlType()).toString());
+
     }
 
 }

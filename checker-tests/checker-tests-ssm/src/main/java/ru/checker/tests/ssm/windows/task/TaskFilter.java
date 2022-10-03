@@ -9,7 +9,6 @@ import ru.checker.tests.desktop.test.temp.CheckerDesktopTest;
 import ru.checker.tests.desktop.utils.CheckerDesktopManipulator;
 import ru.checker.tests.ssm.controls.toogle.SSMToggle;
 import ru.checker.tests.ssm.windows.core.templates.OkCancelWindow;
-import ru.checker.tests.ssm.windows.core.templates.RefreshableWindow;
 import ru.checker.tests.ssm.windows.sap.SapLotsmanFilterWindow;
 
 import java.awt.*;
@@ -113,6 +112,15 @@ public class TaskFilter extends OkCancelWindow {
      */
     public void toggleNew(boolean state) {
         this.changeToggle("toggle_new", "Новые", state);
+    }
+
+    /**
+     * Получение значения поля "Заказ Лоцман".
+     * ID - field_lotsman_order.
+     * @return Значение поля
+     */
+    public String getLotsmanOrderValue() {
+        return this.getValueField("field_lotsman_order", "Заказ Лоцман");
     }
 
     /**

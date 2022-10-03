@@ -2,18 +2,19 @@ package ru.checker.tests.ssm.tests.task.cases;
 
 import lombok.extern.log4j.Log4j2;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
+import ru.checker.tests.desktop.utils.CheckerDesktopMarker;
 import ru.checker.tests.ssm.controls.grid.SSMGrid;
 import ru.checker.tests.ssm.forms.SSMTaskForm;
 import ru.checker.tests.ssm.tests.task.SSMTaskModule;
 import ru.checker.tests.ssm.windows.task.TaskFilter;
 
 /**
- * SSM.G.01.04.P.01. Работа с фильтрами. Даты.
+ * SSM.G.01.04.P.01.04. Работа с фильтрами. Заказ Лоцман.
  *
  * @author vd.zinovev
  */
 @Log4j2
-public class SSMG0104P0101 implements Runnable {
+public class SSMG0104P03 implements Runnable {
 
 
     /**
@@ -25,7 +26,7 @@ public class SSMG0104P0101 implements Runnable {
      * Конструктор.
      * @param root Родительский элемент
      */
-    public SSMG0104P0101(CheckerDesktopWindow root) {
+    public SSMG0104P03(CheckerDesktopWindow root) {
         this.root = root;
     }
 
@@ -35,24 +36,23 @@ public class SSMG0104P0101 implements Runnable {
      */
     @Override
     public void run() {
-        TaskFilter filter;
-        {
-            log.info("Шаг 1");
-            filter = SSMTaskModule.openFilter();
-            filter.setYearsFromValue("2021");
-            filter.setYearsToValue("2021");
-            filter.toggleNew(true);
-            filter.clickOK();
-        }
+
+        SSMTaskForm form;
+        SSMGrid task_grid;
+        SSMGrid lotsman_grid;
+
+        TaskFilter filter = SSMTaskModule.openFilter();
 
         {
-            log.info("Шаг 2");
-            SSMTaskForm form = this.root.form("task_control", SSMTaskForm.class);
-            SSMGrid task_grid = form.getTaskGrid();
-            task_grid.filter("date_start_diapason");
-            task_grid.getDataByRow(0);
-            task_grid.hasNotData();
-            task_grid.clearFilter();
+            log.info("Шаг 1");
+            filter.toggleNew(true);
+            filter.setShopValue("КПЦ");
+            filter.clickOK();
+            filter.checkActivity(false);
+            form = this.root.form("task_control", SSMTaskForm.class);
+            task_grid = form.getTaskGrid();
+            SSMGrid staff = form.getPRBGrid();
+            new CheckerDesktopMarker(staff.getControl()).draw();
         }
 
         log.info("Тестовый случай завершен");

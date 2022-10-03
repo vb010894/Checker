@@ -58,9 +58,31 @@ public class SSMTaskForm {
      * @return Таблицы "Задания"
      */
     public SSMGrid getTaskGrid() {
-        SSMGrid grid =  this.form.custom("task_control_tasks_table", SSMGrid.class);
-        return grid;
+        return this.form.custom("task_control_tasks_table", SSMGrid.class);
     }
+
+    /**
+     * Получение таблицы "Сотрудники".
+     *
+     * ID - "task_control_personal_table".
+     *
+     * @return Таблицы "Сотрудники"
+     */
+    public SSMGrid getStaffGrid() {
+        return this.form.custom("task_control_personal_table", SSMGrid.class);
+    }
+
+    /**
+     * Получение таблицы "Задания на заказ".
+     *
+     * ID - "task_control_prb_table".
+     *
+     * @return Таблицы "Задания на заказ"
+     */
+    public SSMGrid getPRBGrid() {
+        return this.form.custom("task_control_prb_table", SSMGrid.class);
+    }
+
 
     /**
      * Вызывает окно фильтрации.

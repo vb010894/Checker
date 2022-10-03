@@ -1,20 +1,19 @@
 package ru.checker.tests.ssm.test;
 
+import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
-import junit.framework.AssertionFailedError;
+import com.sun.jna.ptr.IntByReference;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
-import mmarquee.automation.AutomationException;
 import mmarquee.automation.ControlType;
 import mmarquee.automation.Element;
 import mmarquee.automation.UIAutomation;
 import mmarquee.automation.controls.ElementBuilder;
+import mmarquee.automation.controls.Search;
 import mmarquee.automation.controls.Window;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LogEvent;
 import org.junit.jupiter.api.Assertions;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -30,8 +29,6 @@ import ru.checker.tests.ssm.widgets.SSMTools;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-
 @Log4j2
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SSMTest extends CheckerDesktopTest {
@@ -42,10 +39,9 @@ public class SSMTest extends CheckerDesktopTest {
     @Getter
     SSMNavigation navigation;
 
-    WinDef.HWND rootHandle;
-
     /**
      * Init test case.
+     *
      * @param id From ID.
      */
     @Parameters({"form.id"})
@@ -57,13 +53,8 @@ public class SSMTest extends CheckerDesktopTest {
         this.rootWindow = getCurrentApp().window("ssm_main");
         this.rootWindow.maximize();
         this.navigation = this.rootWindow.widget("ssm_navigation", SSMNavigation.class);
-        try {
-            this.rootHandle = this.rootWindow.getControl().getNativeWindowHandle();
-        } catch (AutomationException e) {
-            System.out.println("##[warning] не удалось получить handle главного окна");
-        }
 
-        if(!this.getFormNeedCheckActivity(id)) {
+        if (!this.getFormNeedCheckActivity(id)) {
             log.info("Открытие формы без проверки активности");
             Assertions.assertDoesNotThrow(() -> this.openFormByNavigation(id), "Не удалось открыть форму с помощью навигации");
             log.info("Навигация к форме успешно выполнена. Начало тестового случая");
@@ -87,6 +78,7 @@ public class SSMTest extends CheckerDesktopTest {
 
     /**
      * Open form by navigation.
+     *
      * @param formID Form ID
      */
     private void openFormByNavigation(String formID) {
@@ -113,7 +105,7 @@ public class SSMTest extends CheckerDesktopTest {
     @AfterMethod
     public void after() {
         log.info("Завершение тестового случая");
-        Map<String, List<LogEvent>> test = CheckerLogAppender.getLogging();
+        //Map<String, List<LogEvent>> test = CheckerLogAppender.getLogging();
         this.closePopUps();
         this.closeForm();
         log.info("Тестовый случай завершен");
@@ -134,43 +126,59 @@ public class SSMTest extends CheckerDesktopTest {
      * Close popup windows.
      */
     private void closePopUps() {
-        log.info("Закрытие всплывающих окон");
-        //System.out.println(" ---- this.rootHandle = " + this.rootHandle);
-        if(this.rootHandle == null) {
-            return;
-        }
-
-        assertDoesNotThrow(() -> Thread.sleep(1000));
-        WinDef.HWND popUpHandle = User32.INSTANCE.GetForegroundWindow();
-/*        System.out.println(" ---- popUpHandle = " + popUpHandle);
-        try {
-            Element el0 = UIAutomation.getInstance().getElementFromHandle(popUpHandle);
-            System.out.println(" ---- el0.getName() = " + el0.getName());
-            System.out.println(" ---- el0.getClassName() = " + el0.getClassName());
-            System.out.println(" ---- ControlType = " + ControlType.fromValue(el0.getControlType()).name());
-        } catch (AutomationException e) {
-            throw new RuntimeException(e);
-        }*/
-
-        if(popUpHandle == null)
-            return;
-
-        while (popUpHandle != this.rootHandle) {
+        User32.INSTANCE.EnumWindows((hwnd, pointer) -> {
             try {
-                Element el = UIAutomation.getInstance().getElementFromHandle(popUpHandle);
-                if(el.getControlType() == ControlType.Window.getValue()) {
-                    log.debug("Закрытие окна с handle - " + popUpHandle);
-                    new Window(new ElementBuilder().element(el)).close();
+                if (User32.INSTANCE.IsWindowVisible(hwnd)) {
+                    IntByReference reference = new IntByReference(0);
+                    User32.INSTANCE.GetWindowThreadProcessId(hwnd, reference);
+                    if (reference.getValue() == rootWindow.getControl().getElement().getProcessId() & !hwnd.equals(rootWindow.getControl().getNativeWindowHandle()))
+                        this.closeWindowByHandle(hwnd);
 
-                    assertDoesNotThrow(() -> Thread.sleep(500));
-                    popUpHandle = User32.INSTANCE.GetForegroundWindow();
-                } else {
-                    break;
                 }
-
             } catch (Exception ex) {
-                log.warn("Не удалось закрыть всплывающее окно c handle - '{}'", popUpHandle);
-                break;
+                log.error("Не удалось закрыть окно с handle - " + hwnd);
+            }
+
+            return true;
+        }, new Pointer(0));
+    }
+
+    /**
+     * Закрытие окна по Handle
+     *
+     * @param handle Handle окна
+     * @throws Exception Возникает при невозможности доступа к элементу
+     */
+    private void closeWindowByHandle(WinDef.HWND handle) throws Exception {
+
+        List<String> buttons = List.of("Отмена", "Закрыть");
+
+        Element el = UIAutomation.getInstance().getElementFromHandle(handle);
+        if (el.getClassName().equals("TApplication"))
+            return;
+
+        if (el.getControlType() == ControlType.Window.getValue()) {
+            Window window = new Window(new ElementBuilder().element(el));
+            log.debug("Попытка закрыть окно - '{}'. (Класс - '{}')", window.getName(), window.getClassName());
+            boolean result = buttons.stream().anyMatch(button -> {
+                try {
+                    log.debug("Попытка закрытия через кнопку - '{}'", button);
+                    window.getButton(Search.getBuilder().name(button).build()).click();
+                    log.debug("Окно закрыто через кнопку - '{}'. Проверка состояния", button);
+                    Thread.sleep(1000);
+                    boolean check = window.isEnabled();
+                    log.debug("Окно {}активно", (check ? "" : "не"));
+                    return check;
+                } catch (Exception e) {
+                    log.debug("Не удалось закрыть окно с помощью кнопки '{}'", button);
+                    return false;
+                }
+            });
+            if (!result) {
+                log.debug("Закрытие с помощью UIAutomation");
+                window.close();
+                boolean check = UIAutomation.getInstance().getElementFromHandle(window.getNativeWindowHandle()).isEnabled();
+                log.debug("Окно {}активно", (check ? "" : "не"));
             }
         }
     }

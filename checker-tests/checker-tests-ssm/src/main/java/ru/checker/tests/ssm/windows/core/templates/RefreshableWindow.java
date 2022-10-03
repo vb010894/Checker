@@ -1,9 +1,12 @@
 package ru.checker.tests.ssm.windows.core.templates;
 
+import com.sun.jna.platform.win32.User32;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
+import mmarquee.automation.UIAutomation;
+import org.junit.jupiter.api.Assertions;
 import ru.checker.tests.desktop.test.entity.CheckerDesktopWindow;
 
 /**
@@ -43,7 +46,7 @@ public abstract class RefreshableWindow extends GetSetWindow {
         try {
             if(!isSoft)
                 throw new Exception("Софт обновление окна Выключено. Получение нового экземпляра");
-            if(window.getControl().isEnabled())
+            if(this.isEnabled())
                 log.debug("Окно активно. Продолжение теста с активным окном");
             else
                 throw new IllegalStateException("Окно не активно получение нового экземпляра");
@@ -52,5 +55,40 @@ public abstract class RefreshableWindow extends GetSetWindow {
             window.findMySelf();
         }
         log.debug("Окно успешно обновлено");
+    }
+
+    /**
+     * Получает активность окна.
+     * @return Активно/ Неактивно
+     */
+    public boolean isEnabled() {
+        log.debug("Получение активности окна.");
+        boolean result;
+        try {
+            Thread.sleep(1000);
+            result =  User32.INSTANCE.IsWindowVisible(window.getControl().getNativeWindowHandle());
+        } catch (Exception ex) {
+            result = false;
+        }
+        log.debug("Окно {}", (result ? "Активно" : "Неактивно"));
+        return result;
+    }
+
+    /**
+     * Проверка активности окна.
+     * @param state Состояние окна
+     */
+    public void checkActivity(boolean state) {
+        log.debug("Проверка активности окна '{}. {}'", this.window.getID(), this.window.getName());
+        Assertions.assertEquals(
+                this.isEnabled(),
+                state,
+                String.format("Окно '%s. %s' %s, при ожидании - '%s'",
+                        this.window.getID(),
+                        this.window.getName(),
+                        (this.isEnabled() ? "активен" : "неактивен"),
+                        (state ? "активен" : "неактивен")));
+        log.debug("Проверка прошла успешно");
+
     }
 }

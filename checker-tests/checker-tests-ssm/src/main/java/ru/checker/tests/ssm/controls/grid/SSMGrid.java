@@ -137,9 +137,22 @@ public class SSMGrid {
      * Местоположение
      */
     public Rectangle getRectangle() {
-        return assertDoesNotThrow(
-                () -> this.control.getBoundingRectangle().toRectangle(),
-                "Не удалось получить расположение таблицы");
+        log.debug("Получение расположение таблицы '{}. {}'", this.getID(), this.getName());
+        Rectangle rectangle = null;
+        int limit = this.config.getMaxWaitDelay();
+        while (Objects.isNull(rectangle) & limit > 0)
+        try {
+            rectangle = this.control.getBoundingRectangle().toRectangle();
+        } catch (Exception ex) {
+            log.debug("Не удалось получить расположение таблицы. Повторная попытка");
+            assertDoesNotThrow(() -> Thread.sleep(1000), "Не удалось выполнить ожидание получения расположения таблицы");
+            limit--;
+        }
+        assertNotNull(
+                rectangle,
+                String.format("Не удалось получить расположение таблицы '%s. %s'", this.getID(), this.getName()));
+
+        return rectangle;
     }
 
     /**
@@ -263,6 +276,7 @@ public class SSMGrid {
      */
     public boolean hasDataResult() {
         log.info("Проверка наличия данных в таблице '{}.{}'", this.getID(), this.getName());
+        this.getDataByRow(0);
         log.debug("Обнаружено\nКолонок - '{}'\nСтрок - {}", this.data.getHeaderSize(), this.data.getRowSize());
         boolean result = this.data.getRowSize() > 0;
         log.info("В таблице '{}.{}' {} записи", this.getID(), this.getName(), (result ? "имеет" : "не имеет"));
@@ -791,7 +805,7 @@ public class SSMGrid {
         Rectangle rect = this.getRectangle();
         int result = -1;
         for (int i = rect.y; i < rect.height; i++) {
-            if(this.robot.getPixelColor((int) rect.getCenterX(), i).equals(this.config.selectedRowColor)) {
+            if(this.robot.getPixelColor((int) rect.getCenterX(), i).equals(this.config.selectedRowColor) || this.robot.getPixelColor((int) rect.getCenterX(), i).equals(this.config.acceptedRowColor)) {
                 result = i + 3;
                 log.debug("Координаты Y строки получена - '{}'", result);
                 break;

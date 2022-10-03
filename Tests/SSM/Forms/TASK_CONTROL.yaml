@@ -11,6 +11,12 @@ elements:
   - element:
       id: task_control_tasks_table
       name: Таблица
+      index: 1
+      config:
+        unfocused: [ С ]
+        max_wait_delay: 40
+      search:
+        ClassName: TcxGridSite
       filters:
         - filter:
             id: date_start_diapason
@@ -27,16 +33,30 @@ elements:
             column: Цех
             condition1: NOT_EQUAL
             value1: "${shop}"
-      index: 1
-      config:
-        unfocused: [ С ]
-        max_wait_delay: 20
-      search:
-        ClassName: TcxGridSite
+        - filter:
+            id: c_not_new_filter
+            $comment: Фильтр колонки 'С' не равным 'Новый' или 'В работе'
+            condition1: NOT_EQUAL
+            value1: 0
+            column: С
+            columnCondition: "^{1}[СсCc]$"
+        - filter:
+            id: c_not_closed_filter
+            $comment: Фильтр колонки 'С' не равным 'Закрыт'
+            condition1: NOT_EQUAL
+            value1: 2
+            column: С
+            columnCondition: "^{1}[СсCc]$"
+        - filter:
+            id: lotsman_not_equal
+            $comment: Фильтр колонки 'Заказ Лоцман' не равным значению константы 'order_lotsman'
+            condition1: NOT_EQUAL
+            value1: "${order_lotsman}"
+            column: Заказ Лоцман
   - element:
       id: task_control_prb_table
       name: Таблица
-      index: 2
+      index: 0
       config:
         unfocused: [ С ]
         max_wait_delay: 20
@@ -45,7 +65,7 @@ elements:
   - element:
       id: task_control_personal_table
       name: Таблица
-      index: 3
+      index: 2
       config:
         has_selection_bar: false
       search:
